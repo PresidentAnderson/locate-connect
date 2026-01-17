@@ -18,7 +18,7 @@ import {
   getLanguageStatistics,
   usesSyllabics,
   containsSyllabics,
-} from "../languages.ts";
+} from "../languages.js";
 
 test("should have at least 50 Indigenous languages", () => {
   assert.ok(
