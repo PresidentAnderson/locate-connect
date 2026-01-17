@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 const settingsNav = [
   {
@@ -25,8 +24,6 @@ const settingsNav = [
 ];
 
 export default function SettingsPage() {
-  const pathname = usePathname();
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-6">

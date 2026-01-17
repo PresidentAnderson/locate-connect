@@ -61,7 +61,7 @@ export async function PATCH(request: NextRequest) {
     if (!Array.isArray(body.additional_languages)) {
       return NextResponse.json({ error: 'Additional languages must be an array' }, { status: 400 });
     }
-    if (body.additional_languages.some((code: string) => !validLanguageCodes.has(code))) {
+    if (body.additional_languages.some(code => !validLanguageCodes.has(code))) {
       return NextResponse.json({ error: 'Invalid language code in additional languages' }, { status: 400 });
     }
     if (body.additional_languages.length > 5) {
