@@ -134,7 +134,7 @@ export function validateAlertRequest(
     errors.push("Law enforcement contact phone is required");
   }
   if (!request.le_contact_email?.trim()) {
-    errors.push("Law enforcement contact email is required");
+    // Email is optional now, will be auto-generated if missing
   } else if (!isValidEmail(request.le_contact_email)) {
     errors.push("Law enforcement contact email is invalid");
   }

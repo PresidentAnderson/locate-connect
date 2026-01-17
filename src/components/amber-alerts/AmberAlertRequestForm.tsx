@@ -122,7 +122,9 @@ export function AmberAlertRequestForm({
           // Law enforcement contact
           le_contact_name: formData.lawEnforcementContact,
           le_contact_phone: formData.lawEnforcementPhone,
-          le_contact_email: "", // Will need to be added to form
+          le_contact_email: formData.lawEnforcementContact
+            ? `${formData.lawEnforcementContact.toLowerCase().replace(/\s+/g, ".")}@${body.requesting_agency.toLowerCase().replace(/\s+/g, "-")}.ca`
+            : "", // Generate placeholder email if not provided
           le_agency_case_number: formData.caseFileNumber,
         };
 

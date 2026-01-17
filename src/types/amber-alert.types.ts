@@ -46,9 +46,9 @@ export type CanadianProvince =
   | 'YT'; // Yukon
 
 /**
- * AMBER alert criteria validation
+ * AMBER alert criteria validation (used internally)
  */
-export interface AmberAlertCriteria {
+interface AmberAlertCriteria {
   child_under_18: boolean;
   abduction_confirmed: boolean;
   imminent_danger: boolean;
