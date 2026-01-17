@@ -273,8 +273,13 @@ BEGIN
     NEW.behavioral_correlation IS NOT NULL AND NEW.behavioral_correlation != '',
     NEW.medical_correlation IS NOT NULL AND NEW.medical_correlation != '',
     CASE
-      WHEN NEW.behavioral_correlation IS NOT NULL OR NEW.medical_correlation IS NOT NULL
-      THEN 'Has correlation: ' || COALESCE(NEW.behavioral_correlation, '') || ' ' || COALESCE(NEW.medical_correlation, '')
+      WHEN NEW.behavioral_correlation IS NOT NULL AND NEW.behavioral_correlation != '' AND
+           NEW.medical_correlation IS NOT NULL AND NEW.medical_correlation != ''
+      THEN 'Has correlation: ' || NEW.behavioral_correlation || '; ' || NEW.medical_correlation
+      WHEN NEW.behavioral_correlation IS NOT NULL AND NEW.behavioral_correlation != ''
+      THEN 'Has behavioral correlation: ' || NEW.behavioral_correlation
+      WHEN NEW.medical_correlation IS NOT NULL AND NEW.medical_correlation != ''
+      THEN 'Has medical correlation: ' || NEW.medical_correlation
       ELSE 'No correlation provided'
     END
   FROM profiles p

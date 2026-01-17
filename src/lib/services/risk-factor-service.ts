@@ -30,6 +30,16 @@ export interface RiskFactorAccessCheck {
 }
 
 /**
+ * Check if a risk factor has behavioral or medical correlation
+ */
+export function hasCorrelation(factor: SensitiveRiskFactor): boolean {
+  return (
+    (!!factor.behavioralCorrelation && factor.behavioralCorrelation.trim() !== '') ||
+    (!!factor.medicalCorrelation && factor.medicalCorrelation.trim() !== '')
+  );
+}
+
+/**
  * Check if a user can access a specific risk factor
  */
 export function checkRiskFactorAccess(
@@ -57,11 +67,7 @@ export function checkRiskFactorAccess(
 
   // Law enforcement requires correlation for viewing
   if (userRole === 'law_enforcement') {
-    const hasCorrelation =
-      (riskFactor.behavioralCorrelation && riskFactor.behavioralCorrelation.trim() !== '') ||
-      (riskFactor.medicalCorrelation && riskFactor.medicalCorrelation.trim() !== '');
-
-    if (!hasCorrelation) {
+    if (!hasCorrelation(riskFactor)) {
       return {
         canView: false,
         canEdit: false,
@@ -139,11 +145,7 @@ export function calculateRiskFactorWeight(
   let weight = factor.weightInPriority;
 
   // Only apply weight if there's correlation
-  const hasCorrelation =
-    (factor.behavioralCorrelation && factor.behavioralCorrelation.trim() !== '') ||
-    (factor.medicalCorrelation && factor.medicalCorrelation.trim() !== '');
-
-  if (!hasCorrelation) {
+  if (!hasCorrelation(factor)) {
     weight = 0; // No weight without correlation
   }
 
@@ -190,11 +192,7 @@ export function sanitizeRiskFactorForLE(
   }
 
   // Don't show without correlation
-  const hasCorrelation =
-    (factor.behavioralCorrelation && factor.behavioralCorrelation.trim() !== '') ||
-    (factor.medicalCorrelation && factor.medicalCorrelation.trim() !== '');
-
-  if (!hasCorrelation) {
+  if (!hasCorrelation(factor)) {
     return null;
   }
 
@@ -250,9 +248,7 @@ export function createAccessLogEntry(params: {
   userAgent?: string;
   sessionId?: string;
 }): Omit<RiskFactorAccessLog, 'id' | 'accessedAt'> {
-  const hasCorrelation =
-    (params.factor.behavioralCorrelation && params.factor.behavioralCorrelation.trim() !== '') ||
-    (params.factor.medicalCorrelation && params.factor.medicalCorrelation.trim() !== '');
+  const correlation = hasCorrelation(params.factor);
 
   return {
     riskFactorId: params.riskFactorId,
@@ -265,7 +261,7 @@ export function createAccessLogEntry(params: {
     userOrganization: params.userOrganization,
     hadBehavioralCorrelation: !!(params.factor.behavioralCorrelation && params.factor.behavioralCorrelation.trim()),
     hadMedicalCorrelation: !!(params.factor.medicalCorrelation && params.factor.medicalCorrelation.trim()),
-    correlationDetails: hasCorrelation
+    correlationDetails: correlation
       ? generateCorrelationSummary(params.factor)
       : 'No correlation provided',
     ipAddress: params.ipAddress,
