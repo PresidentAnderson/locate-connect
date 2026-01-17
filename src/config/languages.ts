@@ -1,17 +1,39 @@
 /**
  * LocateConnect Language Configuration
  * Includes official languages and Canadian Indigenous languages
+ * 
+ * This configuration supports 50+ Indigenous languages across 7 language families,
+ * including proper ISO 639-3 codes, speaker population data, and writing system information.
  */
 
+export type LanguageFamily = 
+  | "Algonquian"
+  | "Inuit"
+  | "Athabaskan"
+  | "Iroquoian"
+  | "Siouan"
+  | "Salish"
+  | "Wakashan"
+  | "Tsimshianic"
+  | "Haida"
+  | "Na-Dene"
+  | "Mixed (Cree-French)";
+
+export type WritingSystem = "latin" | "syllabics" | "both";
+export type EndangermentStatus = "endangered" | "threatened" | "stable";
+
 export interface Language {
-  code: string;
-  name: string;
-  nativeName: string;
-  family?: string;
-  region?: string;
-  isIndigenous: boolean;
-  isOfficial: boolean;
-  direction: "ltr" | "rtl";
+  code: string;              // ISO 639-3 code or variant
+  name: string;              // English name
+  nativeName: string;        // Native script/name
+  family?: string;           // Language family
+  region?: string;           // Provinces/territories
+  isIndigenous: boolean;     // Whether it's an Indigenous language
+  isOfficial: boolean;       // Whether it's an official language
+  direction: "ltr" | "rtl";  // Text direction
+  speakerCount?: number;     // Approximate number of speakers
+  writingSystem?: WritingSystem;  // Writing system used
+  status?: EndangermentStatus;    // Endangerment status
 }
 
 // Official Languages
@@ -46,6 +68,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 96000,
+    writingSystem: "both",
+    status: "threatened",
   },
   {
     code: "cr-syl",
@@ -56,6 +81,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 96000,
+    writingSystem: "syllabics",
+    status: "threatened",
   },
   {
     code: "oj",
@@ -66,6 +94,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 28000,
+    writingSystem: "both",
+    status: "threatened",
   },
   {
     code: "oj-cr",
@@ -76,6 +107,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 13000,
+    writingSystem: "both",
+    status: "threatened",
   },
   {
     code: "alq",
@@ -86,6 +120,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 2000,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "mic",
@@ -96,6 +133,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 8000,
+    writingSystem: "latin",
+    status: "threatened",
   },
   {
     code: "moe",
@@ -106,6 +146,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 11000,
+    writingSystem: "latin",
+    status: "threatened",
   },
   {
     code: "atj",
@@ -116,6 +159,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 6000,
+    writingSystem: "latin",
+    status: "threatened",
   },
   {
     code: "nsk",
@@ -126,6 +172,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1200,
+    writingSystem: "syllabics",
+    status: "threatened",
   },
   {
     code: "bla",
@@ -136,6 +185,48 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 5000,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "abe",
+    name: "Abenaki",
+    nativeName: "Wôbanakiôdwawôgan",
+    family: "Algonquian",
+    region: "Quebec",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "mez",
+    name: "Malecite-Passamaquoddy",
+    nativeName: "Wolastoqey",
+    family: "Algonquian",
+    region: "New Brunswick, Quebec",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 800,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "pot",
+    name: "Potawatomi",
+    nativeName: "Bodéwadmimwen",
+    family: "Algonquian",
+    region: "Ontario",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 50,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Inuit Languages
@@ -148,6 +239,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 39000,
+    writingSystem: "both",
+    status: "threatened",
   },
   {
     code: "iu-syl",
@@ -158,6 +252,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 39000,
+    writingSystem: "syllabics",
+    status: "threatened",
   },
   {
     code: "ikt",
@@ -168,6 +265,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1300,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "kal",
@@ -178,6 +278,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1600,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Athabaskan/Dene Languages
@@ -190,6 +293,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 12000,
+    writingSystem: "latin",
+    status: "threatened",
   },
   {
     code: "dgr",
@@ -200,6 +306,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 2400,
+    writingSystem: "latin",
+    status: "threatened",
   },
   {
     code: "gwi",
@@ -210,6 +319,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 400,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "scs",
@@ -220,6 +332,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 800,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "xsl",
@@ -230,6 +345,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1500,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "den",
@@ -240,6 +358,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 300,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "tce",
@@ -250,6 +371,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "ttm",
@@ -260,6 +384,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 200,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "tgx",
@@ -270,6 +397,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 10,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "ksk",
@@ -280,6 +410,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 400,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "sek",
@@ -290,6 +423,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "bcr",
@@ -300,6 +436,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1600,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "clc",
@@ -310,6 +449,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 800,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "taa",
@@ -320,6 +462,35 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "haa",
+    name: "Hän",
+    nativeName: "Hän Hwëch'in",
+    family: "Athabaskan",
+    region: "Yukon",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 20,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "srs",
+    name: "Sarsi (Tsuut'ina)",
+    nativeName: "Tsuut'ina",
+    family: "Athabaskan",
+    region: "Alberta",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Iroquoian Languages
@@ -332,6 +503,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 3500,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "cay",
@@ -342,6 +516,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "one",
@@ -352,6 +529,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 200,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "ono",
@@ -362,6 +542,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "see",
@@ -372,6 +555,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "tus",
@@ -382,6 +568,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 50,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Siouan Languages
@@ -394,6 +583,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 3000,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "dak",
@@ -404,6 +596,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 2000,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Salish Languages
@@ -416,6 +611,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 200,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "lil",
@@ -426,7 +624,89 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 300,
+    writingSystem: "latin",
+    status: "endangered",
   },
+  {
+    code: "str",
+    name: "Straits Salish",
+    nativeName: "SENĆOŦEN",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 50,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "squ",
+    name: "Sḵwx̱wú7mesh (Squamish)",
+    nativeName: "Sḵwx̱wú7mesh sníchim",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 10,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "hur",
+    name: "Halq'eméylem",
+    nativeName: "Halq'eméylem",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "oka",
+    name: "Okanagan",
+    nativeName: "Nsyilxcən",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 150,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "coo",
+    name: "Comox",
+    nativeName: "ʔayʔaǰuθəm",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 50,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  {
+    code: "clm",
+    name: "Clallam (Klallam)",
+    nativeName: "Nəxʷsƛ̕áy̕əmúcən",
+    family: "Salish",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 5,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+  // Tsimshianic Languages
   {
     code: "ncg",
     name: "Nisga'a",
@@ -436,6 +716,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 700,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "git",
@@ -446,6 +729,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 1000,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Wakashan Languages
@@ -458,6 +744,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 250,
+    writingSystem: "latin",
+    status: "endangered",
   },
   {
     code: "nuk",
@@ -468,6 +757,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 300,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Haida
@@ -480,6 +772,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 50,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Tlingit
@@ -492,6 +787,9 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 150,
+    writingSystem: "latin",
+    status: "endangered",
   },
 
   // Michif (Métis)
@@ -504,6 +802,24 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
     isIndigenous: true,
     isOfficial: false,
     direction: "ltr",
+    speakerCount: 700,
+    writingSystem: "latin",
+    status: "endangered",
+  },
+
+  // Kutenai (Isolate)
+  {
+    code: "kut",
+    name: "Kutenai",
+    nativeName: "Ktunaxa",
+    family: "Isolate",
+    region: "British Columbia",
+    isIndigenous: true,
+    isOfficial: false,
+    direction: "ltr",
+    speakerCount: 100,
+    writingSystem: "latin",
+    status: "endangered",
   },
 ];
 
@@ -701,6 +1017,76 @@ export function getLanguagesGroupedByCategory(): {
   };
 }
 
+// Get languages by endangerment status
+export function getLanguagesByStatus(status: EndangermentStatus): Language[] {
+  return INDIGENOUS_LANGUAGES.filter((lang) => lang.status === status);
+}
+
+// Get languages by writing system
+export function getLanguagesByWritingSystem(writingSystem: WritingSystem): Language[] {
+  return INDIGENOUS_LANGUAGES.filter((lang) => lang.writingSystem === writingSystem);
+}
+
+// Get languages with speaker count above threshold
+export function getLanguagesBySpeakerCount(minSpeakers: number): Language[] {
+  return INDIGENOUS_LANGUAGES.filter((lang) => 
+    lang.speakerCount && lang.speakerCount >= minSpeakers
+  );
+}
+
+// Get total speaker count for all Indigenous languages
+export function getTotalIndigenousSpeakers(): number {
+  return INDIGENOUS_LANGUAGES.reduce((total, lang) => 
+    total + (lang.speakerCount || 0), 0
+  );
+}
+
+// Get endangered languages (critically endangered = <100 speakers)
+export function getCriticallyEndangeredLanguages(): Language[] {
+  return INDIGENOUS_LANGUAGES.filter((lang) => 
+    lang.speakerCount && lang.speakerCount < 100
+  );
+}
+
+// Get language statistics
+export function getLanguageStatistics(): {
+  totalLanguages: number;
+  totalSpeakers: number;
+  byStatus: Record<EndangermentStatus, number>;
+  byWritingSystem: Record<WritingSystem, number>;
+  byFamily: Record<string, number>;
+} {
+  const stats = {
+    totalLanguages: INDIGENOUS_LANGUAGES.length,
+    totalSpeakers: getTotalIndigenousSpeakers(),
+    byStatus: {
+      endangered: 0,
+      threatened: 0,
+      stable: 0,
+    } as Record<EndangermentStatus, number>,
+    byWritingSystem: {
+      latin: 0,
+      syllabics: 0,
+      both: 0,
+    } as Record<WritingSystem, number>,
+    byFamily: {} as Record<string, number>,
+  };
+
+  INDIGENOUS_LANGUAGES.forEach((lang) => {
+    if (lang.status) {
+      stats.byStatus[lang.status]++;
+    }
+    if (lang.writingSystem) {
+      stats.byWritingSystem[lang.writingSystem]++;
+    }
+    if (lang.family) {
+      stats.byFamily[lang.family] = (stats.byFamily[lang.family] || 0) + 1;
+    }
+  });
+
+  return stats;
+}
+
 // Default export for convenience
 export default {
   OFFICIAL_LANGUAGES,
@@ -721,4 +1107,10 @@ export default {
   getLanguageDisplayName,
   getLanguagesGroupedByFamily,
   getLanguagesGroupedByCategory,
+  getLanguagesByStatus,
+  getLanguagesByWritingSystem,
+  getLanguagesBySpeakerCount,
+  getTotalIndigenousSpeakers,
+  getCriticallyEndangeredLanguages,
+  getLanguageStatistics,
 };
