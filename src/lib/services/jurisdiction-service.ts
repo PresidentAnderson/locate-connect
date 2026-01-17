@@ -85,7 +85,7 @@ export function validateJurisdictionProfile(
     ];
 
     for (const field of weightFields) {
-      const value = (weights as any)[field];
+      const value = weights[field as keyof typeof weights];
       if (typeof value !== "number" || value < 0 || value > 100) {
         errors.push(
           `priorityWeights.${field} must be a number between 0 and 100`
@@ -97,9 +97,9 @@ export function validateJurisdictionProfile(
     if (!weights.thresholds) {
       errors.push("priorityWeights.thresholds is required");
     } else {
-      const thresholdFields = ["priority0", "priority1", "priority2", "priority3"];
+      const thresholdFields = ["priority0", "priority1", "priority2", "priority3"] as const;
       for (const field of thresholdFields) {
-        const value = (weights.thresholds as any)[field];
+        const value = weights.thresholds[field];
         if (typeof value !== "number" || value < 0) {
           errors.push(`priorityWeights.thresholds.${field} must be a non-negative number`);
         }
@@ -116,10 +116,10 @@ export function validateJurisdictionProfile(
       "detentionFacilities",
       "socialServices",
       "transitAuthority",
-    ];
+    ] as const;
 
     for (const field of integrationFields) {
-      const value = (p.integrations as any)[field];
+      const value = p.integrations[field];
       if (typeof value !== "boolean") {
         errors.push(`integrations.${field} must be a boolean`);
       }
@@ -159,10 +159,10 @@ export function validateJurisdictionProfile(
       "missingPersonsUnit",
       "email",
       "address",
-    ];
+    ] as const;
 
     for (const field of contactFields) {
-      const value = (p.contacts as any)[field];
+      const value = p.contacts[field];
       if (typeof value !== "string") {
         errors.push(`contacts.${field} must be a string`);
       }

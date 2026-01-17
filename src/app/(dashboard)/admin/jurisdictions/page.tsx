@@ -17,14 +17,22 @@ export default function JurisdictionsPage() {
   const fetchProfiles = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch("/api/admin/jurisdictions");
       if (!response.ok) {
-        throw new Error("Failed to fetch jurisdiction profiles");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Failed to fetch jurisdiction profiles (${response.status})`
+        );
       }
       const data = await response.json();
       setProfiles(data.profiles);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "An unexpected error occurred while fetching jurisdiction profiles";
+      setError(errorMessage);
+      console.error("Error fetching jurisdiction profiles:", err);
     } finally {
       setLoading(false);
     }
