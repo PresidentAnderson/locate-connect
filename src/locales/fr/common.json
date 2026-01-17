@@ -30,7 +30,10 @@
     "users": "Utilisateurs",
     "systemLogs": "Journaux système",
     "apiKeys": "Clés API",
-    "tipVerification": "Vérification des signalements"
+    "tipVerification": "Vérification des signalements",
+    "familySupport": "Soutien aux familles",
+    "supportResources": "Ressources de soutien",
+    "peerSupport": "Soutien par les pairs"
   },
   "sections": {
     "cases": "Dossiers",

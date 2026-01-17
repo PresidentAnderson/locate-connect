@@ -56,6 +56,33 @@ const notoChineseTrad = Noto_Sans_TC({
 export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
+  manifest: "/manifest.json",
+  themeColor: "#3b82f6",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: siteConfig.name,
+  },
+  formatDetection: {
+    telephone: true,
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -65,6 +92,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr" className="ltr" suppressHydrationWarning>
+      <head>
+        {/* PWA Meta Tags */}
+        <meta name="application-name" content={siteConfig.name} />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content={siteConfig.name} />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="mask-icon" href="/favicon.svg" color="#3b82f6" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSyllabics.variable} ${notoArabic.variable} ${notoChinese.variable} ${notoChineseTrad.variable} antialiased`}
       >

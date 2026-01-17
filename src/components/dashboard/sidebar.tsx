@@ -69,6 +69,14 @@ const familySupportNavigation = [
   { key: "nav.peerSupport", href: "/family-support/peer-support", icon: UserGroupIcon },
 ];
 
+const facialRecognitionNavigation = [
+  { key: "nav.facialRecognition", href: "/facial-recognition", icon: FaceIcon },
+  { key: "nav.photoUpload", href: "/facial-recognition?tab=upload", icon: CameraIcon },
+  { key: "nav.matchReview", href: "/facial-recognition?tab=review", icon: IdentificationIcon },
+  { key: "nav.frConsent", href: "/facial-recognition?tab=consent", icon: ShieldCheckIcon },
+  { key: "nav.frAuditLogs", href: "/facial-recognition?tab=audit", icon: DocumentIcon },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations("common");
@@ -139,6 +147,27 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 pathname === item.href
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.facialRecognition")}
+          </p>
+          {facialRecognitionNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith("/facial-recognition")
                   ? "bg-cyan-50 text-cyan-700"
                   : "text-gray-700 hover:bg-gray-100"
               )}

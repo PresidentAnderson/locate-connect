@@ -30,7 +30,10 @@
     "users": "Users",
     "systemLogs": "System Logs",
     "apiKeys": "API Keys",
-    "tipVerification": "Tip Verification"
+    "tipVerification": "Tip Verification",
+    "familySupport": "Family Support",
+    "supportResources": "Support Resources",
+    "peerSupport": "Peer Support"
   },
   "sections": {
     "cases": "Cases",
@@ -39,6 +42,7 @@
     "analyticsReports": "Analytics & Reports",
     "indigenousLiaison": "Indigenous Liaison",
     "archiveResearch": "Archive & Research",
+    "familySupport": "Family Support",
     "developers": "Developers",
     "administration": "Administration"
   },

@@ -333,66 +333,28 @@ CREATE TABLE match_reviews (
 -- CONSENT RECORDS TABLE
 -- =============================================================================
 
-CREATE TABLE consent_records (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- Subject
-  subject_id UUID REFERENCES profiles(id), -- If registered user
-  subject_case_id UUID REFERENCES cases(id), -- For missing person's family
-  subject_name TEXT,
-  subject_email TEXT,
-  subject_relationship TEXT, -- 'self', 'parent', 'guardian', 'next_of_kin'
-
-  -- Consent details
-  consent_type consent_type NOT NULL,
-  consent_status consent_status DEFAULT 'pending',
-  consent_version TEXT NOT NULL, -- Version of consent form/policy
-
-  -- Scope
-  scope_description TEXT,
-  allowed_uses JSONB, -- {facial_recognition: true, age_progression: true, ...}
-  restricted_uses JSONB, -- Explicitly denied uses
-
-  -- Consent evidence
-  consent_method TEXT NOT NULL, -- 'electronic', 'written', 'verbal'
-  consent_document_url TEXT,
-  electronic_signature TEXT,
-  witness_name TEXT,
-  witness_email TEXT,
-
-  -- Privacy policy
-  privacy_policy_version TEXT,
-  privacy_policy_accepted_at TIMESTAMPTZ,
-
-  -- Timing
-  granted_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ,
-  withdrawn_at TIMESTAMPTZ,
-  withdrawal_reason TEXT,
-
-  -- Identity verification
-  identity_verified BOOLEAN DEFAULT FALSE,
-  identity_verification_method TEXT,
-  identity_verified_at TIMESTAMPTZ,
-  identity_verified_by UUID REFERENCES profiles(id),
-
-  -- Compliance
-  compliance_framework TEXT, -- 'PIPEDA', 'GDPR', etc.
-  data_processing_basis TEXT, -- Legal basis for processing
-
-  -- Audit
-  ip_address INET,
-  user_agent TEXT,
-
-  -- Timestamps
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Add foreign key for photo_submissions.consent_record_id
-ALTER TABLE photo_submissions
-  ADD CONSTRAINT fk_photo_submissions_consent
-  FOREIGN KEY (consent_record_id) REFERENCES consent_records(id);
+ALTER TABLE consent_records
+  ADD COLUMN IF NOT EXISTS subject_id UUID REFERENCES profiles(id),
+  ADD COLUMN IF NOT EXISTS subject_case_id UUID REFERENCES cases(id),
+  ADD COLUMN IF NOT EXISTS subject_name TEXT,
+  ADD COLUMN IF NOT EXISTS subject_email TEXT,
+  ADD COLUMN IF NOT EXISTS subject_relationship TEXT,
+  ADD COLUMN IF NOT EXISTS consent_status TEXT DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS scope_description TEXT,
+  ADD COLUMN IF NOT EXISTS allowed_uses JSONB,
+  ADD COLUMN IF NOT EXISTS restricted_uses JSONB,
+  ADD COLUMN IF NOT EXISTS consent_method TEXT,
+  ADD COLUMN IF NOT EXISTS consent_document_url TEXT,
+  ADD COLUMN IF NOT EXISTS electronic_signature TEXT,
+  ADD COLUMN IF NOT EXISTS witness_name TEXT,
+  ADD COLUMN IF NOT EXISTS witness_email TEXT,
+  ADD COLUMN IF NOT EXISTS privacy_policy_accepted_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS identity_verified BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS identity_verification_method TEXT,
+  ADD COLUMN IF NOT EXISTS identity_verified_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS identity_verified_by UUID REFERENCES profiles(id),
+  ADD COLUMN IF NOT EXISTS compliance_framework TEXT,
+  ADD COLUMN IF NOT EXISTS data_processing_basis TEXT;
 
 -- =============================================================================
 -- PARTNER DATABASE CONFIGURATIONS TABLE
