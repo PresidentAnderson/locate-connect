@@ -13,6 +13,8 @@ import "./globals.css";
 // - "PingFang TC", "Microsoft JhengHei" for Traditional Chinese
 // - "Raavi" for Punjabi
 //
+// TODO: Re-enable Google Fonts when network access is available during build
+// Reference: Issue #131 - Syllabics Font Support for Indigenous Languages
 // When network access is available, uncomment the following imports:
 /*
 import {
@@ -118,6 +120,11 @@ export default function RootLayout({
         <link rel="mask-icon" href="/favicon.svg" color="#3b82f6" />
       </head>
       <body className="antialiased">
+        {/* 
+          Note: Font loading via system fonts defined in globals.css
+          When Google Fonts are re-enabled, restore font CSS variables:
+          className={`${geistSans.variable} ${geistMono.variable} ${notoSyllabics.variable} ${notoArabic.variable} ${notoChinese.variable} ${notoChineseTrad.variable} antialiased`}
+        */}
         <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>
