@@ -274,6 +274,66 @@ function getJurisdictionProfile(id: string): JurisdictionProfile {
 }
 
 /**
+ * Auto-escalation rules based on time elapsed
+ * Returns the new priority level if escalation is needed, otherwise null
+ */
+export function checkAutoEscalation(
+  currentLevel: PriorityLevel,
+  hoursMissing: number,
+  jurisdictionId: string = "qc_spvm_v1"
+): {
+  shouldEscalate: boolean;
+  newLevel?: PriorityLevel;
+  reason?: string;
+} {
+  // P0 (CRITICAL) cannot be escalated further
+  if (currentLevel === 0) {
+    return { shouldEscalate: false };
+  }
+
+  // SPVM escalation rules based on time elapsed and current priority
+  // These rules ensure cases don't languish at lower priorities
+
+  // P4 (MINIMAL) -> P3 (LOW) after 48 hours
+  if (currentLevel === 4 && hoursMissing >= 48) {
+    return {
+      shouldEscalate: true,
+      newLevel: 3,
+      reason: "Case at MINIMAL priority escalated to LOW after 48 hours missing",
+    };
+  }
+
+  // P3 (LOW) -> P2 (MEDIUM) after 72 hours
+  if (currentLevel === 3 && hoursMissing >= 72) {
+    return {
+      shouldEscalate: true,
+      newLevel: 2,
+      reason: "Case at LOW priority escalated to MEDIUM after 72 hours missing",
+    };
+  }
+
+  // P2 (MEDIUM) -> P1 (HIGH) after 120 hours (5 days)
+  if (currentLevel === 2 && hoursMissing >= 120) {
+    return {
+      shouldEscalate: true,
+      newLevel: 1,
+      reason: "Case at MEDIUM priority escalated to HIGH after 5 days missing",
+    };
+  }
+
+  // P1 (HIGH) -> P0 (CRITICAL) after 168 hours (7 days)
+  if (currentLevel === 1 && hoursMissing >= 168) {
+    return {
+      shouldEscalate: true,
+      newLevel: 0,
+      reason: "Case at HIGH priority escalated to CRITICAL after 7 days missing",
+    };
+  }
+
+  return { shouldEscalate: false };
+}
+
+/**
  * Get priority level display info
  */
 export function getPriorityDisplay(level: PriorityLevel): {

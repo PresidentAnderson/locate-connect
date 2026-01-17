@@ -1,4 +1,4 @@
-export { assessPriority, getPriorityDisplay } from "./priority-engine";
+export { assessPriority, checkAutoEscalation, getPriorityDisplay } from "./priority-engine";
 export { RecommendationsEngine } from "./recommendations-engine";
 export * from "./weather-service";
 // Note: compliance-service.ts is server-only and should be imported directly in API routes
