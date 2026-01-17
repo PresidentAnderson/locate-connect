@@ -6,6 +6,7 @@ export * from "./user.types";
 export * from "./dashboard.types";
 export * from "./notification.types";
 export * from "./indigenous.types";
+export * from "./indigenous-outreach.types";
 export * from "./api.types";
 export * from "./audit.types";
 export * from "./monitoring.types";
