@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         status: body.status || "not_collected",
         priority: body.priority || "routine",
         consent_obtained: body.consentObtained,
-        consent_date: body.consentDate || new Date().toISOString().split('T')[0],
+        consent_date: body.consentDate,
         consent_document_url: body.consentDocumentUrl,
         collected_by: body.collectedBy,
         collected_date: body.collectedDate,
