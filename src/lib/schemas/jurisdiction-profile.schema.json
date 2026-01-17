@@ -1,0 +1,279 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://locateconnect.com/schemas/jurisdiction-profile.json",
+  "title": "Jurisdiction Profile",
+  "description": "Schema for jurisdiction-specific configuration in the LocateConnect missing persons system",
+  "type": "object",
+  "required": ["id", "name", "region", "country", "language", "priorityWeights", "integrations", "legalRequirements", "contacts"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Unique identifier for the jurisdiction profile",
+      "examples": ["qc_spvm_v1", "generic"]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full name of the police service or jurisdiction"
+    },
+    "region": {
+      "type": "string",
+      "description": "City or region name"
+    },
+    "country": {
+      "type": "string",
+      "description": "Country name or code"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["en", "fr", "both"],
+      "description": "Preferred language(s) for the jurisdiction"
+    },
+    "priorityWeights": {
+      "type": "object",
+      "required": [
+        "ageUnder12",
+        "age12to17",
+        "ageOver65",
+        "mentalHealthCondition",
+        "medicalDependency",
+        "suicidalRisk",
+        "suspectedAbduction",
+        "domesticViolenceHistory",
+        "outOfCharacter",
+        "noFinancialResources",
+        "adverseWeather",
+        "missingOver24Hours",
+        "missingOver48Hours",
+        "missingOver72Hours",
+        "thresholds"
+      ],
+      "properties": {
+        "ageUnder12": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for children under 12 years old"
+        },
+        "age12to17": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for minors aged 12-17"
+        },
+        "ageOver65": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for seniors 65 years or older"
+        },
+        "mentalHealthCondition": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for mental health conditions"
+        },
+        "medicalDependency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for medical dependencies or conditions"
+        },
+        "suicidalRisk": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for suicidal risk"
+        },
+        "suspectedAbduction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for suspected abduction"
+        },
+        "domesticViolenceHistory": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for history of domestic violence"
+        },
+        "outOfCharacter": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for out-of-character disappearance"
+        },
+        "noFinancialResources": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for lack of financial resources"
+        },
+        "adverseWeather": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for adverse weather conditions"
+        },
+        "missingOver24Hours": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for missing over 24 hours"
+        },
+        "missingOver48Hours": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for missing over 48 hours"
+        },
+        "missingOver72Hours": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Weight for missing over 72 hours"
+        },
+        "thresholds": {
+          "type": "object",
+          "required": ["priority0", "priority1", "priority2", "priority3"],
+          "properties": {
+            "priority0": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Threshold for Priority 0 (Critical)"
+            },
+            "priority1": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Threshold for Priority 1 (High)"
+            },
+            "priority2": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Threshold for Priority 2 (Medium)"
+            },
+            "priority3": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Threshold for Priority 3 (Low)"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "integrations": {
+      "type": "object",
+      "required": [
+        "hospitalRegistry",
+        "morgueRegistry",
+        "borderServices",
+        "detentionFacilities",
+        "socialServices",
+        "transitAuthority"
+      ],
+      "properties": {
+        "hospitalRegistry": {
+          "type": "boolean",
+          "description": "Integration with hospital registry enabled"
+        },
+        "morgueRegistry": {
+          "type": "boolean",
+          "description": "Integration with morgue registry enabled"
+        },
+        "borderServices": {
+          "type": "boolean",
+          "description": "Integration with border services enabled"
+        },
+        "detentionFacilities": {
+          "type": "boolean",
+          "description": "Integration with detention facilities enabled"
+        },
+        "socialServices": {
+          "type": "boolean",
+          "description": "Integration with social services enabled"
+        },
+        "transitAuthority": {
+          "type": "boolean",
+          "description": "Integration with transit authority enabled"
+        }
+      },
+      "additionalProperties": false
+    },
+    "legalRequirements": {
+      "type": "object",
+      "required": [
+        "waitingPeriodHours",
+        "parentalConsentRequired",
+        "dataRetentionDays",
+        "privacyLawReference",
+        "mandatoryReporting"
+      ],
+      "properties": {
+        "waitingPeriodHours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Required waiting period in hours before filing a report"
+        },
+        "parentalConsentRequired": {
+          "type": "boolean",
+          "description": "Whether parental consent is required for minors"
+        },
+        "dataRetentionDays": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Data retention period in days"
+        },
+        "privacyLawReference": {
+          "type": "string",
+          "description": "Reference to applicable privacy law"
+        },
+        "mandatoryReporting": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of entities with mandatory reporting requirements"
+        }
+      },
+      "additionalProperties": false
+    },
+    "contacts": {
+      "type": "object",
+      "required": [
+        "emergencyLine",
+        "nonEmergencyLine",
+        "missingPersonsUnit",
+        "email",
+        "address"
+      ],
+      "properties": {
+        "emergencyLine": {
+          "type": "string",
+          "description": "Emergency contact phone number"
+        },
+        "nonEmergencyLine": {
+          "type": "string",
+          "description": "Non-emergency contact phone number"
+        },
+        "missingPersonsUnit": {
+          "type": "string",
+          "description": "Missing persons unit phone number"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact email address"
+        },
+        "address": {
+          "type": "string",
+          "description": "Physical address of the jurisdiction"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
