@@ -91,9 +91,6 @@ CREATE TABLE cold_case_profiles (
 
   -- Cold case timing
   became_cold_at TIMESTAMPTZ NOT NULL,
-  days_since_cold INTEGER GENERATED ALWAYS AS (
-    EXTRACT(DAY FROM (NOW() - became_cold_at))::INTEGER
-  ) STORED,
   total_days_missing INTEGER,
 
   -- Auto-classification criteria met
@@ -167,6 +164,17 @@ CREATE TABLE cold_case_profiles (
 
   UNIQUE(case_id)
 );
+
+-- =============================================================================
+-- COLD CASE PROFILES VIEW
+-- Derived fields that depend on current date
+-- =============================================================================
+
+CREATE OR REPLACE VIEW v_cold_case_profiles AS
+SELECT
+  cold_case_profiles.*,
+  (CURRENT_DATE - cold_case_profiles.became_cold_at::DATE)::INTEGER AS days_since_cold
+FROM cold_case_profiles;
 
 -- =============================================================================
 -- COLD CASE REVIEWS TABLE

@@ -406,12 +406,10 @@ export async function processDataErasureRequest(
   // Delete/anonymize user data in order of dependencies
 
   // 1. Notifications
-  // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
   const { count: notificationCount } = await supabase
     .from('notifications')
-    .delete()
-    .eq('user_id', userId)
-    .select('*', { count: 'exact', head: true });
+    .delete({ count: 'exact' })
+    .eq('user_id', userId);
 
   if ((notificationCount || 0) > 0) {
     tablesAffected.push('notifications');
@@ -419,12 +417,10 @@ export async function processDataErasureRequest(
   }
 
   // 2. Consent records (anonymize, don't delete for compliance)
-  // @ts-expect-error - Supabase types don't match runtime behavior for select after update
   const { count: consentCount } = await supabase
     .from('consent_records')
-    .update({ user_id: null })
-    .eq('user_id', userId)
-    .select('*', { count: 'exact', head: true });
+    .update({ user_id: null }, { count: 'exact' })
+    .eq('user_id', userId);
 
   if ((consentCount || 0) > 0) {
     tablesAffected.push('consent_records (anonymized)');
@@ -432,12 +428,10 @@ export async function processDataErasureRequest(
   }
 
   // 3. User sessions
-  // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
   const { count: sessionCount } = await supabase
     .from('user_sessions')
-    .delete()
-    .eq('user_id', userId)
-    .select('*', { count: 'exact', head: true });
+    .delete({ count: 'exact' })
+    .eq('user_id', userId);
 
   if ((sessionCount || 0) > 0) {
     tablesAffected.push('user_sessions');
@@ -544,12 +538,10 @@ export async function executeRetentionPolicy(policyId: string): Promise<{
       }
 
       if (policy.action_on_expiry === 'delete') {
-        // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
         const { count: deleteCount } = await supabase
           .from(policy.table_name)
-          .delete()
-          .in('id', recordIds)
-          .select('*', { count: 'exact', head: true });
+          .delete({ count: 'exact' })
+          .in('id', recordIds);
 
         results.recordsDeleted = deleteCount || 0;
       } else if (policy.action_on_expiry === 'archive') {

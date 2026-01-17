@@ -198,6 +198,22 @@ export interface ColdCaseProfile {
   revivalPriorityScore: number;
   revivalPriorityFactors: RevivalPriorityFactor[];
 
+  // Joined relations (populated by API)
+  case?: {
+    id: string;
+    case_number: string;
+    first_name: string;
+    last_name: string;
+    last_seen_date?: string;
+    last_seen_location?: string;
+    status: string;
+    priority_level?: string;
+    is_minor?: boolean;
+    is_indigenous?: boolean;
+    jurisdiction_id?: string;
+    primary_photo_url?: string;
+  };
+
   createdAt: string;
   updatedAt: string;
 }
