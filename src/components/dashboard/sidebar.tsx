@@ -31,6 +31,7 @@ const lawEnforcementNavigation = [
   { key: "nav.leDashboard", href: "/law-enforcement", icon: ShieldIcon },
   { key: "nav.liveFeed", href: "/law-enforcement/live", icon: BoltIcon },
   { key: "nav.priorityCases", href: "/law-enforcement/priority", icon: ExclamationIcon },
+  { key: "nav.amberAlerts", href: "/law-enforcement/amber-alerts", icon: ExclamationTriangleIcon },
 ];
 
 const tipVerificationNavigation = [
