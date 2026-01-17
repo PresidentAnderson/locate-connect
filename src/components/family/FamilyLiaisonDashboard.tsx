@@ -10,7 +10,7 @@ import type {
   SupportGroup,
   FamilyMessage,
   LIAISON_TYPE_LABELS,
-  RESOURCE_CATEGORY_LABELS,
+  FAMILY_SUPPORT_CATEGORY_LABELS,
   CHECK_IN_FREQUENCY_LABELS,
 } from "@/types/family-liaison.types";
 
