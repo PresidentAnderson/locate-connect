@@ -4,6 +4,7 @@ import CaseResolutionPanel from "@/components/cases/CaseResolutionPanel";
 import CaseEvidencePanel from "@/components/cases/CaseEvidencePanel";
 import CaseWeatherPanel from "@/components/cases/CaseWeatherPanel";
 import CaseResourcesPanel from "@/components/cases/CaseResourcesPanel";
+import CaseTimelinePanel from "@/components/cases/CaseTimelinePanel";
 import { cn } from "@/lib";
 
 interface CasePageProps {
@@ -91,6 +92,8 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
       </div>
 
       <CaseResolutionPanel caseId={caseRecord.id} />
+
+      <CaseTimelinePanel caseId={caseRecord.id} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <CaseEvidencePanel caseId={caseRecord.id} />
