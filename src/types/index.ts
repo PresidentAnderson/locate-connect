@@ -16,3 +16,5 @@ export * from "./tip-verification.types";
 export * from "./mobile.types";
 export * from "./training.types";
 export * from "./outcome-report.types";
+export * from "./case-resolution.types";
+export * from "./evidence.types";

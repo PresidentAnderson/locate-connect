@@ -23,6 +23,7 @@ interface AssessmentInput {
   outOfCharacter: boolean;
   hasFinancialResources: boolean;
   adverseWeather: boolean;
+  weatherRiskPoints?: number;
 }
 
 /**
@@ -168,6 +169,17 @@ export function assessPriority(
       factor: "adverse_weather",
       weight,
       description: "Adverse weather conditions",
+      source: "environmental_assessment",
+    });
+  }
+
+  if (input.weatherRiskPoints) {
+    const bounded = Math.max(0, Math.min(10, input.weatherRiskPoints));
+    totalScore += bounded;
+    factors.push({
+      factor: "weather_risk_points",
+      weight: bounded,
+      description: "Weather risk score applied",
       source: "environmental_assessment",
     });
   }
