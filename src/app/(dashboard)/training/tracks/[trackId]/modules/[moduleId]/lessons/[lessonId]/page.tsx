@@ -224,13 +224,13 @@ function RenderSection({ section }: { section: LessonSection }) {
     case "text":
       return <p className="text-gray-700 leading-relaxed mb-4">{section.content}</p>;
 
-    case "heading":
-      const HeadingTag = `h${section.level || 2}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-      return React.createElement(
-        HeadingTag,
-        { className: "font-semibold text-gray-900 mt-6 mb-3" },
-        section.content
-      );
+    case "heading": {
+      const level = section.level || 2;
+      const headingClassName = "font-semibold text-gray-900 mt-6 mb-3";
+      if (level === 1) return <h1 className={headingClassName}>{section.content}</h1>;
+      if (level === 3) return <h3 className={headingClassName}>{section.content}</h3>;
+      return <h2 className={headingClassName}>{section.content}</h2>;
+    }
 
     case "list":
       return (

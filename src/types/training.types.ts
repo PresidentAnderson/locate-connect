@@ -401,6 +401,7 @@ export interface QuizResult {
   totalQuestions: number;
   pointsEarned: number;
   totalPoints: number;
+  canRetry: boolean;
   feedback: {
     questionId: string;
     isCorrect: boolean;

@@ -58,26 +58,49 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Type the track data properly
+    interface ModuleData {
+      id: string;
+      display_order: number;
+      lessons?: { id: string; display_order: number }[];
+      quizzes?: { display_order: number }[];
+    }
+    interface TrackData {
+      id: string;
+      slug: string;
+      title: string;
+      title_fr?: string;
+      description?: string;
+      description_fr?: string;
+      audience: string;
+      icon?: string;
+      color?: string;
+      estimated_duration_minutes: number;
+      is_required: boolean;
+      is_certification_track: boolean;
+      certification_valid_days?: number;
+      pass_percentage: number;
+      display_order: number;
+      status: string;
+      created_by?: string;
+      created_at: string;
+      updated_at: string;
+      modules?: ModuleData[];
+    }
+    const typedTrack = track as TrackData;
+
     // Sort modules and lessons by display_order
-    if (track.modules) {
-      track.modules.sort(
-        (a: { display_order: number }, b: { display_order: number }) =>
-          a.display_order - b.display_order
-      );
+    if (typedTrack.modules) {
+      typedTrack.modules.sort((a, b) => a.display_order - b.display_order);
       if (includeLessons) {
-        track.modules.forEach(
-          (module: {
-            lessons?: { display_order: number }[];
-            quizzes?: { display_order: number }[];
-          }) => {
-            if (module.lessons) {
-              module.lessons.sort((a, b) => a.display_order - b.display_order);
-            }
-            if (module.quizzes) {
-              module.quizzes.sort((a, b) => a.display_order - b.display_order);
-            }
+        typedTrack.modules.forEach((module) => {
+          if (module.lessons) {
+            module.lessons.sort((a, b) => a.display_order - b.display_order);
           }
-        );
+          if (module.quizzes) {
+            module.quizzes.sort((a, b) => a.display_order - b.display_order);
+          }
+        });
       }
     }
 
@@ -110,25 +133,23 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
       // Attach progress to track and modules
       const trackWithProgress = {
-        ...track,
+        ...typedTrack,
         progress: trackProgress,
         certification,
-        modules: track.modules?.map(
-          (module: { id: string; lessons?: { id: string }[] }) => ({
-            ...module,
-            progress: moduleProgress?.find((p) => p.module_id === module.id),
-            lessons: module.lessons?.map((lesson: { id: string }) => ({
-              ...lesson,
-              progress: lessonProgress?.find((p) => p.lesson_id === lesson.id),
-            })),
-          })
-        ),
+        modules: typedTrack.modules?.map((module) => ({
+          ...module,
+          progress: moduleProgress?.find((p) => p.module_id === module.id),
+          lessons: module.lessons?.map((lesson) => ({
+            ...lesson,
+            progress: lessonProgress?.find((p) => p.lesson_id === lesson.id),
+          })),
+        })),
       };
 
       return NextResponse.json({ data: trackWithProgress });
     }
 
-    return NextResponse.json({ data: track });
+    return NextResponse.json({ data: typedTrack });
   } catch (error) {
     console.error("Unexpected error:", error);
     return NextResponse.json(

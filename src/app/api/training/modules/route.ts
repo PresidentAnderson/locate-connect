@@ -45,19 +45,19 @@ export async function GET(request: NextRequest) {
 
     // Sort lessons by display_order
     if (includeLessons && data) {
-      data.forEach(
-        (module: {
+      (
+        data as Array<{
           lessons?: { display_order: number }[];
           quizzes?: { display_order: number }[];
-        }) => {
-          if (module.lessons) {
-            module.lessons.sort((a, b) => a.display_order - b.display_order);
-          }
-          if (module.quizzes) {
-            module.quizzes.sort((a, b) => a.display_order - b.display_order);
-          }
+        }>
+      ).forEach((module) => {
+        if (module.lessons) {
+          module.lessons.sort((a, b) => a.display_order - b.display_order);
         }
-      );
+        if (module.quizzes) {
+          module.quizzes.sort((a, b) => a.display_order - b.display_order);
+        }
+      });
     }
 
     return NextResponse.json({ data });

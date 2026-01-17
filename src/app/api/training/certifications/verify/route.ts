@@ -71,12 +71,17 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Extract track info - handle the case where track is returned as array or object
+    const trackData = Array.isArray(certification.track)
+      ? certification.track[0]
+      : certification.track;
+
     return NextResponse.json({
       valid: true,
       certification: {
         certificateNumber: certification.certificate_number,
-        trackTitle: certification.track?.title,
-        trackTitleFr: certification.track?.title_fr,
+        trackTitle: trackData?.title,
+        trackTitleFr: trackData?.title_fr,
         issuedAt: certification.issued_at,
         expiresAt: certification.expires_at,
         finalScore: certification.final_score_percentage,
