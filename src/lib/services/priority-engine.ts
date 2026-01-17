@@ -279,8 +279,7 @@ function getJurisdictionProfile(id: string): JurisdictionProfile {
  */
 export function checkAutoEscalation(
   currentLevel: PriorityLevel,
-  hoursMissing: number,
-  jurisdictionId: string = "qc_spvm_v1"
+  hoursMissing: number
 ): {
   shouldEscalate: boolean;
   newLevel?: PriorityLevel;
