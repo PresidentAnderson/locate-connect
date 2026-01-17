@@ -1,21 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  useEffect(() => {
+    // Check for messages in URL params
+    const urlMessage = searchParams.get("message");
+    const urlError = searchParams.get("error");
+    if (urlMessage) setMessage(urlMessage);
+    if (urlError) setError(urlError);
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
     setLoading(true);
 
     try {
@@ -29,13 +40,36 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/cases");
+      // Get redirect URL from params or default to /cases
+      const redirect = searchParams.get("redirect") || "/cases";
+      router.push(redirect);
       router.refresh();
     } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) setError(error.message);
+  };
+
+  const handleMicrosoftLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "azure",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: "email",
+      },
+    });
+    if (error) setError(error.message);
   };
 
   return (
@@ -47,6 +81,13 @@ export default function LoginPage() {
           Sign in to access your cases and dashboard
         </p>
       </div>
+
+      {/* Success Message */}
+      {message && (
+        <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+          <p className="text-sm text-green-700">{message}</p>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -118,6 +159,7 @@ export default function LoginPage() {
       <div className="grid grid-cols-2 gap-3">
         <button
           type="button"
+          onClick={handleGoogleLogin}
           className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           <GoogleIcon />
@@ -125,6 +167,7 @@ export default function LoginPage() {
         </button>
         <button
           type="button"
+          onClick={handleMicrosoftLogin}
           className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           <MicrosoftIcon />
@@ -150,6 +193,32 @@ export default function LoginPage() {
         </ul>
       </div>
     </div>
+  );
+}
+
+function LoginLoading() {
+  return (
+    <div className="space-y-6">
+      <div className="text-center lg:text-left">
+        <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Sign in to access your cases and dashboard
+        </p>
+      </div>
+      <div className="animate-pulse space-y-4">
+        <div className="h-10 bg-gray-200 rounded-lg" />
+        <div className="h-10 bg-gray-200 rounded-lg" />
+        <div className="h-10 bg-gray-200 rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }
 

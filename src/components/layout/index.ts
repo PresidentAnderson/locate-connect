@@ -1,3 +1,5 @@
 // Layout components
 // Export components as they are created
-// Example: export { Header } from "./header";
+
+// Placeholder export to make this a valid module
+export {};

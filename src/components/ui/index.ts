@@ -1,3 +1,5 @@
 // Base UI components
 // Export components as they are created
-// Example: export { Button } from "./button";
+
+// Placeholder export to make this a valid module
+export {};

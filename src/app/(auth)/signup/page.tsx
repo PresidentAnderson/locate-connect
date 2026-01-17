@@ -43,18 +43,34 @@ export default function SignupPage() {
       return;
     }
 
+    // Validate LE fields
+    if (formData.role === "law_enforcement") {
+      if (!formData.organization.trim()) {
+        setError("Organization is required for Law Enforcement accounts");
+        return;
+      }
+      if (!formData.badgeNumber.trim()) {
+        setError("Badge number is required for Law Enforcement accounts");
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      // Create auth user
+      // Create auth user with metadata
+      // The database trigger will auto-create the profile
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
             role: formData.role,
+            organization: formData.organization || null,
+            badge_number: formData.badgeNumber || null,
           },
         },
       });
@@ -64,25 +80,15 @@ export default function SignupPage() {
         return;
       }
 
-      if (authData.user) {
-        // Create user profile in database
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: authData.user.id,
-          email: formData.email,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          role: formData.role,
-          organization: formData.organization || null,
-          badge_number: formData.badgeNumber || null,
-          is_verified: formData.role === "user", // Users auto-verified, LE needs approval
-        });
-
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-        }
+      // Check if email confirmation is required
+      if (authData.user && !authData.session) {
+        // Email confirmation required
+        router.push("/login?message=Check your email to confirm your account");
+      } else if (authData.session) {
+        // Auto-confirmed (e.g., in development)
+        router.push("/cases");
+        router.refresh();
       }
-
-      router.push("/login?message=Check your email to confirm your account");
     } catch {
       setError("An unexpected error occurred");
     } finally {
@@ -91,6 +97,7 @@ export default function SignupPage() {
   };
 
   const showLEFields = formData.role === "law_enforcement";
+  const showJournalistFields = formData.role === "journalist";
 
   return (
     <div className="space-y-6">
@@ -215,6 +222,33 @@ export default function SignupPage() {
             </div>
             <p className="text-xs text-cyan-700">
               Your credentials will be verified before full access is granted.
+            </p>
+          </div>
+        )}
+
+        {/* Journalist Fields */}
+        {showJournalistFields && (
+          <div className="space-y-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-800">
+              Journalist Credential Verification
+            </p>
+            <div>
+              <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
+                Media Organization
+              </label>
+              <input
+                id="organization"
+                name="organization"
+                type="text"
+                value={formData.organization}
+                onChange={handleChange}
+                required={showJournalistFields}
+                placeholder="e.g., CBC, La Presse, Globe and Mail"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            </div>
+            <p className="text-xs text-amber-700">
+              Journalists have limited access and must follow media guidelines.
             </p>
           </div>
         )}
