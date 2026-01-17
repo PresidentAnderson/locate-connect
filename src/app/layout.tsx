@@ -71,7 +71,6 @@ export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
   manifest: "/manifest.json",
-  themeColor: "#3b82f6",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -79,13 +78,6 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: true,
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: "cover",
   },
   icons: {
     icon: [
@@ -97,6 +89,15 @@ export const metadata: Metadata = {
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
     ],
   },
+};
+
+// Viewport configuration (moved from metadata per Next.js 16+ requirements)
+// Allows users to zoom for accessibility (WCAG compliance)
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#3b82f6",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

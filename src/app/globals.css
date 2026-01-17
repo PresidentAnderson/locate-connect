@@ -191,11 +191,6 @@ html.rtl .preserve-ltr {
   unicode-bidi: isolate;
 }
 
-/* Arabic-specific font stack */
-html[lang="ar"] body {
-  font-family: "Noto Sans Arabic", "Segoe UI", "Tahoma", var(--font-sans), sans-serif;
-}
-
 /* =============================================================================
    Multi-language Font Support
    ============================================================================= */
