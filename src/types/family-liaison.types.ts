@@ -206,11 +206,14 @@ export interface FamilyMessage {
   senderId: string;
   senderType: 'liaison' | 'family' | 'system';
   recipientId?: string;
+  recipientContactId?: string;
+  threadId?: string;
   subject?: string;
   message: string;
   isRead: boolean;
   readAt?: string;
   isUrgent: boolean;
+  isEncrypted?: boolean;
   attachments: {
     fileName: string;
     fileUrl: string;
@@ -218,6 +221,12 @@ export interface FamilyMessage {
     fileSize: number;
   }[];
   createdAt: string;
+  sender?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl?: string;
+  };
 }
 
 export interface CaseProgressReport {

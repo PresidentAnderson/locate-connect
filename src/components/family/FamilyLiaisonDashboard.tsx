@@ -116,7 +116,14 @@ export function FamilyLiaisonDashboard({
           supportGroups={data.availableSupportGroups}
         />
       )}
-      {activeTab === "messages" && <MessagesTab messages={data.recentMessages} caseId={caseId} />}
+      {activeTab === "messages" && (
+        <MessagesTab
+          messages={data.recentMessages}
+          caseId={caseId}
+          primaryLiaison={data.primaryLiaison}
+          familyContacts={data.familyContacts}
+        />
+      )}
       {activeTab === "documents" && <DocumentsTab documents={data.recentDocuments} />}
     </div>
   );
@@ -447,55 +454,324 @@ function ResourcesTab({
 function MessagesTab({
   messages,
   caseId,
+  primaryLiaison,
+  familyContacts,
 }: {
   messages: FamilyMessage[];
   caseId: string;
+  primaryLiaison?: FamilyLiaison;
+  familyContacts: FamilyContact[];
 }) {
   const [selectedMessage, setSelectedMessage] = useState<FamilyMessage | null>(null);
+  const [messageList, setMessageList] = useState<FamilyMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
+  const [recipientValue, setRecipientValue] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [urgent, setUrgent] = useState(false);
+  const [replyBody, setReplyBody] = useState("");
+
+  useEffect(() => {
+    setMessageList(normalizeMessages(messages));
+    setLoading(true);
+    setError(null);
+    fetchMessages();
+  }, [caseId, messages]);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`/api/family/messages?caseId=${caseId}`);
+      if (!response.ok) {
+        const payload = await response.json();
+        setError(payload?.error || "Failed to load messages.");
+        return;
+      }
+      const payload = await response.json();
+      const normalized = normalizeMessages(payload.data || []);
+      setMessageList(normalized);
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+      setError("Failed to load messages.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const normalizeMessages = (rawMessages: FamilyMessage[] | Record<string, unknown>[]) =>
+    rawMessages.map((message) => normalizeMessage(message as Record<string, unknown>));
+
+  const normalizeMessage = (raw: Record<string, unknown>): FamilyMessage => {
+    const senderRaw = raw.sender as
+      | { id: string; first_name?: string; last_name?: string; avatar_url?: string; firstName?: string; lastName?: string; avatarUrl?: string }
+      | undefined;
+
+    return {
+      id: String(raw.id ?? ""),
+      caseId: String(raw.case_id ?? raw.caseId ?? ""),
+      senderId: String(raw.sender_id ?? raw.senderId ?? ""),
+      senderType: (raw.sender_type ?? raw.senderType ?? "system") as FamilyMessage["senderType"],
+      recipientId: raw.recipient_id ? String(raw.recipient_id) : (raw.recipientId as string | undefined),
+      recipientContactId: raw.recipient_contact_id
+        ? String(raw.recipient_contact_id)
+        : (raw.recipientContactId as string | undefined),
+      threadId: raw.thread_id ? String(raw.thread_id) : (raw.threadId as string | undefined),
+      subject: (raw.subject as string | undefined) || undefined,
+      message: String(raw.message ?? ""),
+      isRead: Boolean(raw.is_read ?? raw.isRead ?? false),
+      readAt: (raw.read_at as string | undefined) ?? (raw.readAt as string | undefined),
+      isUrgent: Boolean(raw.is_urgent ?? raw.isUrgent ?? false),
+      isEncrypted: Boolean(raw.is_encrypted ?? raw.isEncrypted ?? true),
+      attachments: (raw.attachments as FamilyMessage["attachments"]) || [],
+      createdAt: String(raw.created_at ?? raw.createdAt ?? new Date().toISOString()),
+      sender: senderRaw
+        ? {
+            id: senderRaw.id,
+            firstName: senderRaw.first_name ?? senderRaw.firstName ?? "",
+            lastName: senderRaw.last_name ?? senderRaw.lastName ?? "",
+            avatarUrl: senderRaw.avatar_url ?? senderRaw.avatarUrl,
+          }
+        : undefined,
+    };
+  };
+
+  const handleSelectMessage = async (message: FamilyMessage) => {
+    setSelectedMessage(message);
+    setIsComposing(false);
+    setReplyBody("");
+    if (message.isRead) return;
+
+    try {
+      await fetch("/api/family/messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: message.id, isRead: true }),
+      });
+      setMessageList((prev) =>
+        prev.map((item) => (item.id === message.id ? { ...item, isRead: true } : item))
+      );
+    } catch (err) {
+      console.error("Failed to mark message as read:", err);
+    }
+  };
+
+  const recipientOptions = [
+    ...(primaryLiaison?.user
+      ? [
+          {
+            value: `profile:${primaryLiaison.user.id}`,
+            label: `Primary Liaison · ${primaryLiaison.user.firstName} ${primaryLiaison.user.lastName}`,
+          },
+        ]
+      : []),
+    ...familyContacts.map((contact) => ({
+      value: `contact:${contact.id}`,
+      label: `Family Contact · ${contact.firstName} ${contact.lastName}`,
+    })),
+  ];
+
+  const sendMessage = async (payload: {
+    recipientId?: string;
+    recipientContactId?: string;
+    threadId?: string;
+    subject?: string;
+    message: string;
+    isUrgent?: boolean;
+  }) => {
+    setError(null);
+    try {
+      const response = await fetch("/api/family/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caseId, ...payload }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setError(result?.error || "Failed to send message.");
+        return false;
+      }
+      const newMessage = normalizeMessage(result.data as Record<string, unknown>);
+      setMessageList((prev) => [newMessage, ...prev]);
+      setSelectedMessage(newMessage);
+      return true;
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      setError("Failed to send message.");
+      return false;
+    }
+  };
+
+  const handleCompose = async () => {
+    if (!recipientValue || !body.trim()) {
+      setError("Recipient and message are required.");
+      return;
+    }
+
+    const [type, id] = recipientValue.split(":");
+    const success = await sendMessage({
+      recipientId: type === "profile" ? id : undefined,
+      recipientContactId: type === "contact" ? id : undefined,
+      subject: subject.trim() || undefined,
+      message: body.trim(),
+      isUrgent: urgent,
+    });
+
+    if (success) {
+      setRecipientValue("");
+      setSubject("");
+      setBody("");
+      setUrgent(false);
+      setIsComposing(false);
+    }
+  };
+
+  const handleReply = async () => {
+    if (!selectedMessage || !replyBody.trim()) {
+      return;
+    }
+
+    const recipientId = selectedMessage.senderId || selectedMessage.recipientId;
+    const threadId = selectedMessage.threadId || selectedMessage.id;
+    const success = await sendMessage({
+      recipientId: recipientId || undefined,
+      threadId,
+      subject: selectedMessage.subject,
+      message: replyBody.trim(),
+    });
+
+    if (success) {
+      setReplyBody("");
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Message List */}
       <div className="lg:col-span-1 bg-white rounded-lg border border-gray-200">
         <div className="p-4 border-b border-gray-200">
-          <button className="w-full px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700">
+          <button
+            className="w-full px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+            onClick={() => {
+              setIsComposing(true);
+              setSelectedMessage(null);
+              setReplyBody("");
+            }}
+          >
             New Message
           </button>
         </div>
         <div className="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
-          {messages.map((message) => (
-            <button
-              key={message.id}
-              onClick={() => setSelectedMessage(message)}
-              className={`w-full p-4 text-left hover:bg-gray-50 ${
-                selectedMessage?.id === message.id ? "bg-cyan-50" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900 truncate">
-                  {message.subject || "No subject"}
-                </span>
-                {!message.isRead && (
-                  <span className="h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
-                )}
-              </div>
-              <p className="text-sm text-gray-500 truncate mt-1">{message.message}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                {new Date(message.createdAt).toLocaleDateString()}
-              </p>
-            </button>
-          ))}
+          {loading ? (
+            <div className="p-4 text-sm text-gray-500">Loading messages...</div>
+          ) : messageList.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500">No messages yet.</div>
+          ) : (
+            messageList.map((message) => (
+              <button
+                key={message.id}
+                onClick={() => handleSelectMessage(message)}
+                className={`w-full p-4 text-left hover:bg-gray-50 ${
+                  selectedMessage?.id === message.id ? "bg-cyan-50" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-900 truncate">
+                    {message.subject || "No subject"}
+                  </span>
+                  {!message.isRead && (
+                    <span className="h-2 w-2 rounded-full bg-cyan-500 flex-shrink-0" />
+                  )}
+                </div>
+                <p className="text-sm text-gray-500 truncate mt-1">{message.message}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {new Date(message.createdAt).toLocaleDateString()}
+                </p>
+              </button>
+            ))
+          )}
         </div>
       </div>
 
       {/* Message Detail */}
       <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6">
-        {selectedMessage ? (
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+        {isComposing ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Recipient</label>
+              <select
+                value={recipientValue}
+                onChange={(event) => setRecipientValue(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              >
+                <option value="">Select recipient</option>
+                {recipientOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Subject</label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(event) => setSubject(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Message</label>
+              <textarea
+                value={body}
+                onChange={(event) => setBody(event.target.value)}
+                className="mt-1 w-full rounded-lg border border-gray-300 p-3 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                rows={6}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={urgent}
+                onChange={(event) => setUrgent(event.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-cyan-600"
+              />
+              Mark as urgent
+            </label>
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+                onClick={() => setIsComposing(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+                onClick={handleCompose}
+              >
+                Send Message
+              </button>
+            </div>
+          </div>
+        ) : selectedMessage ? (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {selectedMessage.subject || "No subject"}
-              </h2>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {selectedMessage.subject || "No subject"}
+                </h2>
+                {selectedMessage.sender && (
+                  <p className="text-xs text-gray-500">
+                    From {selectedMessage.sender.firstName} {selectedMessage.sender.lastName}
+                  </p>
+                )}
+              </div>
               {selectedMessage.isUrgent && (
                 <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
                   Urgent
@@ -528,11 +804,16 @@ function MessagesTab({
             <div className="mt-6 pt-6 border-t border-gray-200">
               <textarea
                 placeholder="Type your reply..."
+                value={replyBody}
+                onChange={(event) => setReplyBody(event.target.value)}
                 className="w-full rounded-lg border border-gray-300 p-3 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
                 rows={4}
               />
               <div className="mt-3 flex justify-end">
-                <button className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700">
+                <button
+                  className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+                  onClick={handleReply}
+                >
                   Send Reply
                 </button>
               </div>
