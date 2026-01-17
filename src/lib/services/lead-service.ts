@@ -17,6 +17,10 @@ import {
   LeadStatus,
 } from "@/types/lead.types";
 
+// Constants
+const DEFAULT_PRIORITY_LEVEL = "p3_low" as const;
+const DEFAULT_CREDIBILITY_SCORE = 50;
+
 /**
  * Convert database row to Lead object
  */
@@ -134,8 +138,8 @@ export async function createLead(
         longitude: input.longitude || null,
         city: input.city || null,
         province: input.province || null,
-        priority_level: input.priorityLevel || "p3_low",
-        credibility_score: input.credibilityScore ?? 50,
+        priority_level: input.priorityLevel || DEFAULT_PRIORITY_LEVEL,
+        credibility_score: input.credibilityScore ?? DEFAULT_CREDIBILITY_SCORE,
         assigned_to: input.assignedTo || null,
         sighting_date: input.sightingDate || null,
       })

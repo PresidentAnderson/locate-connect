@@ -9,6 +9,9 @@ import {
 } from "@/lib/services/lead-service";
 import { UpdateLeadInput } from "@/types/lead.types";
 
+// Valid actions for special operations
+const VALID_ACTIONS = ["assign", "verify"] as const;
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -110,7 +113,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
       // Invalid action
       return NextResponse.json(
-        { error: `Invalid action: ${body.action}. Valid actions are: assign, verify` },
+        { error: `Invalid action: ${body.action}. Valid actions are: ${VALID_ACTIONS.join(", ")}` },
         { status: 400 }
       );
     }

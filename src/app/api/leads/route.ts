@@ -3,6 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createLead, listLeads } from "@/lib/services/lead-service";
 import { CreateLeadInput, LeadFilters } from "@/types/lead.types";
 
+// Valid enum values for query parameter validation
+const VALID_STATUSES = ["new", "investigating", "verified", "dismissed", "acted_upon"] as const;
+const VALID_LEAD_TYPES = ["social_media", "email_opened", "location", "witness", "hospital", "detention", "other"] as const;
+const VALID_PRIORITY_LEVELS = ["p0_critical", "p1_high", "p2_medium", "p3_low", "p4_routine"] as const;
+
 /**
  * GET /api/leads
  * List leads with optional filters
@@ -27,19 +32,19 @@ export async function GET(request: NextRequest) {
     }
     if (searchParams.get("status")) {
       const status = searchParams.get("status")!;
-      if (["new", "investigating", "verified", "dismissed", "acted_upon"].includes(status)) {
+      if (VALID_STATUSES.includes(status as any)) {
         filters.status = status as LeadFilters["status"];
       }
     }
     if (searchParams.get("leadType")) {
       const leadType = searchParams.get("leadType")!;
-      if (["social_media", "email_opened", "location", "witness", "hospital", "detention", "other"].includes(leadType)) {
+      if (VALID_LEAD_TYPES.includes(leadType as any)) {
         filters.leadType = leadType as LeadFilters["leadType"];
       }
     }
     if (searchParams.get("priorityLevel")) {
       const priority = searchParams.get("priorityLevel")!;
-      if (["p0_critical", "p1_high", "p2_medium", "p3_low", "p4_routine"].includes(priority)) {
+      if (VALID_PRIORITY_LEVELS.includes(priority as any)) {
         filters.priorityLevel = priority as LeadFilters["priorityLevel"];
       }
     }
