@@ -1,4 +1,6 @@
 {
+  "_comment": "Mi'kmaq Intake Form Translations - REQUIRES PROFESSIONAL TRANSLATION",
+  "_instructions": "This file contains placeholder translations for the missing person intake form. All strings below need to be translated by certified Mi'kmaq language translators or native speakers.",
   "header": {
     "title": "Report a Missing Person",
     "subtitle": "Complete all sections to file a report"
@@ -13,13 +15,14 @@
     "review": { "title": "Review & Submit" }
   },
   "navigation": {
-    "previous": "Previous",
-    "next": "Next",
-    "submit": "Submit Report"
+    "previous": "← Previous",
+    "next": "Next →",
+    "submit": "Submit Report",
+    "submitting": "Submitting..."
   },
   "privacy": {
     "title": "Privacy Notice",
-    "body": "Information collected will be shared with law enforcement agencies as required. By submitting this form, you consent to the processing of this data in accordance with privacy laws."
+    "body": "Information collected will be shared with law enforcement agencies as required. By submitting this form, you consent to the processing of this data in accordance with Quebec privacy laws."
   },
   "reporter": {
     "title": "Your Information",
@@ -50,6 +53,7 @@
     "lastName": "Last Name",
     "dob": "Date of Birth",
     "gender": "Gender",
+    "selectGender": "Select gender",
     "height": "Height",
     "weight": "Weight",
     "hairColor": "Hair Color",
@@ -124,9 +128,11 @@
     "reporterDescription": "This helps us communicate with you effectively and connect you with appropriate support services.",
     "reporterLanguagesLabel": "Languages you speak",
     "reporterLanguagesPlaceholder": "Select all languages you can communicate in",
+    "searchPlaceholder": "Search languages...",
     "reporterPreferredLabel": "Preferred contact language",
     "interpreterNeeded": "Interpreter assistance needed",
     "interpreterLanguage": "Interpreter language",
+    "reporterOtherLabel": "Other language or dialect (optional)",
     "subjectTitle": "Missing Person's Language Information",
     "subjectDescription": "Understanding what languages the missing person speaks helps with community outreach and communication if they are found.",
     "subjectPrimaryLabel": "Primary languages spoken by the missing person",
@@ -136,6 +142,8 @@
     "subjectRespondsHelp": "This is helpful for search teams and community outreach. Include languages they understand even if they don't speak them fluently.",
     "subjectOfficialLabel": "Can communicate in English or French",
     "subjectOfficialHelp": "This helps determine if language-specific outreach or translators may be needed during the search.",
+    "subjectOtherLabel": "Other language or dialect (optional)",
+    "otherPlaceholder": "Enter language or dialect",
     "summaryTitle": "Language Summary",
     "reporterSummaryLabel": "Your languages:",
     "subjectSummaryLabel": "Missing person's languages:"
@@ -157,5 +165,19 @@
     "riskMentalLabel": "Mental Health",
     "languageReporterLabel": "Reporter languages",
     "languageSubjectLabel": "Missing person languages"
+  },
+  "success": {
+    "kicker": "Report received",
+    "title": "Thank you for submitting this report",
+    "subtitle": "Our response team will review the details and coordinate next steps.",
+    "caseLabel": "Case number:",
+    "nextStepsTitle": "What happens next:",
+    "nextSteps": {
+      "first": "A coordinator will validate the details and may reach out for clarification.",
+      "second": "We will notify relevant agencies and assign a response team.",
+      "third": "You can monitor updates in your case dashboard."
+    },
+    "backToCases": "View case dashboard",
+    "newReport": "Start another report"
   }
 }
