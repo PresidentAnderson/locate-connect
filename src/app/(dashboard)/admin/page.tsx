@@ -61,8 +61,8 @@ export default function AdminPage() {
             <ActionButton icon="📊" label="View Analytics" />
             <ActionButton icon="🔑" label="Manage API Keys" />
             <ActionButton icon="📋" label="View Audit Logs" />
+            <ActionButton icon="🌍" label="Jurisdictions" href="/admin/jurisdictions" />
             <ActionButton icon="⚙️" label="System Settings" />
-            <ActionButton icon="🧪" label="Test Mode" />
           </div>
         </div>
 
@@ -200,11 +200,22 @@ function ServiceStatus({
   );
 }
 
-function ActionButton({ icon, label }: { icon: string; label: string }) {
+function ActionButton({ icon, label, href }: { icon: string; label: string; href?: string }) {
+  const className = "flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors";
+  
+  if (href) {
+    return (
+      <a href={href} className={className}>
+        <span>{icon}</span>
+        <span>{label}</span>
+      </a>
+    );
+  }
+  
   return (
     <button
       type="button"
-      className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+      className={className}
     >
       <span>{icon}</span>
       <span>{label}</span>
