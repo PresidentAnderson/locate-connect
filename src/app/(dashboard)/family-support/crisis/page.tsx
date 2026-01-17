@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib";
+
+// Force dynamic rendering to avoid useSearchParams SSR issues
+export const dynamic = "force-dynamic";
 
 interface SupportResource {
   id: string;
