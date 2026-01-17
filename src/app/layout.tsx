@@ -1,4 +1,20 @@
 import type { Metadata } from "next";
+import { siteConfig } from "@/config";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import "./globals.css";
+
+// NOTE: Google Fonts are temporarily disabled due to network restrictions during build
+// The application will use system fonts defined in globals.css with comprehensive fallback chains
+// These include:
+// - System fonts for Latin scripts (English, French, Spanish)
+// - "Noto Sans Canadian Aboriginal", "Euphemia UCAS" for Indigenous syllabics
+// - "Segoe UI", "Tahoma" for Arabic
+// - "PingFang SC", "Microsoft YaHei" for Simplified Chinese
+// - "PingFang TC", "Microsoft JhengHei" for Traditional Chinese
+// - "Raavi" for Punjabi
+//
+// When network access is available, uncomment the following imports:
+/*
 import {
   Geist,
   Geist_Mono,
@@ -7,9 +23,6 @@ import {
   Noto_Sans_SC,
   Noto_Sans_TC,
 } from "next/font/google";
-import { siteConfig } from "@/config";
-import { LocaleProvider } from "@/components/i18n/LocaleProvider";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +65,7 @@ const notoChineseTrad = Noto_Sans_TC({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
+*/
 
 export const metadata: Metadata = {
   title: siteConfig.name,
@@ -102,9 +116,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <link rel="mask-icon" href="/favicon.svg" color="#3b82f6" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSyllabics.variable} ${notoArabic.variable} ${notoChinese.variable} ${notoChineseTrad.variable} antialiased`}
-      >
+      <body className="antialiased">
         <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>

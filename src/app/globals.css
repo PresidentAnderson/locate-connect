@@ -8,8 +8,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Using system font fallbacks when Google Fonts are unavailable */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,12 +29,12 @@ body {
 /* Indigenous Syllabics Font Support */
 /* Canadian Aboriginal Syllabics Unicode Range: U+1400-167F, U+18B0-18FF */
 .font-syllabics {
-  font-family: var(--font-syllabics), "Noto Sans Canadian Aboriginal", "Euphemia UCAS", "Euphemia", "Aboriginal Sans", "Pigiarniq", sans-serif;
+  font-family: "Noto Sans Canadian Aboriginal", "Euphemia UCAS", "Euphemia", "Aboriginal Sans", "Pigiarniq", sans-serif;
 }
 
 /* Auto-apply syllabics font to content containing syllabics characters */
 [data-syllabics="true"] {
-  font-family: var(--font-syllabics), "Noto Sans Canadian Aboriginal", "Euphemia UCAS", "Euphemia", "Aboriginal Sans", sans-serif;
+  font-family: "Noto Sans Canadian Aboriginal", "Euphemia UCAS", "Euphemia", "Aboriginal Sans", sans-serif;
 }
 
 /* Language badge styling */
@@ -201,17 +202,17 @@ html[lang="ar"] body {
 
 /* Arabic font stack */
 html[lang="ar"] body {
-  font-family: var(--font-arabic), "Noto Sans Arabic", "Segoe UI", "Tahoma", var(--font-sans), sans-serif;
+  font-family: "Noto Sans Arabic", "Segoe UI", "Tahoma", var(--font-sans), sans-serif;
 }
 
 /* Chinese font stack (Simplified - Mandarin) */
 html[lang="zh"] body {
-  font-family: var(--font-chinese-sc), "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans CN", var(--font-sans), sans-serif;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans CN", var(--font-sans), sans-serif;
 }
 
 /* Chinese font stack (Traditional - Cantonese) */
 html[lang="yue"] body {
-  font-family: var(--font-chinese-tc), "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Source Han Sans TW", var(--font-sans), sans-serif;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Source Han Sans TW", var(--font-sans), sans-serif;
 }
 
 /* Punjabi (Gurmukhi) font stack */
