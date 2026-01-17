@@ -202,7 +202,7 @@ test("containsSyllabics should detect syllabics in text", () => {
   assert.strictEqual(containsSyllabics("Nēhiyawēwin"), false);
 });
 
-test("should have languages from all 7 major families", () => {
+test("should have languages from all 12 language families", () => {
   const families = new Set(INDIGENOUS_LANGUAGES.map((lang) => lang.family));
   
   assert.ok(families.has("Algonquian"), "Should have Algonquian languages");

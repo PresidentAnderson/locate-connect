@@ -2,7 +2,7 @@
  * LocateConnect Language Configuration
  * Includes official languages and Canadian Indigenous languages
  * 
- * This configuration supports 50+ Indigenous languages across 7 language families,
+ * This configuration supports 57+ Indigenous languages across 12 language families,
  * including proper ISO 639-3 codes, speaker population data, and writing system information.
  */
 
@@ -17,6 +17,7 @@ export type LanguageFamily =
   | "Tsimshianic"
   | "Haida"
   | "Na-Dene"
+  | "Isolate"
   | "Mixed (Cree-French)";
 
 export type WritingSystem = "latin" | "syllabics" | "both";
