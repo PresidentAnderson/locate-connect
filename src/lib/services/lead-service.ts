@@ -187,13 +187,7 @@ export async function getLeadWithDetails(
     // Get lead
     const { data: leadData, error: leadError } = await supabase
       .from("leads")
-      .select(
-        `
-        *,
-        assigned_to_profile:profiles!assigned_to(id, first_name, last_name, email),
-        verified_by_profile:profiles!verified_by(id, first_name, last_name, email)
-      `
-      )
+      .select("*")
       .eq("id", leadId)
       .single();
 
@@ -202,14 +196,14 @@ export async function getLeadWithDetails(
     }
 
     // Get notes
-    const { data: notesData, error: notesError } = await supabase
+    const { data: notesData } = await supabase
       .from("lead_notes")
       .select()
       .eq("lead_id", leadId)
       .order("created_at", { ascending: false });
 
     // Get attachments
-    const { data: attachmentsData, error: attachmentsError } = await supabase
+    const { data: attachmentsData } = await supabase
       .from("lead_attachments")
       .select()
       .eq("lead_id", leadId)
@@ -224,22 +218,40 @@ export async function getLeadWithDetails(
         : [],
     };
 
-    if (leadData.assigned_to_profile) {
-      result.assignedToProfile = {
-        id: leadData.assigned_to_profile.id,
-        firstName: leadData.assigned_to_profile.first_name,
-        lastName: leadData.assigned_to_profile.last_name,
-        email: leadData.assigned_to_profile.email,
-      };
+    // Fetch assigned_to profile if present
+    if (leadData.assigned_to) {
+      const { data: assignedProfile } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .eq("id", leadData.assigned_to)
+        .single();
+
+      if (assignedProfile) {
+        result.assignedToProfile = {
+          id: assignedProfile.id,
+          firstName: assignedProfile.first_name,
+          lastName: assignedProfile.last_name,
+          email: assignedProfile.email,
+        };
+      }
     }
 
-    if (leadData.verified_by_profile) {
-      result.verifiedByProfile = {
-        id: leadData.verified_by_profile.id,
-        firstName: leadData.verified_by_profile.first_name,
-        lastName: leadData.verified_by_profile.last_name,
-        email: leadData.verified_by_profile.email,
-      };
+    // Fetch verified_by profile if present
+    if (leadData.verified_by) {
+      const { data: verifiedProfile } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, email")
+        .eq("id", leadData.verified_by)
+        .single();
+
+      if (verifiedProfile) {
+        result.verifiedByProfile = {
+          id: verifiedProfile.id,
+          firstName: verifiedProfile.first_name,
+          lastName: verifiedProfile.last_name,
+          email: verifiedProfile.email,
+        };
+      }
     }
 
     return { data: result, error: null };
