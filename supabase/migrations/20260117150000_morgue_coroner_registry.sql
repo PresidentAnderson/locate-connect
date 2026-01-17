@@ -237,7 +237,12 @@ CREATE TABLE IF NOT EXISTS public.dna_sample_coordination (
     -- Metadata
     coordinated_by UUID NOT NULL REFERENCES auth.users(id),
     created_at TIMESTAMPTZ DEFAULT now(),
-    updated_at TIMESTAMPTZ DEFAULT now()
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    
+    -- Constraints
+    CONSTRAINT consent_date_required CHECK (
+        consent_obtained = false OR consent_date IS NOT NULL
+    )
 );
 
 -- Sensitive notifications for potential matches

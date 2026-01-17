@@ -128,6 +128,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Consent date must be provided when consent is obtained
+    if (body.consentObtained && !body.consentDate) {
+      return NextResponse.json(
+        { error: "Consent date is required when consent is obtained" },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("dna_sample_coordination")
       .insert({
