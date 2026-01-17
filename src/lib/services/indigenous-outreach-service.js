@@ -20,15 +20,15 @@
  * @returns {Object} Rendered notification with substituted values
  */
 export function renderTemplate(template, variables) {
+  // Use a single regex replacement with callback for better performance
   const substitute = (text) => {
-    let result = text;
-    for (const [key, value] of Object.entries(variables)) {
+    return text.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+      const value = variables[varName];
       if (value !== undefined && value !== null) {
-        const placeholder = `{{${key}}}`;
-        result = result.replaceAll(placeholder, String(value));
+        return String(value);
       }
-    }
-    return result;
+      return match; // Keep placeholder if variable not found
+    });
   };
 
   return {
@@ -75,8 +75,13 @@ export function getCommunitiesByLanguageAndRegion(
   languageCode,
   targetProvinces
 ) {
+  // Create index for O(1) lookups
+  const langMappingIndex = new Map(
+    languageMappings.map(lm => [lm.languageCode, lm])
+  );
+  
   // Find the language mapping
-  const langMapping = languageMappings.find(lm => lm.languageCode === languageCode);
+  const langMapping = langMappingIndex.get(languageCode);
   if (!langMapping) {
     return [];
   }
