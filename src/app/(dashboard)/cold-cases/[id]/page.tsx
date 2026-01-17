@@ -66,16 +66,16 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
               <ArrowLeftIcon className="h-5 w-5" />
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              {caseData?.first_name as string} {caseData?.last_name as string}
+              {String(caseData?.first_name || '')} {String(caseData?.last_name || '')}
             </h1>
-            <ClassificationBadge classification={coldCase.classification as string} />
+            <ClassificationBadge classification={String(coldCase.classification || '')} />
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            {`${caseData?.case_number || ''} | Cold for ${coldCase.days_since_cold || 0} days`}
+            {`${String(caseData?.case_number || '')} | Cold for ${Number(coldCase.days_since_cold) || 0} days`}
           </p>
         </div>
         <div className="flex gap-3">
-          {!coldCase.current_reviewer_id && (
+          {!Boolean(coldCase.current_reviewer_id) && (
             <button
               onClick={() => startReview()}
               className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
@@ -93,32 +93,32 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         <QuickStat
           label="Priority Score"
-          value={coldCase.revival_priority_score as number || 0}
+          value={Number(coldCase.revival_priority_score) || 0}
           icon={<ChartIcon className="h-4 w-4 text-cyan-500" />}
         />
         <QuickStat
           label="Reviews"
-          value={coldCase.reviews_completed as number || 0}
+          value={Number(coldCase.reviews_completed) || 0}
           icon={<SearchIcon className="h-4 w-4 text-blue-500" />}
         />
         <QuickStat
           label="Revival Attempts"
-          value={coldCase.revival_attempts as number || 0}
+          value={Number(coldCase.revival_attempts) || 0}
           icon={<SparklesIcon className="h-4 w-4 text-green-500" />}
         />
         <QuickStat
           label="Digitization"
-          value={`${coldCase.digitization_progress || 0}%`}
+          value={`${Number(coldCase.digitization_progress) || 0}%`}
           icon={<DocumentIcon className="h-4 w-4 text-purple-500" />}
         />
         <QuickStat
           label="DNA Status"
-          value={formatDNAStatus(coldCase.dna_submission_status as string)}
+          value={formatDNAStatus(String(coldCase.dna_submission_status || ''))}
           icon={<DNAIcon className="h-4 w-4 text-indigo-500" />}
         />
         <QuickStat
           label="Pattern Matches"
-          value={(coldCase.unreviewedPatternMatches as unknown[])?.length || 0}
+          value={Array.isArray(coldCase.unreviewedPatternMatches) ? coldCase.unreviewedPatternMatches.length : 0}
           icon={<PatternIcon className="h-4 w-4 text-orange-500" />}
         />
       </div>
