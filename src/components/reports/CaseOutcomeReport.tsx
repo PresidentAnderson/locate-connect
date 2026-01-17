@@ -67,10 +67,10 @@ export interface CaseOutcomeData {
   // Recommendations
   recommendations: {
     id: string;
-    category: "process" | "resource" | "communication" | "technology";
+    category: "process" | "resource" | "communication" | "technology" | "training" | "policy";
     title: string;
     description: string;
-    priority: "high" | "medium" | "low";
+    priority: "high" | "medium" | "low" | "critical";
   }[];
 
   // Similar Cases
@@ -709,12 +709,15 @@ function getCategoryStyle(category: string): string {
     resource: "bg-green-100 text-green-700",
     communication: "bg-purple-100 text-purple-700",
     technology: "bg-cyan-100 text-cyan-700",
+    training: "bg-amber-100 text-amber-700",
+    policy: "bg-rose-100 text-rose-700",
   };
   return styles[category] || "bg-gray-100 text-gray-700";
 }
 
 function getPriorityStyle(priority: string): string {
   const styles: Record<string, string> = {
+    critical: "bg-red-200 text-red-800",
     high: "bg-red-100 text-red-700",
     medium: "bg-amber-100 text-amber-700",
     low: "bg-green-100 text-green-700",

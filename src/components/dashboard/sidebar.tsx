@@ -15,6 +15,7 @@ const navigation = [
 const dashboardNavigation = [
   { key: "nav.executiveDashboard", href: "/dashboards/executive", icon: ChartBarIcon },
   { key: "nav.operationsDashboard", href: "/dashboards/operations", icon: ClipboardIcon },
+  { key: "nav.resolutionHeatMap", href: "/analytics/resolution-heatmap", icon: MapPinIcon },
   { key: "nav.stakeholderReports", href: "/dashboards/reports", icon: DocumentChartIcon },
 ];
 
@@ -73,6 +74,18 @@ const familySupportNavigation = [
   { key: "nav.familySupport", href: "/family-support", icon: HeartIcon },
   { key: "nav.supportResources", href: "/family-support/resources", icon: BookOpenIcon },
   { key: "nav.peerSupport", href: "/family-support/peer-support", icon: UserGroupIcon },
+];
+
+const trainingNavigation = [
+  { key: "nav.training", href: "/training", icon: GraduationCapIcon },
+  { key: "nav.myCertifications", href: "/training?tab=certifications", icon: CertificateIcon },
+  { key: "nav.myBadges", href: "/training?tab=badges", icon: TrophyIcon },
+];
+
+const successStoriesNavigation = [
+  { key: "nav.successStories", href: "/success-stories", icon: SparklesIcon },
+  { key: "nav.manageStories", href: "/success-stories/manage", icon: DocumentTextIcon },
+  { key: "nav.successMetrics", href: "/success-stories/metrics", icon: ChartBarIcon },
 ];
 
 const facialRecognitionNavigation = [
@@ -249,6 +262,27 @@ export function Sidebar() {
 
         <div className="mt-6 space-y-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.successStories")}
+          </p>
+          {successStoriesNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith("/success-stories")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
             {t("sections.indigenousLiaison")}
           </p>
           {indigenousLiaisonNavigation.map((item) => (
@@ -315,6 +349,27 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.training")}
+          </p>
+          {trainingNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith("/training")
                   ? "bg-cyan-50 text-cyan-700"
                   : "text-gray-700 hover:bg-gray-100"
               )}
@@ -650,6 +705,14 @@ function MegaphoneIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+    </svg>
+  );
+}
+
+function SparklesIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
     </svg>
   );
 }

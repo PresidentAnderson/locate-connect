@@ -41,7 +41,11 @@
     "frAuditLogs": "Audit Logs",
     "coldCases": "Cold Cases",
     "coldCaseReviews": "Cold Case Reviews",
-    "coldCaseCampaigns": "Cold Case Campaigns"
+    "coldCaseCampaigns": "Cold Case Campaigns",
+    "resolutionHeatMap": "Resolution Heat Map",
+    "successStories": "Success Stories",
+    "manageStories": "Manage Stories",
+    "successMetrics": "Success Metrics"
   },
   "sections": {
     "cases": "Cases",
@@ -54,7 +58,8 @@
     "familySupport": "Family Support",
     "developers": "Developers",
     "administration": "Administration",
-    "coldCases": "Cold Cases"
+    "coldCases": "Cold Cases",
+    "successStories": "Success Stories"
   },
   "header": {
     "searchLabel": "Search cases",

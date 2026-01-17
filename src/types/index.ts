@@ -14,3 +14,5 @@ export * from "./volunteer.types";
 export * from "./reward.types";
 export * from "./tip-verification.types";
 export * from "./mobile.types";
+export * from "./training.types";
+export * from "./outcome-report.types";

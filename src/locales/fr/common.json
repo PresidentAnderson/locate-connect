@@ -41,7 +41,11 @@
     "frAuditLogs": "Journaux d'audit",
     "coldCases": "Cas non résolus",
     "coldCaseReviews": "Révision des cas non résolus",
-    "coldCaseCampaigns": "Campagnes cas non résolus"
+    "coldCaseCampaigns": "Campagnes cas non résolus",
+    "resolutionHeatMap": "Carte thermique des résolutions",
+    "successStories": "Histoires de succès",
+    "manageStories": "Gérer les histoires",
+    "successMetrics": "Métriques de succès"
   },
   "sections": {
     "cases": "Dossiers",
@@ -54,7 +58,8 @@
     "familySupport": "Soutien aux familles",
     "developers": "Développeurs",
     "administration": "Administration",
-    "coldCases": "Cas non résolus"
+    "coldCases": "Cas non résolus",
+    "successStories": "Histoires de succès"
   },
   "header": {
     "searchLabel": "Rechercher des dossiers",
