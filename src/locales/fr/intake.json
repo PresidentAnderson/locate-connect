@@ -4,13 +4,27 @@
     "subtitle": "Remplissez toutes les sections pour déposer un signalement"
   },
   "steps": {
-    "reporter": { "title": "Vos informations" },
-    "missing-person": { "title": "Personne disparue" },
-    "circumstances": { "title": "Circonstances" },
-    "contacts": { "title": "Contacts connus" },
-    "languages": { "title": "Langues" },
-    "risks": { "title": "Facteurs de risque" },
-    "review": { "title": "Révision et soumission" }
+    "reporter": {
+      "title": "Vos informations"
+    },
+    "missing-person": {
+      "title": "Personne disparue"
+    },
+    "circumstances": {
+      "title": "Circonstances"
+    },
+    "contacts": {
+      "title": "Contacts connus"
+    },
+    "languages": {
+      "title": "Langues"
+    },
+    "risks": {
+      "title": "Facteurs de risque"
+    },
+    "review": {
+      "title": "Révision et soumission"
+    }
   },
   "navigation": {
     "previous": "← Précédent",
@@ -79,7 +93,27 @@
     "circumstances": "Circonstances",
     "circumstancesHelp": "Que faisait la personne? Était-ce inhabituel?",
     "outOfCharacter": "Cette disparition est-elle inhabituelle?",
-    "locationPlaceholder": "Ville, Province"
+    "locationPlaceholder": "Ville, Province",
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
   },
   "contacts": {
     "title": "Contacts connus et réseaux sociaux",

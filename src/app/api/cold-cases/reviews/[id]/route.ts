@@ -250,6 +250,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return apiServerError(completeError.message);
     }
 
+    if (completeBody.revivalRecommended && completeBody.revivalDecision === 'revive') {
+      await supabase
+        .from('cases')
+        .update({ lifecycle_status: 'revived' })
+        .eq('id', review.case_id);
+    }
+
     // Update additional fields
     const updateData: Record<string, unknown> = {};
 

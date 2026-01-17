@@ -113,6 +113,24 @@ export type PatternMatchType =
   | 'modus_operandi'
   | 'circumstantial';
 
+export type RevivalTriggerType =
+  | 'eligibility_engine'
+  | 'new_tip'
+  | 'new_evidence'
+  | 'family_request'
+  | 'anniversary'
+  | 'pattern_match'
+  | 'admin_review'
+  | 'manual';
+
+export type RevivalTriggerSource =
+  | 'system'
+  | 'family'
+  | 'law_enforcement'
+  | 'partner'
+  | 'public'
+  | 'admin';
+
 // =============================================================================
 // COLD CASE PROFILE
 // =============================================================================
@@ -285,6 +303,22 @@ export interface ColdCaseReview {
 
   createdAt: string;
   updatedAt: string;
+}
+
+// =============================================================================
+// REVIVAL TRIGGER LOG
+// =============================================================================
+
+export interface ColdCaseRevivalTrigger {
+  id: string;
+  caseId: string;
+  coldCaseProfileId?: string | null;
+  triggerType: RevivalTriggerType;
+  triggerSource: RevivalTriggerSource;
+  summary: string;
+  details: Record<string, unknown>;
+  createdBy?: string | null;
+  createdAt: string;
 }
 
 export interface PatternMatchResult {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import type { ColdCaseDashboardStats, ColdCaseProfile } from "@/types/cold-case.types";
+import type { ColdCaseDashboardStats, ColdCaseProfile, ColdCaseReview } from "@/types/cold-case.types";
 
 export default function ColdCasesPage() {
   const [stats, setStats] = useState<ColdCaseDashboardStats | null>(null);
@@ -487,8 +487,30 @@ function ColdCasesList({ cases }: { cases: ColdCaseProfile[] }) {
 }
 
 // Reviews List Component
+type ReviewQueueItem = ColdCaseReview & {
+  case?: {
+    id: string;
+    case_number: string;
+    first_name: string;
+    last_name: string;
+    last_seen_date?: string;
+    primary_photo_url?: string;
+  };
+  reviewer?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  cold_case_profile?: {
+    id: string;
+    classification: string;
+    revival_priority_score: number;
+  };
+};
+
 function ReviewsList() {
-  const [reviews, setReviews] = useState<unknown[]>([]);
+  const [reviews, setReviews] = useState<ReviewQueueItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -497,7 +519,7 @@ function ReviewsList() {
 
   const fetchReviews = async () => {
     try {
-      const res = await fetch("/api/cold-cases/reviews?pageSize=20");
+      const res = await fetch("/api/cold-cases/review-queue?pageSize=20");
       if (res.ok) {
         const data = await res.json();
         setReviews(data.data || []);
@@ -537,7 +559,41 @@ function ReviewsList() {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <p className="text-sm text-gray-500">Reviews list coming soon...</p>
+      <div className="space-y-4">
+        {reviews.map((review) => {
+          const caseLabel = review.case
+            ? `${review.case.first_name} ${review.case.last_name}`.trim()
+            : "Case";
+          const caseNumber = review.case?.case_number || review.caseId;
+          const reviewerName = review.reviewer
+            ? `${review.reviewer.first_name} ${review.reviewer.last_name}`.trim()
+            : "Unassigned";
+          return (
+            <div
+              key={review.id}
+              className="flex items-center justify-between rounded-lg border border-gray-100 p-4"
+            >
+              <div>
+                <Link
+                  href={`/cold-cases/reviews/${review.id}`}
+                  className="text-sm font-semibold text-gray-900 hover:text-cyan-600"
+                >
+                  {caseNumber} · {caseLabel}
+                </Link>
+                <p className="mt-1 text-xs text-gray-500">
+                  {review.status.replace("_", " ")} · Reviewer: {reviewerName}
+                </p>
+              </div>
+              <div className="text-right text-xs text-gray-500">
+                {review.dueDate && (
+                  <div>Due {new Date(review.dueDate).toLocaleDateString()}</div>
+                )}
+                <div>Review #{review.reviewNumber}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

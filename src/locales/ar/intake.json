@@ -4,13 +4,27 @@
     "subtitle": "أكمل جميع الأقسام لتقديم التقرير"
   },
   "steps": {
-    "reporter": { "title": "معلوماتك" },
-    "missing-person": { "title": "الشخص المفقود" },
-    "circumstances": { "title": "الظروف" },
-    "contacts": { "title": "جهات الاتصال المعروفة" },
-    "languages": { "title": "اللغات" },
-    "risks": { "title": "عوامل الخطر" },
-    "review": { "title": "المراجعة والإرسال" }
+    "reporter": {
+      "title": "معلوماتك"
+    },
+    "missing-person": {
+      "title": "الشخص المفقود"
+    },
+    "circumstances": {
+      "title": "الظروف"
+    },
+    "contacts": {
+      "title": "جهات الاتصال المعروفة"
+    },
+    "languages": {
+      "title": "اللغات"
+    },
+    "risks": {
+      "title": "عوامل الخطر"
+    },
+    "review": {
+      "title": "المراجعة والإرسال"
+    }
   },
   "navigation": {
     "previous": "السابق",
@@ -77,7 +91,27 @@
     "circumstances": "الظروف",
     "circumstancesHelp": "ماذا كان يفعل الشخص؟ هل كان هذا غير معتاد؟",
     "outOfCharacter": "هل هذا الاختفاء غير معتاد؟",
-    "locationPlaceholder": "المدينة، المقاطعة"
+    "locationPlaceholder": "المدينة، المقاطعة",
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
   },
   "contacts": {
     "title": "جهات الاتصال المعروفة ووسائل التواصل الاجتماعي",

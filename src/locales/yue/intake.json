@@ -4,13 +4,27 @@
     "subtitle": "填寫所有部分以提交報告"
   },
   "steps": {
-    "reporter": { "title": "你嘅資料" },
-    "missing-person": { "title": "失蹤人口" },
-    "circumstances": { "title": "情況" },
-    "contacts": { "title": "已知聯絡人" },
-    "languages": { "title": "語言" },
-    "risks": { "title": "風險因素" },
-    "review": { "title": "審核同提交" }
+    "reporter": {
+      "title": "你嘅資料"
+    },
+    "missing-person": {
+      "title": "失蹤人口"
+    },
+    "circumstances": {
+      "title": "情況"
+    },
+    "contacts": {
+      "title": "已知聯絡人"
+    },
+    "languages": {
+      "title": "語言"
+    },
+    "risks": {
+      "title": "風險因素"
+    },
+    "review": {
+      "title": "審核同提交"
+    }
   },
   "navigation": {
     "previous": "上一步",
@@ -77,7 +91,27 @@
     "circumstances": "情況",
     "circumstancesHelp": "該人當時做緊咩？呢個情況係咪唔尋常？",
     "outOfCharacter": "呢次失蹤係咪唔尋常？",
-    "locationPlaceholder": "城市，省份"
+    "locationPlaceholder": "城市，省份",
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
   },
   "contacts": {
     "title": "已知聯絡人同社交媒體",

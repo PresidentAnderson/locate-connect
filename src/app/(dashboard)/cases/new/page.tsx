@@ -54,8 +54,11 @@ export default function NewCasePage() {
   const [lastSeenTime, setLastSeenTime] = useState("");
   const [lastSeenLocation, setLastSeenLocation] = useState("");
   const [lastSeenLocationDetails, setLastSeenLocationDetails] = useState("");
+  const [lastSeenLocationConfidence, setLastSeenLocationConfidence] = useState("unknown");
+  const [lastSeenWitnessType, setLastSeenWitnessType] = useState("unknown");
   const [outOfCharacter, setOutOfCharacter] = useState(false);
   const [circumstances, setCircumstances] = useState("");
+  const [unverifiedNotes, setUnverifiedNotes] = useState("");
   const [contactEmails, setContactEmails] = useState("");
   const [contactPhones, setContactPhones] = useState("");
   const [socialHandles, setSocialHandles] = useState<Record<string, string>>({});
@@ -257,9 +260,12 @@ export default function NewCasePage() {
           distinguishingFeatures: missingDistinguishing,
           lastSeenDate: lastSeenDateTime.toISOString(),
           lastSeenLocation,
+          lastSeenLocationConfidence,
+          lastSeenWitnessType,
           locationDetails: lastSeenLocationDetails,
           outOfCharacter,
           circumstances,
+          unverifiedNotes,
           medicalConditions: parsedMedicalConditions,
           medications: parsedMedications,
           mentalHealthConditions,
@@ -396,14 +402,20 @@ export default function NewCasePage() {
             lastSeenTime={lastSeenTime}
             lastSeenLocation={lastSeenLocation}
             lastSeenLocationDetails={lastSeenLocationDetails}
+            lastSeenLocationConfidence={lastSeenLocationConfidence}
+            lastSeenWitnessType={lastSeenWitnessType}
             outOfCharacter={outOfCharacter}
             circumstances={circumstances}
+            unverifiedNotes={unverifiedNotes}
             onLastSeenDateChange={setLastSeenDate}
             onLastSeenTimeChange={setLastSeenTime}
             onLastSeenLocationChange={setLastSeenLocation}
             onLastSeenLocationDetailsChange={setLastSeenLocationDetails}
+            onLastSeenLocationConfidenceChange={setLastSeenLocationConfidence}
+            onLastSeenWitnessTypeChange={setLastSeenWitnessType}
             onOutOfCharacterChange={setOutOfCharacter}
             onCircumstancesChange={setCircumstances}
+            onUnverifiedNotesChange={setUnverifiedNotes}
           />
         )}
         {currentStep === "contacts" && (
@@ -781,27 +793,39 @@ function CircumstancesForm({
   lastSeenTime,
   lastSeenLocation,
   lastSeenLocationDetails,
+  lastSeenLocationConfidence,
+  lastSeenWitnessType,
   outOfCharacter,
   circumstances,
+  unverifiedNotes,
   onLastSeenDateChange,
   onLastSeenTimeChange,
   onLastSeenLocationChange,
   onLastSeenLocationDetailsChange,
+  onLastSeenLocationConfidenceChange,
+  onLastSeenWitnessTypeChange,
   onOutOfCharacterChange,
   onCircumstancesChange,
+  onUnverifiedNotesChange,
 }: {
   lastSeenDate: string;
   lastSeenTime: string;
   lastSeenLocation: string;
   lastSeenLocationDetails: string;
+  lastSeenLocationConfidence: string;
+  lastSeenWitnessType: string;
   outOfCharacter: boolean;
   circumstances: string;
+  unverifiedNotes: string;
   onLastSeenDateChange: (value: string) => void;
   onLastSeenTimeChange: (value: string) => void;
   onLastSeenLocationChange: (value: string) => void;
   onLastSeenLocationDetailsChange: (value: string) => void;
+  onLastSeenLocationConfidenceChange: (value: string) => void;
+  onLastSeenWitnessTypeChange: (value: string) => void;
   onOutOfCharacterChange: (value: boolean) => void;
   onCircumstancesChange: (value: string) => void;
+  onUnverifiedNotesChange: (value: string) => void;
 }) {
   const t = useTranslations("intake");
 
@@ -841,6 +865,36 @@ function CircumstancesForm({
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">{t("circumstances.locationConfidence")}</label>
+          <select
+            value={lastSeenLocationConfidence}
+            onChange={(e) => onLastSeenLocationConfidenceChange(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          >
+            <option value="unknown">{t("circumstances.confidenceOptions.unknown")}</option>
+            <option value="low">{t("circumstances.confidenceOptions.low")}</option>
+            <option value="medium">{t("circumstances.confidenceOptions.medium")}</option>
+            <option value="high">{t("circumstances.confidenceOptions.high")}</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">{t("circumstances.witnessType")}</label>
+          <select
+            value={lastSeenWitnessType}
+            onChange={(e) => onLastSeenWitnessTypeChange(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          >
+            <option value="unknown">{t("circumstances.witnessTypeOptions.unknown")}</option>
+            <option value="self_reported">{t("circumstances.witnessTypeOptions.self_reported")}</option>
+            <option value="family">{t("circumstances.witnessTypeOptions.family")}</option>
+            <option value="friend">{t("circumstances.witnessTypeOptions.friend")}</option>
+            <option value="public">{t("circumstances.witnessTypeOptions.public")}</option>
+            <option value="law_enforcement">{t("circumstances.witnessTypeOptions.law_enforcement")}</option>
+            <option value="camera">{t("circumstances.witnessTypeOptions.camera")}</option>
+            <option value="other">{t("circumstances.witnessTypeOptions.other")}</option>
+          </select>
+        </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700">{t("circumstances.locationDetails")}</label>
           <p className="text-xs text-gray-500">{t("circumstances.locationDetailsHelp")}</p>
@@ -858,6 +912,16 @@ function CircumstancesForm({
             rows={4}
             value={circumstances}
             onChange={(e) => onCircumstancesChange(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-gray-700">{t("circumstances.unverifiedNotes")}</label>
+          <p className="text-xs text-gray-500">{t("circumstances.unverifiedNotesHelp")}</p>
+          <textarea
+            rows={3}
+            value={unverifiedNotes}
+            onChange={(e) => onUnverifiedNotesChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
