@@ -151,12 +151,15 @@ export async function GET(request: Request) {
         fiveToTenYears,
         tenPlusYears,
       },
-      recentRevivals: recentRevivals?.map(r => ({
-        caseId: r.case_id,
-        caseNumber: r.case?.case_number || 'Unknown',
-        revivedAt: r.updated_at,
-        daysCold: r.days_since_cold || 0,
-      })) || [],
+      recentRevivals: recentRevivals?.map(r => {
+        const caseData = r.case as unknown as { case_number: string } | null;
+        return {
+          caseId: r.case_id,
+          caseNumber: caseData?.case_number || 'Unknown',
+          revivedAt: r.updated_at,
+          daysCold: r.days_since_cold || 0,
+        };
+      }) || [],
     };
 
     return apiSuccess(stats);
