@@ -16,6 +16,7 @@ const dashboardNavigation = [
   { key: "nav.executiveDashboard", href: "/dashboards/executive", icon: ChartBarIcon },
   { key: "nav.operationsDashboard", href: "/dashboards/operations", icon: ClipboardIcon },
   { key: "nav.stakeholderReports", href: "/dashboards/reports", icon: DocumentChartIcon },
+  { key: "nav.systemHealth", href: "/dashboards/system-health", icon: BoltIcon },
 ];
 
 const adminNavigation = [
