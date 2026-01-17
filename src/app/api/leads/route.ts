@@ -26,13 +26,22 @@ export async function GET(request: NextRequest) {
       filters.caseId = searchParams.get("caseId")!;
     }
     if (searchParams.get("status")) {
-      filters.status = searchParams.get("status") as any;
+      const status = searchParams.get("status")!;
+      if (["new", "investigating", "verified", "dismissed", "acted_upon"].includes(status)) {
+        filters.status = status as LeadFilters["status"];
+      }
     }
     if (searchParams.get("leadType")) {
-      filters.leadType = searchParams.get("leadType") as any;
+      const leadType = searchParams.get("leadType")!;
+      if (["social_media", "email_opened", "location", "witness", "hospital", "detention", "other"].includes(leadType)) {
+        filters.leadType = leadType as LeadFilters["leadType"];
+      }
     }
     if (searchParams.get("priorityLevel")) {
-      filters.priorityLevel = searchParams.get("priorityLevel") as any;
+      const priority = searchParams.get("priorityLevel")!;
+      if (["p0_critical", "p1_high", "p2_medium", "p3_low", "p4_routine"].includes(priority)) {
+        filters.priorityLevel = priority as LeadFilters["priorityLevel"];
+      }
     }
     if (searchParams.get("assignedTo")) {
       filters.assignedTo = searchParams.get("assignedTo")!;

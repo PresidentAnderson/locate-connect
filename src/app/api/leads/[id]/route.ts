@@ -76,29 +76,43 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const body = (await request.json()) as UpdateLeadInput & {
-      action?: "assign" | "verify";
+      action?: string;
       assignToUserId?: string;
     };
 
     // Handle special actions
-    if (body.action === "assign" && body.assignToUserId) {
-      const { data, error } = await assignLead(
-        supabase,
-        id,
-        body.assignToUserId
-      );
-      if (error) {
-        return NextResponse.json({ error }, { status: 500 });
+    if (body.action) {
+      if (body.action === "assign") {
+        if (!body.assignToUserId) {
+          return NextResponse.json(
+            { error: "assignToUserId is required for assign action" },
+            { status: 400 }
+          );
+        }
+        const { data, error } = await assignLead(
+          supabase,
+          id,
+          body.assignToUserId
+        );
+        if (error) {
+          return NextResponse.json({ error }, { status: 500 });
+        }
+        return NextResponse.json({ data });
       }
-      return NextResponse.json({ data });
-    }
 
-    if (body.action === "verify") {
-      const { data, error } = await verifyLead(supabase, id, user.id);
-      if (error) {
-        return NextResponse.json({ error }, { status: 500 });
+      if (body.action === "verify") {
+        const { data, error } = await verifyLead(supabase, id, user.id);
+        if (error) {
+          return NextResponse.json({ error }, { status: 500 });
+        }
+        return NextResponse.json({ data });
       }
-      return NextResponse.json({ data });
+
+      // Invalid action
+      return NextResponse.json(
+        { error: `Invalid action: ${body.action}. Valid actions are: assign, verify` },
+        { status: 400 }
+      );
     }
 
     // Remove action fields from body before updating

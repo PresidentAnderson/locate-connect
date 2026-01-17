@@ -195,15 +195,15 @@ export async function getLeadWithDetails(
       return { data: null, error: leadError.message };
     }
 
-    // Get notes
-    const { data: notesData } = await supabase
+    // Get notes (non-critical, continue even if fails)
+    const { data: notesData, error: notesError } = await supabase
       .from("lead_notes")
       .select()
       .eq("lead_id", leadId)
       .order("created_at", { ascending: false });
 
-    // Get attachments
-    const { data: attachmentsData } = await supabase
+    // Get attachments (non-critical, continue even if fails)
+    const { data: attachmentsData, error: attachmentsError } = await supabase
       .from("lead_attachments")
       .select()
       .eq("lead_id", leadId)
@@ -212,21 +212,21 @@ export async function getLeadWithDetails(
     const lead = mapLeadFromDb(leadData);
     const result: LeadWithDetails = {
       ...lead,
-      notes: notesData ? notesData.map(mapLeadNoteFromDb) : [],
-      attachments: attachmentsData
+      notes: notesData && !notesError ? notesData.map(mapLeadNoteFromDb) : [],
+      attachments: attachmentsData && !attachmentsError
         ? attachmentsData.map(mapLeadAttachmentFromDb)
         : [],
     };
 
-    // Fetch assigned_to profile if present
+    // Fetch assigned_to profile if present (non-critical, continue even if fails)
     if (leadData.assigned_to) {
-      const { data: assignedProfile } = await supabase
+      const { data: assignedProfile, error: assignedError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, email")
         .eq("id", leadData.assigned_to)
         .single();
 
-      if (assignedProfile) {
+      if (assignedProfile && !assignedError) {
         result.assignedToProfile = {
           id: assignedProfile.id,
           firstName: assignedProfile.first_name,
@@ -236,15 +236,15 @@ export async function getLeadWithDetails(
       }
     }
 
-    // Fetch verified_by profile if present
+    // Fetch verified_by profile if present (non-critical, continue even if fails)
     if (leadData.verified_by) {
-      const { data: verifiedProfile } = await supabase
+      const { data: verifiedProfile, error: verifiedError } = await supabase
         .from("profiles")
         .select("id, first_name, last_name, email")
         .eq("id", leadData.verified_by)
         .single();
 
-      if (verifiedProfile) {
+      if (verifiedProfile && !verifiedError) {
         result.verifiedByProfile = {
           id: verifiedProfile.id,
           firstName: verifiedProfile.first_name,
