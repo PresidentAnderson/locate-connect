@@ -10,6 +10,11 @@ export interface PushSubscriptionData {
   expirationTime: number | null;
 }
 
+// Extended NotificationOptions with vibrate support (ServiceWorker API)
+interface ExtendedNotificationOptions extends NotificationOptions {
+  vibrate?: number | number[];
+}
+
 /**
  * Check if push notifications are supported
  */
@@ -294,8 +299,8 @@ export const PUBLIC_NOTIFICATION_CATEGORIES = {
 export function createNotificationOptions(
   type: string,
   data: Record<string, unknown>
-): NotificationOptions {
-  const baseOptions: NotificationOptions = {
+): ExtendedNotificationOptions {
+  const baseOptions: ExtendedNotificationOptions = {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/badge-72x72.png',
     vibrate: [100, 50, 100],
