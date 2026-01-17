@@ -8,12 +8,11 @@ import {
   getLanguagesByFamily,
   OFFICIAL_LANGUAGES,
   INDIGENOUS_LANGUAGES,
+  containsSyllabics,
 } from "@/config/languages";
+import { SyllabicsText } from "@/components/ui/SyllabicsText";
 
-// Check if text contains Canadian Aboriginal Syllabics (U+1400-167F, U+18B0-18FF)
-export function containsSyllabics(text: string): boolean {
-  return /[\u1400-\u167F\u18B0-\u18FF]/.test(text);
-}
+export { containsSyllabics };
 
 // Language Badge Component
 interface LanguageBadgeProps {
@@ -32,7 +31,8 @@ export function LanguageBadge({
   const language = ALL_LANGUAGES.find((l) => l.code === code);
   if (!language) return null;
 
-  const hasSyllabics = containsSyllabics(language.nativeName);
+  const displayText = showNativeName ? language.nativeName : language.name;
+  const hasSyllabics = containsSyllabics(displayText);
   const badgeClass = language.isIndigenous
     ? "language-badge-indigenous"
     : "language-badge-official";
@@ -42,9 +42,7 @@ export function LanguageBadge({
       className={`language-badge ${badgeClass} ${size === "sm" ? "text-xs py-0" : ""}`}
       data-syllabics={hasSyllabics}
     >
-      <span className={hasSyllabics ? "font-syllabics" : ""}>
-        {showNativeName ? language.nativeName : language.name}
-      </span>
+      <SyllabicsText text={displayText} />
       {onRemove && (
         <button
           type="button"
@@ -351,7 +349,6 @@ export function LanguageMultiSelect({
                   <div>
                     {groupLangs.map((lang) => {
                       const isSelected = value.includes(lang.code);
-                      const hasSyllabics = containsSyllabics(lang.nativeName);
                       const isDisabled =
                         !isSelected &&
                         maxSelections !== undefined &&
@@ -398,13 +395,10 @@ export function LanguageMultiSelect({
                           <span>
                             {lang.name}
                             {lang.nativeName !== lang.name && (
-                              <span
-                                className={`ml-1 text-gray-500 ${
-                                  hasSyllabics ? "font-syllabics" : ""
-                                }`}
-                              >
-                                ({lang.nativeName})
-                              </span>
+                              <SyllabicsText
+                                text={`(${lang.nativeName})`}
+                                className="ml-1 text-gray-500"
+                              />
                             )}
                           </span>
                         </button>
@@ -514,4 +508,5 @@ export default {
   LanguageMultiSelect,
   InterpreterRequest,
   containsSyllabics,
+  SyllabicsText,
 };

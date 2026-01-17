@@ -6,3 +6,4 @@ export {
   InterpreterRequest,
   containsSyllabics,
 } from "./LanguageSelect";
+export { SyllabicsText } from "./SyllabicsText";
