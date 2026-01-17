@@ -28,7 +28,7 @@ export type AlertDistributionStatus =
   | "expired"
   | "cancelled";
 
-export type ComplianceStatus =
+export type CrossBorderComplianceStatus =
   | "compliant"
   | "pending_review"
   | "non_compliant"
@@ -235,7 +235,7 @@ export interface ComplianceRecord {
   agreementId: string;
   jurisdictionId: string;
   complianceType: "data_sharing" | "privacy_law" | "retention_policy" | "cross_border_transfer";
-  status: ComplianceStatus;
+  status: CrossBorderComplianceStatus;
   checkDate: string;
   checkedBy: string;
   findings: string;
