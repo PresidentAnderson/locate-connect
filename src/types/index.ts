@@ -13,3 +13,4 @@ export * from "./family-liaison.types";
 export * from "./volunteer.types";
 export * from "./reward.types";
 export * from "./tip-verification.types";
+export * from "./mobile.types";

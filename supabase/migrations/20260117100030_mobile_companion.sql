@@ -367,9 +367,10 @@ CREATE POLICY field_data_entries_select ON field_data_entries
     FOR SELECT USING (
         auth.uid() = user_id OR
         EXISTS (
-            SELECT 1 FROM user_roles ur
-            WHERE ur.user_id = auth.uid()
-            AND ur.role IN ('admin', 'law_enforcement', 'case_manager')
+            SELECT 1 FROM profiles p
+            WHERE p.id = auth.uid()
+            AND p.role IN ('admin', 'law_enforcement', 'developer')
+            AND p.is_verified = TRUE
         )
     );
 
@@ -386,9 +387,10 @@ CREATE POLICY mobile_evidence_select ON mobile_evidence
     FOR SELECT USING (
         auth.uid() = user_id OR
         EXISTS (
-            SELECT 1 FROM user_roles ur
-            WHERE ur.user_id = auth.uid()
-            AND ur.role IN ('admin', 'law_enforcement', 'case_manager')
+            SELECT 1 FROM profiles p
+            WHERE p.id = auth.uid()
+            AND p.role IN ('admin', 'law_enforcement', 'developer')
+            AND p.is_verified = TRUE
         )
     );
 
@@ -404,9 +406,10 @@ CREATE POLICY gps_tagged_tips_select ON gps_tagged_tips
             SELECT 1 FROM tips t
             WHERE t.id = tip_id
             AND (t.tipster_id = auth.uid() OR EXISTS (
-                SELECT 1 FROM user_roles ur
-                WHERE ur.user_id = auth.uid()
-                AND ur.role IN ('admin', 'law_enforcement', 'tip_reviewer')
+                SELECT 1 FROM profiles p
+                WHERE p.id = auth.uid()
+                AND p.role IN ('admin', 'law_enforcement', 'developer')
+                AND p.is_verified = TRUE
             ))
         )
     );
@@ -427,9 +430,10 @@ CREATE POLICY voice_notes_select ON voice_notes
     FOR SELECT USING (
         auth.uid() = user_id OR
         EXISTS (
-            SELECT 1 FROM user_roles ur
-            WHERE ur.user_id = auth.uid()
-            AND ur.role IN ('admin', 'law_enforcement', 'case_manager')
+            SELECT 1 FROM profiles p
+            WHERE p.id = auth.uid()
+            AND p.role IN ('admin', 'law_enforcement', 'developer')
+            AND p.is_verified = TRUE
         )
     );
 
@@ -458,9 +462,10 @@ CREATE POLICY push_notification_logs_select ON push_notification_logs
     FOR SELECT USING (
         auth.uid() = user_id OR
         EXISTS (
-            SELECT 1 FROM user_roles ur
-            WHERE ur.user_id = auth.uid()
-            AND ur.role = 'admin'
+            SELECT 1 FROM profiles p
+            WHERE p.id = auth.uid()
+            AND p.role IN ('admin', 'developer')
+            AND p.is_verified = TRUE
         )
     );
 

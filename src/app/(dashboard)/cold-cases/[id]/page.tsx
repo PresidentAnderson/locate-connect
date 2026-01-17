@@ -71,7 +71,7 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
             <ClassificationBadge classification={coldCase.classification as string} />
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            {caseData?.case_number as string} | Cold for {coldCase.days_since_cold || 0} days
+            {`${caseData?.case_number || ''} | Cold for ${coldCase.days_since_cold || 0} days`}
           </p>
         </div>
         <div className="flex gap-3">
