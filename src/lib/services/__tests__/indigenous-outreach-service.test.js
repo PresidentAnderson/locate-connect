@@ -307,6 +307,12 @@ test("calculateLanguageCoverage reports coverage statistics", () => {
       languageCode: "oj",
       languageName: "Ojibwe",
     },
+    {
+      ...sampleLanguageMapping,
+      id: "lang-3",
+      languageCode: "en",
+      languageName: "English",
+    },
   ];
   
   const templates = [
@@ -315,9 +321,10 @@ test("calculateLanguageCoverage reports coverage statistics", () => {
   
   const coverage = calculateLanguageCoverage(languageMappings, templates);
   
-  assert.equal(coverage.totalLanguages, 2);
+  assert.equal(coverage.totalLanguages, 3);
   assert.equal(coverage.coveredLanguages, 1); // Only English has template
-  assert.equal(coverage.uncoveredLanguages.length, 1);
+  assert.equal(coverage.uncoveredLanguages.length, 2);
+  assert(coverage.uncoveredLanguages.includes("Cree"));
   assert(coverage.uncoveredLanguages.includes("Ojibwe"));
 });
 

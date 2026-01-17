@@ -9,37 +9,18 @@
  * - Community organization lookup and routing
  */
 
-import type {
-  NotificationTemplate,
-  NotificationQueueInput,
-  TemplateVariables,
-  TemplateType,
-  NotificationChannel,
-  NotificationPriority,
-  MultiLanguageDispatch,
-  DispatchResult,
-  DispatchError,
-  LanguageRegionMapping,
-  CommunityOrganization,
-  RenderedNotification,
-  RegionalTargeting,
-} from '@/types/indigenous-outreach.types';
-
 // =============================================================================
 // TEMPLATE RENDERING
 // =============================================================================
 
 /**
  * Renders a notification template by substituting variables
- * @param template The notification template
- * @param variables The variables to substitute
- * @returns Rendered notification with substituted values
+ * @param {Object} template The notification template
+ * @param {Object} variables The variables to substitute
+ * @returns {Object} Rendered notification with substituted values
  */
-export function renderTemplate(
-  template: NotificationTemplate,
-  variables: TemplateVariables
-): RenderedNotification {
-  const substitute = (text: string): string => {
+export function renderTemplate(template, variables) {
+  const substitute = (text) => {
     let result = text;
     for (const [key, value] of Object.entries(variables)) {
       if (value !== undefined && value !== null) {
@@ -60,15 +41,12 @@ export function renderTemplate(
 
 /**
  * Validates that all required variables are present in the template
- * @param template The notification template
- * @param variables The variables provided
- * @returns Array of missing variable names
+ * @param {Object} template The notification template
+ * @param {Object} variables The variables provided
+ * @returns {string[]} Array of missing variable names
  */
-export function validateTemplateVariables(
-  template: NotificationTemplate,
-  variables: TemplateVariables
-): string[] {
-  const missing: string[] = [];
+export function validateTemplateVariables(template, variables) {
+  const missing = [];
   
   for (const varName of template.variables) {
     if (!(varName in variables) || variables[varName] === undefined || variables[varName] === null) {
@@ -85,18 +63,18 @@ export function validateTemplateVariables(
 
 /**
  * Gets communities in a specific region that serve a given language
- * @param languageMappings Language region mappings
- * @param organizations Community organizations
- * @param languageCode Language code to filter by
- * @param targetProvinces Optional province filter
- * @returns Array of organization IDs
+ * @param {Array} languageMappings Language region mappings
+ * @param {Array} organizations Community organizations
+ * @param {string} languageCode Language code to filter by
+ * @param {string[]} targetProvinces Optional province filter
+ * @returns {string[]} Array of organization IDs
  */
 export function getCommunitiesByLanguageAndRegion(
-  languageMappings: LanguageRegionMapping[],
-  organizations: CommunityOrganization[],
-  languageCode: string,
-  targetProvinces?: string[]
-): string[] {
+  languageMappings,
+  organizations,
+  languageCode,
+  targetProvinces
+) {
   // Find the language mapping
   const langMapping = languageMappings.find(lm => lm.languageCode === languageCode);
   if (!langMapping) {
@@ -126,15 +104,12 @@ export function getCommunitiesByLanguageAndRegion(
 
 /**
  * Determines which languages to use based on regional targeting
- * @param targeting Regional targeting configuration
- * @param languageMappings Available language mappings
- * @returns Array of language codes that should be used
+ * @param {Object} targeting Regional targeting configuration
+ * @param {Array} languageMappings Available language mappings
+ * @returns {string[]} Array of language codes that should be used
  */
-export function selectLanguagesForRegion(
-  targeting: RegionalTargeting,
-  languageMappings: LanguageRegionMapping[]
-): string[] {
-  const selectedLanguages = new Set<string>();
+export function selectLanguagesForRegion(targeting, languageMappings) {
+  const selectedLanguages = new Set();
 
   // If specific languages are requested, use those
   if (targeting.languages && targeting.languages.length > 0) {
@@ -173,21 +148,14 @@ export function selectLanguagesForRegion(
  * This function prepares notifications but doesn't send them.
  * Actual sending is handled by a background worker or API endpoint.
  * 
- * @param dispatch Multi-language dispatch configuration
- * @param templates Available notification templates
- * @param organizations Community organizations to notify
- * @returns Notification queue inputs ready to be inserted
+ * @param {Object} dispatch Multi-language dispatch configuration
+ * @param {Array} templates Available notification templates
+ * @param {Array} organizations Community organizations to notify
+ * @returns {Object} Notification queue inputs and errors
  */
-export function prepareMultiLanguageNotifications(
-  dispatch: MultiLanguageDispatch,
-  templates: NotificationTemplate[],
-  organizations: CommunityOrganization[]
-): {
-  queueItems: NotificationQueueInput[];
-  errors: DispatchError[];
-} {
-  const queueItems: NotificationQueueInput[] = [];
-  const errors: DispatchError[] = [];
+export function prepareMultiLanguageNotifications(dispatch, templates, organizations) {
+  const queueItems = [];
+  const errors = [];
 
   // Process each target language
   for (const languageCode of dispatch.targetLanguages) {
@@ -234,7 +202,7 @@ export function prepareMultiLanguageNotifications(
 
       // Create a queue item for each recipient
       for (const recipient of recipients) {
-        const queueItem: NotificationQueueInput = {
+        const queueItem = {
           caseId: dispatch.caseId,
           organizationId: recipient.organizationId,
           communityId: recipient.communityId,
@@ -258,7 +226,7 @@ export function prepareMultiLanguageNotifications(
 
       // If no specific recipients, create a broadcast item
       if (recipients.length === 0) {
-        const queueItem: NotificationQueueInput = {
+        const queueItem = {
           caseId: dispatch.caseId,
           notificationType: dispatch.templateType,
           channel,
@@ -285,15 +253,16 @@ export function prepareMultiLanguageNotifications(
 
 /**
  * Gets recipients for a specific language and channel combination
+ * @private
  */
 function getRecipientsForLanguageAndChannel(
-  organizations: CommunityOrganization[],
-  languageCode: string,
-  channel: NotificationChannel,
-  targetCommunities?: string[],
-  targetOrganizations?: string[]
-): Array<{ organizationId?: string; communityId?: string; type: string }> {
-  const recipients: Array<{ organizationId?: string; communityId?: string; type: string }> = [];
+  organizations,
+  languageCode,
+  channel,
+  targetCommunities,
+  targetOrganizations
+) {
+  const recipients = [];
 
   // Filter organizations by language support and channel preferences
   const relevantOrgs = organizations.filter(org => {
@@ -335,15 +304,12 @@ function getRecipientsForLanguageAndChannel(
 
 /**
  * Gets all available templates for a specific template type
- * @param templates All templates
- * @param templateType The type of template to filter
- * @returns Templates grouped by language code
+ * @param {Array} templates All templates
+ * @param {string} templateType The type of template to filter
+ * @returns {Object} Templates grouped by language code
  */
-export function getTemplatesByType(
-  templates: NotificationTemplate[],
-  templateType: TemplateType
-): Record<string, NotificationTemplate> {
-  const result: Record<string, NotificationTemplate> = {};
+export function getTemplatesByType(templates, templateType) {
+  const result = {};
 
   templates
     .filter(t => t.templateType === templateType && t.isApproved)
@@ -356,14 +322,11 @@ export function getTemplatesByType(
 
 /**
  * Gets supported languages for a template type
- * @param templates All templates
- * @param templateType The type of template
- * @returns Array of language codes that have approved templates
+ * @param {Array} templates All templates
+ * @param {string} templateType The type of template
+ * @returns {string[]} Array of language codes that have approved templates
  */
-export function getSupportedLanguages(
-  templates: NotificationTemplate[],
-  templateType: TemplateType
-): string[] {
+export function getSupportedLanguages(templates, templateType) {
   return templates
     .filter(t => t.templateType === templateType && t.isApproved)
     .map(t => t.languageCode);
@@ -375,19 +338,11 @@ export function getSupportedLanguages(
 
 /**
  * Calculates coverage statistics for language support
- * @param languageMappings Language mappings
- * @param templates Available templates
- * @returns Coverage statistics
+ * @param {Array} languageMappings Language mappings
+ * @param {Array} templates Available templates
+ * @returns {Object} Coverage statistics
  */
-export function calculateLanguageCoverage(
-  languageMappings: LanguageRegionMapping[],
-  templates: NotificationTemplate[]
-): {
-  totalLanguages: number;
-  coveredLanguages: number;
-  coverageByTemplateType: Record<TemplateType, number>;
-  uncoveredLanguages: string[];
-} {
+export function calculateLanguageCoverage(languageMappings, templates) {
   const activeLanguages = languageMappings.filter(lm => lm.isActive);
   const totalLanguages = activeLanguages.length;
 
@@ -405,7 +360,7 @@ export function calculateLanguageCoverage(
     .map(lang => lang.languageName);
 
   // Calculate coverage by template type
-  const templateTypes: TemplateType[] = [
+  const templateTypes = [
     'missing_alert',
     'amber_alert',
     'found_safe',
@@ -414,7 +369,7 @@ export function calculateLanguageCoverage(
     'case_update',
   ];
 
-  const coverageByTemplateType: Record<TemplateType, number> = {} as Record<TemplateType, number>;
+  const coverageByTemplateType = {};
 
   for (const templateType of templateTypes) {
     const languagesForType = new Set(
