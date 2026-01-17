@@ -7,3 +7,6 @@ export {
   createServerClient,
   updateSession,
 } from "./supabase";
+
+// Services
+export { assessPriority, getPriorityDisplay } from "./services";
