@@ -17,6 +17,22 @@ interface ColdCaseData {
   dna_submission_status: string;
   current_reviewer_id?: string;
   review_due_date?: string;
+  classified_at?: string;
+  classification_reason?: string;
+  review_frequency?: string;
+  next_review_date?: string;
+  criteria_no_leads_90_days?: boolean;
+  criteria_no_tips_60_days?: boolean;
+  criteria_no_activity_180_days?: boolean;
+  criteria_manually_marked?: boolean;
+  criteria_resource_constraints?: boolean;
+  dna_samples_available?: boolean;
+  dna_database_checked?: string[];
+  anniversary_date?: string;
+  last_anniversary_campaign?: string;
+  family_notified_of_cold_status?: boolean;
+  family_opted_out_notifications?: boolean;
+  family_last_contact_date?: string;
   case?: {
     id: string;
     case_number: string;
@@ -50,7 +66,7 @@ interface ColdCaseData {
   dnaSubmissions?: unknown[];
   recentCampaigns?: unknown[];
   recentReviews?: unknown[];
-  [key: string]: unknown;
+  revival_priority_factors?: { factor: string; weight: number }[];
 }
 
 interface ColdCaseDetailProps {
@@ -273,13 +289,35 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
   }
 }
 
+// Case data type for Overview tab
+interface CaseDataForOverview {
+  first_name?: string;
+  last_name?: string;
+  age_at_disappearance?: string;
+  last_seen_date?: string;
+  last_seen_city?: string;
+  last_seen_province?: string;
+  status?: string;
+  priority_level?: string;
+  circumstances?: string;
+  is_minor?: boolean;
+  is_elderly?: boolean;
+  is_indigenous?: boolean;
+  has_dementia?: boolean;
+  has_autism?: boolean;
+  is_suicidal_risk?: boolean;
+  suspected_abduction?: boolean;
+  suspected_foul_play?: boolean;
+  is_medication_dependent?: boolean;
+}
+
 // Overview Tab
 function OverviewTab({
   coldCase,
   caseData,
 }: {
-  coldCase: Record<string, unknown>;
-  caseData: Record<string, unknown> | undefined;
+  coldCase: ColdCaseData;
+  caseData: CaseDataForOverview | undefined;
 }) {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -289,19 +327,19 @@ function OverviewTab({
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <h3 className="text-lg font-semibold text-gray-900">Missing Person</h3>
           <div className="mt-4 grid grid-cols-2 gap-4">
-            <InfoItem label="Name" value={`${caseData?.first_name} ${caseData?.last_name}`} />
-            <InfoItem label="Age at Disappearance" value={caseData?.age_at_disappearance as string} />
-            <InfoItem label="Last Seen" value={caseData?.last_seen_date ? new Date(caseData.last_seen_date as string).toLocaleDateString() : "Unknown"} />
+            <InfoItem label="Name" value={`${caseData?.first_name || ''} ${caseData?.last_name || ''}`} />
+            <InfoItem label="Age at Disappearance" value={caseData?.age_at_disappearance || 'Unknown'} />
+            <InfoItem label="Last Seen" value={caseData?.last_seen_date ? new Date(caseData.last_seen_date).toLocaleDateString() : "Unknown"} />
             <InfoItem label="Location" value={`${caseData?.last_seen_city || ""}, ${caseData?.last_seen_province || ""}`} />
-            <InfoItem label="Status" value={caseData?.status as string} />
-            <InfoItem label="Priority" value={caseData?.priority_level as string} />
+            <InfoItem label="Status" value={caseData?.status || 'Unknown'} />
+            <InfoItem label="Priority" value={caseData?.priority_level || 'Unknown'} />
           </div>
-          {caseData?.circumstances && (
+          {caseData?.circumstances ? (
             <div className="mt-4">
               <p className="text-sm font-medium text-gray-500">Circumstances</p>
-              <p className="mt-1 text-sm text-gray-900">{caseData.circumstances as string}</p>
+              <p className="mt-1 text-sm text-gray-900">{caseData.circumstances}</p>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Risk Factors */}
@@ -473,29 +511,29 @@ function ReviewsTab({ reviews, coldCaseId }: { reviews: unknown[]; coldCaseId: s
         const r = review as Record<string, unknown>;
         const reviewer = r.reviewer as Record<string, unknown> | undefined;
         return (
-          <div key={r.id as string} className="rounded-xl border border-gray-200 bg-white p-6">
+          <div key={String(r.id)} className="rounded-xl border border-gray-200 bg-white p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">Review #{r.review_number}</h4>
+                <h4 className="font-medium text-gray-900">Review #{String(r.review_number || '')}</h4>
                 <p className="text-sm text-gray-500">
-                  {r.review_type} review by {reviewer?.first_name} {reviewer?.last_name}
+                  {String(r.review_type || '')} review by {String(reviewer?.first_name || '')} {String(reviewer?.last_name || '')}
                 </p>
               </div>
               <StatusBadge status={r.status as string} />
             </div>
-            {r.summary && (
-              <p className="mt-4 text-sm text-gray-700">{r.summary as string}</p>
-            )}
+            {r.summary ? (
+              <p className="mt-4 text-sm text-gray-700">{String(r.summary)}</p>
+            ) : null}
             <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
               <span>Started: {r.started_at ? new Date(r.started_at as string).toLocaleDateString() : "Not started"}</span>
-              {r.completed_at && (
-                <span>Completed: {new Date(r.completed_at as string).toLocaleDateString()}</span>
-              )}
-              {r.revival_recommended !== undefined && (
+              {r.completed_at ? (
+                <span>Completed: {new Date(String(r.completed_at)).toLocaleDateString()}</span>
+              ) : null}
+              {r.revival_recommended !== undefined ? (
                 <span className={cn("font-medium", r.revival_recommended ? "text-green-600" : "text-gray-600")}>
                   Revival {r.revival_recommended ? "Recommended" : "Not Recommended"}
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         );
@@ -588,11 +626,11 @@ function DNATab({ submissions, coldCaseId, caseId }: { submissions: unknown[]; c
                   </span>
                 </div>
               </div>
-              {s.match_found && (
+              {s.match_found ? (
                 <div className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">
-                  Match Found: {s.match_details as string}
+                  Match Found: {String(s.match_details || '')}
                 </div>
-              )}
+              ) : null}
             </div>
           );
         })
@@ -637,15 +675,15 @@ function CampaignsTab({ campaigns, coldCaseId, caseId }: { campaigns: unknown[];
               <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <span className="text-gray-500">Reach:</span>{" "}
-                  <span className="text-gray-900">{c.actual_reach || 0}</span>
+                  <span className="text-gray-900">{Number(c.actual_reach) || 0}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Tips:</span>{" "}
-                  <span className="text-gray-900">{c.actual_tips_generated || 0}</span>
+                  <span className="text-gray-900">{Number(c.actual_tips_generated) || 0}</span>
                 </div>
                 <div>
                   <span className="text-gray-500">Leads:</span>{" "}
-                  <span className="text-gray-900">{c.actual_leads_generated || 0}</span>
+                  <span className="text-gray-900">{Number(c.actual_leads_generated) || 0}</span>
                 </div>
               </div>
             </div>
@@ -680,10 +718,10 @@ function PatternsTab({ matches }: { matches: unknown[] }) {
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-medium text-gray-900">
-                  {matchedCase?.first_name} {matchedCase?.last_name}
+                  {String(matchedCase?.first_name ?? '')} {String(matchedCase?.last_name ?? '')}
                 </h4>
                 <p className="text-sm text-gray-500">
-                  {matchedCase?.case_number} | {m.match_type as string} match
+                  {String(matchedCase?.case_number ?? '')} | {m.match_type as string} match
                 </p>
               </div>
               <ConfidenceBadge level={m.confidence_level as string} score={m.confidence_score as number} />

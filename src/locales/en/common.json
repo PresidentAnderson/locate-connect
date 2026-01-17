@@ -38,7 +38,10 @@
     "photoUpload": "Photo Upload",
     "matchReview": "Match Review",
     "frConsent": "Consent Manager",
-    "frAuditLogs": "Audit Logs"
+    "frAuditLogs": "Audit Logs",
+    "coldCases": "Cold Cases",
+    "coldCaseReviews": "Cold Case Reviews",
+    "coldCaseCampaigns": "Cold Case Campaigns"
   },
   "sections": {
     "cases": "Cases",
@@ -50,7 +53,8 @@
     "archiveResearch": "Archive & Research",
     "familySupport": "Family Support",
     "developers": "Developers",
-    "administration": "Administration"
+    "administration": "Administration",
+    "coldCases": "Cold Cases"
   },
   "header": {
     "searchLabel": "Search cases",

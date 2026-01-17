@@ -5,7 +5,7 @@
   },
   "steps": {
     "reporter": { "title": "Vos informations" },
-    "missingPerson": { "title": "Personne disparue" },
+    "missing-person": { "title": "Personne disparue" },
     "circumstances": { "title": "Circonstances" },
     "contacts": { "title": "Contacts connus" },
     "languages": { "title": "Langues" },

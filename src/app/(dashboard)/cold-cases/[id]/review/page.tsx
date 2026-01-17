@@ -187,12 +187,12 @@ export default function ColdCaseReviewPage({ params }: ReviewPageProps) {
               <ArrowLeftIcon className="h-5 w-5" />
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              Cold Case Review #{review.review_number}
+              Cold Case Review #{String(review.review_number ?? '')}
             </h1>
             <StatusBadge status={review.status as string} />
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            {caseData?.first_name} {caseData?.last_name} - {caseData?.case_number}
+            {String(caseData?.first_name ?? '')} {String(caseData?.last_name ?? '')} - {String(caseData?.case_number ?? '')}
           </p>
         </div>
         <div className="flex gap-3">
@@ -597,9 +597,9 @@ function ChecklistItemRow({
               {(item.status as string).replace("_", " ")}
             </span>
           </div>
-          {item.item_description && (
+          {item.item_description ? (
             <p className="mt-1 text-sm text-gray-500">{item.item_description as string}</p>
-          )}
+          ) : null}
         </div>
         {!disabled && (
           <div className="flex gap-2">
@@ -655,12 +655,12 @@ function ChecklistItemRow({
               placeholder="Additional notes..."
             />
           </div>
-          {item.result_summary && (
+          {item.result_summary ? (
             <div className="rounded-lg bg-gray-50 p-3">
               <p className="text-sm font-medium text-gray-700">Result Summary</p>
               <p className="mt-1 text-sm text-gray-600">{item.result_summary as string}</p>
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>
@@ -689,9 +689,9 @@ function PatternMatchesSection({ matches }: { matches: unknown[] }) {
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-medium text-gray-900">
-                  {matchedCase?.first_name} {matchedCase?.last_name}
+                  {String(matchedCase?.first_name ?? '')} {String(matchedCase?.last_name ?? '')}
                 </h4>
-                <p className="text-sm text-gray-500">{matchedCase?.case_number}</p>
+                <p className="text-sm text-gray-500">{String(matchedCase?.case_number ?? '')}</p>
               </div>
               <span className="rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">
                 {Math.round((m.confidence_score as number) * 100)}% confidence
@@ -728,9 +728,9 @@ function LeadsSection({ leads }: { leads: unknown[] }) {
               </div>
               <StatusBadge status={l.status as string} />
             </div>
-            {l.description && (
+            {l.description ? (
               <p className="mt-2 text-sm text-gray-600">{l.description as string}</p>
-            )}
+            ) : null}
           </div>
         );
       })}

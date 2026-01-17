@@ -7,7 +7,7 @@
 // Push Notification Types
 // ============================================
 
-export interface PushSubscription {
+export interface MobilePushSubscription {
   id: string;
   userId: string;
   endpoint: string;

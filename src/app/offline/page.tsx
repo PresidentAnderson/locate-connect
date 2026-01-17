@@ -5,6 +5,9 @@
  */
 
 import Link from "next/link";
+import { RefreshButton } from "./refresh-button";
+
+export const dynamic = "force-dynamic";
 
 export default function OfflinePage() {
   return (
@@ -123,12 +126,7 @@ export default function OfflinePage() {
 
         {/* Actions */}
         <div className="space-y-3">
-          <button
-            onClick={() => window.location.reload()}
-            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Try Again
-          </button>
+          <RefreshButton />
           <Link
             href="/"
             className="block w-full px-4 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors"

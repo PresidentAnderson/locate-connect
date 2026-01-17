@@ -38,7 +38,10 @@
     "photoUpload": "Téléversement de photos",
     "matchReview": "Révision des correspondances",
     "frConsent": "Gestionnaire de consentement",
-    "frAuditLogs": "Journaux d'audit"
+    "frAuditLogs": "Journaux d'audit",
+    "coldCases": "Cas non résolus",
+    "coldCaseReviews": "Révision des cas non résolus",
+    "coldCaseCampaigns": "Campagnes cas non résolus"
   },
   "sections": {
     "cases": "Dossiers",
@@ -50,7 +53,8 @@
     "archiveResearch": "Archives & recherche",
     "familySupport": "Soutien aux familles",
     "developers": "Développeurs",
-    "administration": "Administration"
+    "administration": "Administration",
+    "coldCases": "Cas non résolus"
   },
   "header": {
     "searchLabel": "Rechercher des dossiers",
