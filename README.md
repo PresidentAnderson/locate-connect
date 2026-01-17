@@ -20,6 +20,37 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Configuration
+
+### Environment Variables
+
+Copy `.env.local.example` to `.env.local` and configure:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Required environment variables:
+- Supabase configuration
+- Sentry DSN (for error tracking - optional but recommended)
+
+See [Error Tracking Documentation](./docs/ERROR_TRACKING.md) for Sentry setup instructions.
+
+## Features
+
+### Error Tracking & Monitoring
+
+Comprehensive error tracking is implemented using Sentry. Features include:
+- Automatic error capture for JavaScript exceptions
+- API error tracking (5xx responses)
+- User context and breadcrumb trails
+- Performance monitoring
+- Source maps for production debugging
+
+For detailed setup and usage instructions, see:
+- [Error Tracking Documentation](./docs/ERROR_TRACKING.md)
+- [Error Tracking Examples](./docs/ERROR_TRACKING_EXAMPLES.ts)
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

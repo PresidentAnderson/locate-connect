@@ -317,7 +317,7 @@ export function getCurrentEventId(): string | undefined {
  * Show user feedback dialog
  * @param eventId Event ID to attach feedback to
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function showFeedbackDialog(eventId?: string): void {
   if (typeof window === 'undefined') return;
 
@@ -325,8 +325,10 @@ export function showFeedbackDialog(eventId?: string): void {
   if (!client) return;
 
   // Use the Sentry feedback integration if available
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const feedback = client.getIntegration(Sentry.feedbackIntegration as any);
   if (feedback && 'showDialog' in feedback) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (feedback as any).showDialog();
   }
 }
