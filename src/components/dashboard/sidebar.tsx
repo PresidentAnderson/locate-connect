@@ -69,6 +69,7 @@ const indigenousLiaisonNavigation = [
   { key: "nav.mmiwgCases", href: "/indigenous-liaison/mmiwg", icon: ExclamationTriangleIcon },
   { key: "nav.liaisonContacts", href: "/indigenous-liaison/contacts", icon: UserGroupIcon },
   { key: "nav.resources", href: "/indigenous-liaison/resources", icon: BookOpenIcon },
+  { key: "nav.communityNotifications", href: "/indigenous-liaison/notifications", icon: BellIcon },
 ];
 
 const familySupportNavigation = [
