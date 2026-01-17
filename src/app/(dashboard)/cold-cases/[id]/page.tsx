@@ -4,13 +4,62 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+// Local type for cold case data from API
+interface ColdCaseData {
+  id: string;
+  case_id: string;
+  classification: string;
+  days_since_cold: number;
+  revival_priority_score: number;
+  reviews_completed: number;
+  revival_attempts: number;
+  digitization_progress: number;
+  dna_submission_status: string;
+  current_reviewer_id?: string;
+  review_due_date?: string;
+  case?: {
+    id: string;
+    case_number: string;
+    first_name: string;
+    last_name: string;
+    age_at_disappearance?: string;
+    last_seen_date?: string;
+    last_seen_location?: string;
+    last_seen_city?: string;
+    last_seen_province?: string;
+    primary_photo_url?: string;
+    status?: string;
+    priority_level?: string;
+    circumstances?: string;
+    is_minor?: boolean;
+    is_elderly?: boolean;
+    is_indigenous?: boolean;
+    has_dementia?: boolean;
+    has_autism?: boolean;
+    is_suicidal_risk?: boolean;
+    suspected_abduction?: boolean;
+    suspected_foul_play?: boolean;
+    is_medication_dependent?: boolean;
+  };
+  current_reviewer?: {
+    first_name: string;
+    last_name: string;
+  };
+  unreviewedPatternMatches?: unknown[];
+  unprocessedEvidence?: unknown[];
+  dnaSubmissions?: unknown[];
+  recentCampaigns?: unknown[];
+  recentReviews?: unknown[];
+  [key: string]: unknown;
+}
+
 interface ColdCaseDetailProps {
   params: Promise<{ id: string }>;
 }
 
 export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
   const { id } = use(params);
-  const [coldCase, setColdCase] = useState<Record<string, unknown> | null>(null);
+  const [coldCase, setColdCase] = useState<ColdCaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "evidence" | "dna" | "campaigns" | "patterns">("overview");
 
@@ -51,7 +100,7 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
     );
   }
 
-  const caseData = coldCase.case as Record<string, unknown> | undefined;
+  const caseData = coldCase.case;
 
   return (
     <div className="space-y-6">
@@ -66,16 +115,16 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
               <ArrowLeftIcon className="h-5 w-5" />
             </Link>
             <h1 className="text-2xl font-bold text-gray-900">
-              {String(caseData?.first_name || '')} {String(caseData?.last_name || '')}
+              {caseData?.first_name || ''} {caseData?.last_name || ''}
             </h1>
-            <ClassificationBadge classification={String(coldCase.classification || '')} />
+            <ClassificationBadge classification={coldCase.classification} />
           </div>
           <p className="mt-1 text-sm text-gray-500">
-            {`${String(caseData?.case_number || '')} | Cold for ${Number(coldCase.days_since_cold) || 0} days`}
+            {`${caseData?.case_number || ''} | Cold for ${coldCase.days_since_cold || 0} days`}
           </p>
         </div>
         <div className="flex gap-3">
-          {!Boolean(coldCase.current_reviewer_id) && (
+          {!coldCase.current_reviewer_id && (
             <button
               onClick={() => startReview()}
               className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
@@ -93,32 +142,32 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
         <QuickStat
           label="Priority Score"
-          value={Number(coldCase.revival_priority_score) || 0}
+          value={coldCase.revival_priority_score || 0}
           icon={<ChartIcon className="h-4 w-4 text-cyan-500" />}
         />
         <QuickStat
           label="Reviews"
-          value={Number(coldCase.reviews_completed) || 0}
+          value={coldCase.reviews_completed || 0}
           icon={<SearchIcon className="h-4 w-4 text-blue-500" />}
         />
         <QuickStat
           label="Revival Attempts"
-          value={Number(coldCase.revival_attempts) || 0}
+          value={coldCase.revival_attempts || 0}
           icon={<SparklesIcon className="h-4 w-4 text-green-500" />}
         />
         <QuickStat
           label="Digitization"
-          value={`${Number(coldCase.digitization_progress) || 0}%`}
+          value={`${coldCase.digitization_progress || 0}%`}
           icon={<DocumentIcon className="h-4 w-4 text-purple-500" />}
         />
         <QuickStat
           label="DNA Status"
-          value={formatDNAStatus(String(coldCase.dna_submission_status || ''))}
+          value={formatDNAStatus(coldCase.dna_submission_status || '')}
           icon={<DNAIcon className="h-4 w-4 text-indigo-500" />}
         />
         <QuickStat
           label="Pattern Matches"
-          value={Array.isArray(coldCase.unreviewedPatternMatches) ? coldCase.unreviewedPatternMatches.length : 0}
+          value={coldCase.unreviewedPatternMatches?.length || 0}
           icon={<PatternIcon className="h-4 w-4 text-orange-500" />}
         />
       </div>
@@ -131,8 +180,8 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
             <div className="flex-1">
               <p className="font-medium text-yellow-800">Review In Progress</p>
               <p className="text-sm text-yellow-700">
-                Assigned to {(coldCase.current_reviewer as Record<string, unknown>)?.first_name} {(coldCase.current_reviewer as Record<string, unknown>)?.last_name}
-                {coldCase.review_due_date && ` | Due: ${new Date(coldCase.review_due_date as string).toLocaleDateString()}`}
+                Assigned to {String(coldCase.current_reviewer?.first_name ?? '')} {String(coldCase.current_reviewer?.last_name ?? '')}
+                {coldCase.review_due_date && ` | Due: ${new Date(String(coldCase.review_due_date)).toLocaleDateString()}`}
               </p>
             </div>
             <Link
