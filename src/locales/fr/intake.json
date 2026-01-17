@@ -16,7 +16,18 @@
     "previous": "← Précédent",
     "next": "Suivant →",
     "submit": "Soumettre le signalement",
-    "submitting": "Soumission..."
+    "submitting": "Soumission...",
+    "saveDraft": "Enregistrer le brouillon",
+    "draftSaved": "Brouillon enregistré"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Format de courriel invalide",
+    "invalidPhone": "Format de numéro de téléphone invalide",
+    "futureDate": "La date ne peut pas être dans le futur",
+    "invalidDate": "Format de date invalide",
+    "invalidDob": "Date de naissance invalide",
+    "fixErrors": "Veuillez corriger les erreurs ci-dessus avant de continuer"
   },
   "privacy": {
     "title": "Avis de confidentialité",
@@ -59,6 +70,11 @@
     "distinguishing": "Signes distinctifs",
     "distinguishingHelp": "Tatouages, cicatrices, taches de naissance, vêtements portés",
     "photo": "Télécharger une photo",
+    "photoUploading": "Téléchargement...",
+    "photoUploaded": "Photo téléchargée",
+    "photoRemove": "Supprimer la photo",
+    "photoMaxSize": "Taille maximale du fichier : 10 Mo",
+    "photoFormats": "Formats acceptés : JPEG, PNG, WebP, HEIC",
     "genderOptions": {
       "male": "Homme",
       "female": "Femme",

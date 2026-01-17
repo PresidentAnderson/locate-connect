@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { IntakeLanguageSection } from "@/components/intake";
+import { IntakeLanguageSection, PhotoUpload } from "@/components/intake";
 import { LanguageBadge } from "@/components/ui/LanguageSelect";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { useTranslations } from "@/hooks/useTranslations";
+import {
+  validateReporterForm,
+  validateMissingPersonForm,
+  validateCircumstancesForm,
+  hasValidationErrors,
+  type ValidationResult,
+} from "@/lib/utils/validation";
+import { saveDraft, loadDraft, clearDraft, hasDraft } from "@/lib/utils/draft";
 
 type Step =
   | "reporter"
@@ -34,6 +42,10 @@ export default function NewCasePage() {
   const [currentStep, setCurrentStep] = useState<Step>("reporter");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  
+  // Validation errors
+  const [validationErrors, setValidationErrors] = useState<Record<string, ValidationResult>>({});
 
   const [reporterFirstName, setReporterFirstName] = useState("");
   const [reporterLastName, setReporterLastName] = useState("");
@@ -50,6 +62,7 @@ export default function NewCasePage() {
   const [missingHairColor, setMissingHairColor] = useState("");
   const [missingEyeColor, setMissingEyeColor] = useState("");
   const [missingDistinguishing, setMissingDistinguishing] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [lastSeenDate, setLastSeenDate] = useState("");
   const [lastSeenTime, setLastSeenTime] = useState("");
   const [lastSeenLocation, setLastSeenLocation] = useState("");
@@ -78,6 +91,148 @@ export default function NewCasePage() {
   const [subjectCanCommunicateOfficial, setSubjectCanCommunicateOfficial] = useState(true);
   const [subjectOtherLanguage, setSubjectOtherLanguage] = useState("");
 
+  // Load draft on mount
+  useEffect(() => {
+    const draft = loadDraft();
+    if (draft && hasDraft()) {
+      // Restore all form fields from draft
+      setReporterFirstName(draft.reporterFirstName || "");
+      setReporterLastName(draft.reporterLastName || "");
+      setReporterEmail(draft.reporterEmail || "");
+      setReporterPhone(draft.reporterPhone || "");
+      setReporterAddress(draft.reporterAddress || "");
+      setReporterRelationship(draft.reporterRelationship || "");
+      setMissingFirstName(draft.missingFirstName || "");
+      setMissingLastName(draft.missingLastName || "");
+      setMissingDateOfBirth(draft.missingDateOfBirth || "");
+      setMissingGender(draft.missingGender || "");
+      setMissingHeight(draft.missingHeight || "");
+      setMissingWeight(draft.missingWeight || "");
+      setMissingHairColor(draft.missingHairColor || "");
+      setMissingEyeColor(draft.missingEyeColor || "");
+      setMissingDistinguishing(draft.missingDistinguishing || "");
+      setPhotoUrl(draft.photoUrl || "");
+      setLastSeenDate(draft.lastSeenDate || "");
+      setLastSeenTime(draft.lastSeenTime || "");
+      setLastSeenLocation(draft.lastSeenLocation || "");
+      setLastSeenLocationDetails(draft.lastSeenLocationDetails || "");
+      setOutOfCharacter(draft.outOfCharacter || false);
+      setCircumstances(draft.circumstances || "");
+      setContactEmails(draft.contactEmails || "");
+      setContactPhones(draft.contactPhones || "");
+      setSocialHandles(draft.socialHandles || {});
+      setContactFriends(draft.contactFriends || [{ name: "", relationship: "", contact: "" }]);
+      setMedicalConditions(draft.medicalConditions || "");
+      setMedications(draft.medications || "");
+      setMentalHealthStatus(draft.mentalHealthStatus || "");
+      setSuicidalRisk(draft.suicidalRisk || false);
+      setThreats(draft.threats || [{ name: "", relationship: "", description: "" }]);
+      setReporterLanguages(draft.reporterLanguages || []);
+      setReporterPreferredLanguage(draft.reporterPreferredLanguage || "");
+      setReporterNeedsInterpreter(draft.reporterNeedsInterpreter || false);
+      setReporterOtherLanguage(draft.reporterOtherLanguage || "");
+      setSubjectPrimaryLanguages(draft.subjectPrimaryLanguages || []);
+      setSubjectRespondsToLanguages(draft.subjectRespondsToLanguages || []);
+      setSubjectCanCommunicateOfficial(draft.subjectCanCommunicateOfficial ?? true);
+      setSubjectOtherLanguage(draft.subjectOtherLanguage || "");
+    }
+  }, []);
+
+  const handleSaveDraft = useCallback(() => {
+    saveDraft({
+      reporterFirstName,
+      reporterLastName,
+      reporterEmail,
+      reporterPhone,
+      reporterAddress,
+      reporterRelationship,
+      missingFirstName,
+      missingLastName,
+      missingDateOfBirth,
+      missingGender,
+      missingHeight,
+      missingWeight,
+      missingHairColor,
+      missingEyeColor,
+      missingDistinguishing,
+      photoUrl,
+      lastSeenDate,
+      lastSeenTime,
+      lastSeenLocation,
+      lastSeenLocationDetails,
+      outOfCharacter,
+      circumstances,
+      contactEmails,
+      contactPhones,
+      socialHandles,
+      contactFriends,
+      medicalConditions,
+      medications,
+      mentalHealthStatus,
+      suicidalRisk,
+      threats,
+      reporterLanguages,
+      reporterPreferredLanguage,
+      reporterNeedsInterpreter,
+      reporterOtherLanguage,
+      subjectPrimaryLanguages,
+      subjectRespondsToLanguages,
+      subjectCanCommunicateOfficial,
+      subjectOtherLanguage,
+    });
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000);
+  }, [
+    reporterFirstName,
+    reporterLastName,
+    reporterEmail,
+    reporterPhone,
+    reporterAddress,
+    reporterRelationship,
+    missingFirstName,
+    missingLastName,
+    missingDateOfBirth,
+    missingGender,
+    missingHeight,
+    missingWeight,
+    missingHairColor,
+    missingEyeColor,
+    missingDistinguishing,
+    photoUrl,
+    lastSeenDate,
+    lastSeenTime,
+    lastSeenLocation,
+    lastSeenLocationDetails,
+    outOfCharacter,
+    circumstances,
+    contactEmails,
+    contactPhones,
+    socialHandles,
+    contactFriends,
+    medicalConditions,
+    medications,
+    mentalHealthStatus,
+    suicidalRisk,
+    threats,
+    reporterLanguages,
+    reporterPreferredLanguage,
+    reporterNeedsInterpreter,
+    reporterOtherLanguage,
+    subjectPrimaryLanguages,
+    subjectRespondsToLanguages,
+    subjectCanCommunicateOfficial,
+    subjectOtherLanguage,
+  ]);
+
+  // Auto-save draft every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleSaveDraft();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [handleSaveDraft]);
+
   useEffect(() => {
     if (reporterLanguages.length === 0) {
       setReporterPreferredLanguage("");
@@ -91,7 +246,57 @@ export default function NewCasePage() {
 
   const currentStepIndex = steps.findIndex((s) => s === currentStep);
 
+  const validateCurrentStep = (): boolean => {
+    setValidationErrors({});
+    
+    if (currentStep === "reporter") {
+      const errors = validateReporterForm({
+        firstName: reporterFirstName,
+        lastName: reporterLastName,
+        email: reporterEmail,
+        phone: reporterPhone,
+        relationship: reporterRelationship,
+      });
+      
+      if (hasValidationErrors(errors)) {
+        setValidationErrors(errors);
+        return false;
+      }
+    }
+    
+    if (currentStep === "missing-person") {
+      const errors = validateMissingPersonForm({
+        firstName: missingFirstName,
+        lastName: missingLastName,
+        dateOfBirth: missingDateOfBirth,
+      });
+      
+      if (hasValidationErrors(errors)) {
+        setValidationErrors(errors);
+        return false;
+      }
+    }
+    
+    if (currentStep === "circumstances") {
+      const errors = validateCircumstancesForm({
+        lastSeenDate,
+        lastSeenLocation,
+      });
+      
+      if (hasValidationErrors(errors)) {
+        setValidationErrors(errors);
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const nextStep = () => {
+    if (!validateCurrentStep()) {
+      return;
+    }
+    
     if (currentStepIndex < steps.length - 1) {
       setCurrentStep(steps[currentStepIndex + 1]);
     }
@@ -255,6 +460,7 @@ export default function NewCasePage() {
           hairColor: missingHairColor,
           eyeColor: missingEyeColor,
           distinguishingFeatures: missingDistinguishing,
+          photoUrl: photoUrl || null,
           lastSeenDate: lastSeenDateTime.toISOString(),
           lastSeenLocation,
           locationDetails: lastSeenLocationDetails,
@@ -285,6 +491,10 @@ export default function NewCasePage() {
         setSubmitError(payload?.error || "Failed to submit report.");
         return;
       }
+      
+      // Clear draft on successful submission
+      clearDraft();
+      
       const caseNumber = payload?.data?.case_number as string | undefined;
       const successUrl = caseNumber
         ? `/cases/success?case=${encodeURIComponent(caseNumber)}`
@@ -308,6 +518,11 @@ export default function NewCasePage() {
           <p className="mt-1 text-sm text-gray-500">
             {t("header.subtitle")}
           </p>
+          {draftSaved && (
+            <p className="mt-1 text-xs text-green-600">
+              ✓ {t("navigation.draftSaved")}
+            </p>
+          )}
         </div>
         <LocaleSwitcher label={tCommon("language.label")} />
       </div>
@@ -366,6 +581,7 @@ export default function NewCasePage() {
             onReporterPhoneChange={setReporterPhone}
             onReporterAddressChange={setReporterAddress}
             onReporterRelationshipChange={setReporterRelationship}
+            validationErrors={validationErrors}
           />
         )}
         {currentStep === "missing-person" && (
@@ -379,6 +595,7 @@ export default function NewCasePage() {
             hairColor={missingHairColor}
             eyeColor={missingEyeColor}
             distinguishing={missingDistinguishing}
+            photoUrl={photoUrl}
             onFirstNameChange={setMissingFirstName}
             onLastNameChange={setMissingLastName}
             onDateOfBirthChange={setMissingDateOfBirth}
@@ -388,6 +605,8 @@ export default function NewCasePage() {
             onHairColorChange={setMissingHairColor}
             onEyeColorChange={setMissingEyeColor}
             onDistinguishingChange={setMissingDistinguishing}
+            onPhotoUrlChange={setPhotoUrl}
+            validationErrors={validationErrors}
           />
         )}
         {currentStep === "circumstances" && (
@@ -404,6 +623,7 @@ export default function NewCasePage() {
             onLastSeenLocationDetailsChange={setLastSeenLocationDetails}
             onOutOfCharacterChange={setOutOfCharacter}
             onCircumstancesChange={setCircumstances}
+            validationErrors={validationErrors}
           />
         )}
         {currentStep === "contacts" && (
@@ -520,6 +740,7 @@ function ReporterForm({
   onReporterPhoneChange,
   onReporterAddressChange,
   onReporterRelationshipChange,
+  validationErrors = {},
 }: {
   reporterFirstName: string;
   reporterLastName: string;
@@ -533,6 +754,7 @@ function ReporterForm({
   onReporterPhoneChange: (value: string) => void;
   onReporterAddressChange: (value: string) => void;
   onReporterRelationshipChange: (value: string) => void;
+  validationErrors?: Record<string, ValidationResult>;
 }) {
   const t = useTranslations("intake");
   const relationships = [
@@ -561,8 +783,16 @@ function ReporterForm({
             type="text"
             value={reporterFirstName}
             onChange={(e) => onReporterFirstNameChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.firstName && !validationErrors.firstName.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.firstName && !validationErrors.firstName.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.firstName.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("reporter.lastName")}</label>
@@ -570,8 +800,16 @@ function ReporterForm({
             type="text"
             value={reporterLastName}
             onChange={(e) => onReporterLastNameChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.lastName && !validationErrors.lastName.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.lastName && !validationErrors.lastName.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.lastName.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("reporter.email")}</label>
@@ -579,8 +817,16 @@ function ReporterForm({
             type="email"
             value={reporterEmail}
             onChange={(e) => onReporterEmailChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.email && !validationErrors.email.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.email && !validationErrors.email.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.email.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("reporter.phone")}</label>
@@ -588,15 +834,28 @@ function ReporterForm({
             type="tel"
             value={reporterPhone}
             onChange={(e) => onReporterPhoneChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.phone && !validationErrors.phone.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.phone && !validationErrors.phone.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.phone.error}</p>
+          )}
         </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700">{t("reporter.relationship")}</label>
           <select
             value={reporterRelationship}
             onChange={(e) => onReporterRelationshipChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.relationship && !validationErrors.relationship.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           >
             <option value="">{t("reporter.selectRelationship")}</option>
             {relationships.map((key) => (
@@ -605,6 +864,9 @@ function ReporterForm({
               </option>
             ))}
           </select>
+          {validationErrors.relationship && !validationErrors.relationship.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.relationship.error}</p>
+          )}
         </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700">{t("reporter.address")}</label>
@@ -630,6 +892,7 @@ function MissingPersonForm({
   hairColor,
   eyeColor,
   distinguishing,
+  photoUrl,
   onFirstNameChange,
   onLastNameChange,
   onDateOfBirthChange,
@@ -639,6 +902,8 @@ function MissingPersonForm({
   onHairColorChange,
   onEyeColorChange,
   onDistinguishingChange,
+  onPhotoUrlChange,
+  validationErrors = {},
 }: {
   firstName: string;
   lastName: string;
@@ -649,6 +914,7 @@ function MissingPersonForm({
   hairColor: string;
   eyeColor: string;
   distinguishing: string;
+  photoUrl: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
   onDateOfBirthChange: (value: string) => void;
@@ -658,6 +924,8 @@ function MissingPersonForm({
   onHairColorChange: (value: string) => void;
   onEyeColorChange: (value: string) => void;
   onDistinguishingChange: (value: string) => void;
+  onPhotoUrlChange: (value: string) => void;
+  validationErrors?: Record<string, ValidationResult>;
 }) {
   const t = useTranslations("intake");
   const genderOptions = ["male", "female", "other"];
@@ -676,8 +944,16 @@ function MissingPersonForm({
             type="text"
             value={firstName}
             onChange={(e) => onFirstNameChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.firstName && !validationErrors.firstName.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.firstName && !validationErrors.firstName.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.firstName.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.lastName")}</label>
@@ -685,8 +961,16 @@ function MissingPersonForm({
             type="text"
             value={lastName}
             onChange={(e) => onLastNameChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.lastName && !validationErrors.lastName.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.lastName && !validationErrors.lastName.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.lastName.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.dob")}</label>
@@ -694,8 +978,16 @@ function MissingPersonForm({
             type="date"
             value={dateOfBirth}
             onChange={(e) => onDateOfBirthChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.dateOfBirth && !validationErrors.dateOfBirth.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.dateOfBirth && !validationErrors.dateOfBirth.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.dateOfBirth.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.gender")}</label>
@@ -760,17 +1052,17 @@ function MissingPersonForm({
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">{t("missingPerson.photo")}</label>
-          <div className="mt-1 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10">
-            <div className="text-center">
-              <span className="text-4xl">📷</span>
-              <p className="mt-2 text-sm text-gray-600">
-                {t("missingPerson.photoHelper")}
-              </p>
-            </div>
-          </div>
-        </div>
+        <PhotoUpload
+          onUploadComplete={onPhotoUrlChange}
+          currentPhotoUrl={photoUrl}
+          label={t("missingPerson.photo")}
+          helper={t("missingPerson.photoHelper")}
+          uploading={t("missingPerson.photoUploading")}
+          uploaded={t("missingPerson.photoUploaded")}
+          remove={t("missingPerson.photoRemove")}
+          maxSize={t("missingPerson.photoMaxSize")}
+          formats={t("missingPerson.photoFormats")}
+        />
       </div>
     </div>
   );
@@ -789,6 +1081,7 @@ function CircumstancesForm({
   onLastSeenLocationDetailsChange,
   onOutOfCharacterChange,
   onCircumstancesChange,
+  validationErrors = {},
 }: {
   lastSeenDate: string;
   lastSeenTime: string;
@@ -802,6 +1095,7 @@ function CircumstancesForm({
   onLastSeenLocationDetailsChange: (value: string) => void;
   onOutOfCharacterChange: (value: boolean) => void;
   onCircumstancesChange: (value: string) => void;
+  validationErrors?: Record<string, ValidationResult>;
 }) {
   const t = useTranslations("intake");
 
@@ -819,8 +1113,16 @@ function CircumstancesForm({
             type="date"
             value={lastSeenDate}
             onChange={(e) => onLastSeenDateChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.lastSeenDate && !validationErrors.lastSeenDate.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.lastSeenDate && !validationErrors.lastSeenDate.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.lastSeenDate.error}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("circumstances.lastSeenTime")}</label>
@@ -838,8 +1140,16 @@ function CircumstancesForm({
             placeholder={t("circumstances.locationPlaceholder")}
             value={lastSeenLocation}
             onChange={(e) => onLastSeenLocationChange(e.target.value)}
-            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+            className={cn(
+              "mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1",
+              validationErrors.lastSeenLocation && !validationErrors.lastSeenLocation.isValid
+                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            )}
           />
+          {validationErrors.lastSeenLocation && !validationErrors.lastSeenLocation.isValid && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.lastSeenLocation.error}</p>
+          )}
         </div>
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-gray-700">{t("circumstances.locationDetails")}</label>

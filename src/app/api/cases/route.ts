@@ -17,6 +17,7 @@ interface CasePayload {
   hairColor?: string;
   eyeColor?: string;
   distinguishingFeatures?: string;
+  photoUrl?: string | null;
   lastSeenDate?: string;
   lastSeenLocation?: string;
   locationDetails?: string;
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
     hair_color: body.hairColor || null,
     eye_color: body.eyeColor || null,
     distinguishing_features: body.distinguishingFeatures || null,
+    primary_photo_url: body.photoUrl || null,
     last_seen_date: body.lastSeenDate,
     last_seen_location: body.lastSeenLocation || null,
     circumstances: body.circumstances || null,

@@ -16,7 +16,18 @@
     "previous": "← Previous",
     "next": "Next →",
     "submit": "Submit Report",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "saveDraft": "Save Draft",
+    "draftSaved": "Draft saved"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email format",
+    "invalidPhone": "Invalid phone number format",
+    "futureDate": "Date cannot be in the future",
+    "invalidDate": "Invalid date format",
+    "invalidDob": "Invalid date of birth",
+    "fixErrors": "Please fix the errors above before continuing"
   },
   "privacy": {
     "title": "Privacy Notice",
@@ -59,6 +70,11 @@
     "distinguishing": "Distinguishing Features",
     "distinguishingHelp": "Tattoos, scars, birthmarks, clothing last seen wearing",
     "photo": "Upload Photo",
+    "photoUploading": "Uploading...",
+    "photoUploaded": "Photo uploaded",
+    "photoRemove": "Remove photo",
+    "photoMaxSize": "Maximum file size: 10MB",
+    "photoFormats": "Accepted formats: JPEG, PNG, WebP, HEIC",
     "genderOptions": {
       "male": "Male",
       "female": "Female",
