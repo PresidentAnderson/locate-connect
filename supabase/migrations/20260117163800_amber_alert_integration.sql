@@ -627,3 +627,37 @@ COMMENT ON TABLE amber_alert_metrics IS 'Performance metrics and analytics for A
 
 COMMENT ON FUNCTION get_active_amber_alerts_nearby IS 'Returns active AMBER alerts within specified radius of coordinates';
 COMMENT ON FUNCTION check_amber_alert_criteria IS 'Validates if a case meets AMBER alert criteria';
+
+-- Get AMBER alert statistics
+CREATE OR REPLACE FUNCTION get_amber_alert_stats()
+RETURNS JSONB AS $$
+DECLARE
+  v_stats JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'active_count', (SELECT COUNT(*) FROM amber_alert_requests WHERE status = 'active'),
+    'pending_count', (SELECT COUNT(*) FROM amber_alert_requests WHERE status = 'pending_review'),
+    'month_count', (
+      SELECT COUNT(*) 
+      FROM amber_alert_requests 
+      WHERE created_at >= date_trunc('month', CURRENT_DATE)
+    ),
+    'recovery_rate', (
+      SELECT COALESCE(
+        ROUND(
+          (COUNT(*) FILTER (WHERE status = 'resolved') * 100.0) / 
+          NULLIF(COUNT(*) FILTER (WHERE status IN ('resolved', 'expired', 'cancelled')), 0),
+          0
+        ),
+        0
+      )
+      FROM amber_alert_requests
+      WHERE created_at >= CURRENT_DATE - INTERVAL '12 months'
+    )
+  ) INTO v_stats;
+  
+  RETURN v_stats;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION get_amber_alert_stats IS 'Returns statistics for AMBER alerts dashboard';
