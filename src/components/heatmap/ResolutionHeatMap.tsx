@@ -65,7 +65,16 @@ export function ResolutionHeatMap({
       try {
         // Dynamically import Leaflet
         const L = await import("leaflet");
-        await import("leaflet/dist/leaflet.css");
+
+        // Add Leaflet CSS via link tag if not already added
+        if (!document.querySelector('link[href*="leaflet.css"]')) {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+          link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
+          link.crossOrigin = "";
+          document.head.appendChild(link);
+        }
 
         // Try to import heat layer plugin
         let HeatLayer: unknown;
