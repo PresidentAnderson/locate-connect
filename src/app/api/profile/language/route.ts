@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { ALL_LANGUAGES } from '@/config/languages';
 
 export async function GET() {
   const supabase = await createClient();
@@ -44,6 +45,33 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
+
+  // Validate language codes
+  const validLanguageCodes = new Set(ALL_LANGUAGES.map(lang => lang.code));
+  
+  if (body.preferred_language && !validLanguageCodes.has(body.preferred_language)) {
+    return NextResponse.json({ error: 'Invalid preferred language code' }, { status: 400 });
+  }
+  
+  if (body.communication_language && !validLanguageCodes.has(body.communication_language)) {
+    return NextResponse.json({ error: 'Invalid communication language code' }, { status: 400 });
+  }
+  
+  if (body.additional_languages) {
+    if (!Array.isArray(body.additional_languages)) {
+      return NextResponse.json({ error: 'Additional languages must be an array' }, { status: 400 });
+    }
+    if (body.additional_languages.some((code: string) => !validLanguageCodes.has(code))) {
+      return NextResponse.json({ error: 'Invalid language code in additional languages' }, { status: 400 });
+    }
+    if (body.additional_languages.length > 5) {
+      return NextResponse.json({ error: 'Maximum 5 additional languages allowed' }, { status: 400 });
+    }
+  }
+
+  if (body.needs_interpreter !== undefined && typeof body.needs_interpreter !== 'boolean') {
+    return NextResponse.json({ error: 'needs_interpreter must be a boolean' }, { status: 400 });
+  }
 
   const updateData: {
     preferred_language?: string;
