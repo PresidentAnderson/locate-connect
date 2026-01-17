@@ -394,12 +394,15 @@ function generateInsights(
   clusters: unknown[],
   patterns: unknown[]
 ): HeatMapInsights {
+  const typedClusters = clusters as Record<string, unknown>[];
+  const typedPatterns = patterns as Record<string, unknown>[];
+
   // Calculate total resolutions across all clusters
-  const totalResolutions = clusters.reduce((sum: number, c: Record<string, unknown>) =>
+  const totalResolutions = typedClusters.reduce((sum, c) =>
     sum + (c.total_resolutions as number || 0), 0);
 
   // Generate top patterns
-  const topPatterns = patterns.slice(0, 5).map((p: Record<string, unknown>) => ({
+  const topPatterns = typedPatterns.slice(0, 5).map((p) => ({
     title: p.pattern_name as string,
     description: p.pattern_description as string,
     confidenceLevel: p.confidence_level as number,
@@ -420,11 +423,11 @@ function generateInsights(
   return {
     totalResolutions,
     dateRange: {
-      startDate: clusters.length > 0 ?
-        Math.min(...clusters.map((c: Record<string, unknown>) => new Date(c.period_start as string).getTime())).toString() :
+      startDate: typedClusters.length > 0 ?
+        Math.min(...typedClusters.map((c) => new Date(c.period_start as string).getTime())).toString() :
         new Date().toISOString(),
-      endDate: clusters.length > 0 ?
-        Math.max(...clusters.map((c: Record<string, unknown>) => new Date(c.period_end as string).getTime())).toString() :
+      endDate: typedClusters.length > 0 ?
+        Math.max(...typedClusters.map((c) => new Date(c.period_end as string).getTime())).toString() :
         new Date().toISOString(),
     },
     topPatterns,
@@ -436,21 +439,22 @@ function generateInsights(
 }
 
 function generateDistanceInsights(clusters: unknown[]): HeatMapInsights["distanceInsights"] {
+  const typedClusters = clusters as Record<string, unknown>[];
   const ageGroups: AgeGroupCategory[] = ["child", "teen", "young_adult", "adult", "elderly"];
 
   return ageGroups.map(ageGroup => {
-    const relevantClusters = clusters.filter((c: Record<string, unknown>) => {
+    const relevantClusters = typedClusters.filter((c) => {
       const count = c[`${ageGroup}_count`] as number;
       return count && count > 0;
     });
 
-    const totalCount = relevantClusters.reduce((sum: number, c: Record<string, unknown>) => {
+    const totalCount = relevantClusters.reduce((sum, c) => {
       const countKey = `${ageGroup === "young_adult" ? "young_adult" : ageGroup}_count`;
       return sum + (c[countKey] as number || 0);
     }, 0);
 
     const avgDistance = relevantClusters.length > 0
-      ? relevantClusters.reduce((sum: number, c: Record<string, unknown>) =>
+      ? relevantClusters.reduce((sum, c) =>
           sum + (c.avg_distance_from_last_seen_km as number || 0), 0) / relevantClusters.length
       : 0;
 
@@ -470,20 +474,21 @@ function generateDistanceInsights(clusters: unknown[]): HeatMapInsights["distanc
 }
 
 function generateDemographicInsights(clusters: unknown[]): HeatMapInsights["demographicInsights"] {
+  const typedClusters = clusters as Record<string, unknown>[];
   const ageGroups: AgeGroupCategory[] = ["child", "teen", "young_adult", "adult", "elderly"];
 
   return ageGroups.map(ageGroup => {
     const countKey = ageGroup === "young_adult" ? "young_adult_count" : `${ageGroup}_count`;
-    const totalCases = clusters.reduce((sum: number, c: Record<string, unknown>) =>
+    const totalCases = typedClusters.reduce((sum, c) =>
       sum + (c[countKey] as number || 0), 0);
 
     return {
       ageGroup,
       totalCases,
       resolutionRate: 100, // All these are resolved cases
-      avgResolutionHours: clusters.length > 0
-        ? clusters.reduce((sum: number, c: Record<string, unknown>) =>
-            sum + (c.avg_resolution_hours as number || 0), 0) / clusters.length
+      avgResolutionHours: typedClusters.length > 0
+        ? typedClusters.reduce((sum, c) =>
+            sum + (c.avg_resolution_hours as number || 0), 0) / typedClusters.length
         : 0,
       topDispositions: [],
       topSources: [],
@@ -492,6 +497,7 @@ function generateDemographicInsights(clusters: unknown[]): HeatMapInsights["demo
 }
 
 function generateTemporalInsights(clusters: unknown[]): HeatMapInsights["temporalInsights"] {
+  const typedClusters = clusters as Record<string, unknown>[];
   const timeCategories: TimeOfDayCategory[] = ["early_morning", "morning", "afternoon", "evening"];
   const countKeys: Record<TimeOfDayCategory, string> = {
     early_morning: "early_morning_count",
@@ -502,7 +508,7 @@ function generateTemporalInsights(clusters: unknown[]): HeatMapInsights["tempora
   };
 
   const totalByTime = timeCategories.reduce((acc, time) => {
-    acc[time] = clusters.reduce((sum: number, c: Record<string, unknown>) =>
+    acc[time] = typedClusters.reduce((sum, c) =>
       sum + (c[countKeys[time]] as number || 0), 0);
     return acc;
   }, {} as Record<TimeOfDayCategory, number>);
@@ -517,6 +523,7 @@ function generateTemporalInsights(clusters: unknown[]): HeatMapInsights["tempora
 }
 
 function generateSourceInsights(clusters: unknown[]): HeatMapInsights["sourceInsights"] {
+  const typedClusters = clusters as Record<string, unknown>[];
   const sources: ResolutionSource[] = ["hospital", "shelter", "police_station", "home_address", "public_location", "school"];
   const sourceKeys: Record<string, string> = {
     hospital: "hospital_source_count",
@@ -529,7 +536,7 @@ function generateSourceInsights(clusters: unknown[]): HeatMapInsights["sourceIns
 
   const totalBySource = sources.reduce((acc, source) => {
     const key = sourceKeys[source] || `${source}_count`;
-    acc[source] = clusters.reduce((sum: number, c: Record<string, unknown>) =>
+    acc[source] = typedClusters.reduce((sum, c) =>
       sum + (c[key] as number || 0), 0);
     return acc;
   }, {} as Record<ResolutionSource, number>);
