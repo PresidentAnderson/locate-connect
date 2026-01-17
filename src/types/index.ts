@@ -20,3 +20,4 @@ export * from "./case-resolution.types";
 export * from "./evidence.types";
 export * from "./email-tracking.types";
 export * from "./social-monitoring.types";
+export * from "./lead.types";
