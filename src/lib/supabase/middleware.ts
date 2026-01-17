@@ -1,34 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { UserRole } from "@/types";
+import { ROUTE_ACCESS } from "@/lib/auth/constants";
 
 // Routes that require authentication
 const protectedRoutes = ["/cases", "/admin", "/law-enforcement", "/settings", "/profile"];
 
 // Routes that should redirect to dashboard if already logged in
 const authRoutes = ["/login", "/signup", "/forgot-password"];
-
-// Route access mapping - defines which roles can access which routes
-const ROUTE_ACCESS: Record<string, UserRole[]> = {
-  "/admin": ["admin"],
-  "/developers": ["admin", "developer"],
-  "/law-enforcement": ["admin", "law_enforcement"],
-  "/analytics": ["admin", "developer"],
-  "/cases": ["admin", "developer", "law_enforcement", "journalist", "user"],
-  "/settings": ["admin", "developer", "law_enforcement", "journalist", "user"],
-  "/profile": ["admin", "developer", "law_enforcement", "journalist", "user"],
-  "/dashboards": ["admin", "developer", "law_enforcement"],
-  "/reports": ["admin", "developer", "law_enforcement"],
-  "/cold-cases": ["admin", "developer", "law_enforcement"],
-  "/facial-recognition": ["admin", "law_enforcement"],
-  "/family-support": ["admin", "law_enforcement"],
-  "/indigenous-liaison": ["admin", "law_enforcement"],
-  "/success-stories": ["admin", "developer", "law_enforcement", "journalist"],
-  "/tip-verification": ["admin", "law_enforcement"],
-  "/training": ["admin", "developer", "law_enforcement"],
-  "/archive": ["admin", "developer", "law_enforcement", "journalist"],
-  "/research-portal": ["admin", "developer", "journalist"],
-};
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

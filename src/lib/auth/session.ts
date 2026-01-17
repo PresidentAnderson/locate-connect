@@ -5,6 +5,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { User } from "@/types";
 import type { UserRole, Permission } from "@/types";
+import { ROLE_PERMISSIONS_MAP } from "./constants";
 
 export interface UserProfile extends User {
   id: string;
@@ -46,13 +47,16 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     return null;
   }
 
+  const userRole = profile.role as UserRole;
+  const permissions = ROLE_PERMISSIONS_MAP[userRole] || [];
+
   return {
     id: profile.id,
     email: profile.email,
     firstName: profile.first_name || "",
     lastName: profile.last_name || "",
-    role: profile.role as UserRole,
-    permissions: [], // Will be populated from ROLE_PERMISSIONS map
+    role: userRole,
+    permissions,
     organization: profile.organization,
     badgeNumber: profile.badge_number,
     pressCredentials: profile.press_credentials,
