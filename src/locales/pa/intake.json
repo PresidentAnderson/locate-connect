@@ -5,7 +5,7 @@
   },
   "steps": {
     "reporter": { "title": "ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ" },
-    "missingPerson": { "title": "ਗੁੰਮ ਵਿਅਕਤੀ" },
+    "missing-person": { "title": "ਗੁੰਮ ਵਿਅਕਤੀ" },
     "circumstances": { "title": "ਹਾਲਾਤ" },
     "contacts": { "title": "ਜਾਣੇ-ਪਛਾਣੇ ਸੰਪਰਕ" },
     "languages": { "title": "ਭਾਸ਼ਾਵਾਂ" },

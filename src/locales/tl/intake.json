@@ -5,7 +5,7 @@
   },
   "steps": {
     "reporter": { "title": "Iyong Impormasyon" },
-    "missingPerson": { "title": "Nawawalang Tao" },
+    "missing-person": { "title": "Nawawalang Tao" },
     "circumstances": { "title": "Mga Pangyayari" },
     "contacts": { "title": "Kilalang mga Contact" },
     "languages": { "title": "Mga Wika" },

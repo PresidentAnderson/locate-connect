@@ -5,7 +5,7 @@
   },
   "steps": {
     "reporter": { "title": "معلوماتك" },
-    "missingPerson": { "title": "الشخص المفقود" },
+    "missing-person": { "title": "الشخص المفقود" },
     "circumstances": { "title": "الظروف" },
     "contacts": { "title": "جهات الاتصال المعروفة" },
     "languages": { "title": "اللغات" },

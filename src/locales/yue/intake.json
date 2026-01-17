@@ -5,7 +5,7 @@
   },
   "steps": {
     "reporter": { "title": "你嘅資料" },
-    "missingPerson": { "title": "失蹤人口" },
+    "missing-person": { "title": "失蹤人口" },
     "circumstances": { "title": "情況" },
     "contacts": { "title": "已知聯絡人" },
     "languages": { "title": "語言" },
