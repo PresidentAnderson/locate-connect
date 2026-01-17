@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { SEARCH_EVENT_STATUSES } from "@/types/volunteer.types";
 
 interface SearchEvent {
   id: string;
@@ -33,9 +34,9 @@ export default function SearchEventsPage() {
       let url = "/api/search-events?limit=50";
       
       if (filter === "active") {
-        url += "&status=in_progress";
+        url += `&status=${SEARCH_EVENT_STATUSES.IN_PROGRESS}`;
       } else if (filter === "upcoming") {
-        url += "&status=registration_open";
+        url += `&status=${SEARCH_EVENT_STATUSES.REGISTRATION_OPEN}`;
       }
 
       const response = await fetch(url);

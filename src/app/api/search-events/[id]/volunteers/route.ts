@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { VOLUNTEER_STATUSES } from "@/types/volunteer.types";
 
 /**
  * GET /api/search-events/[id]/volunteers
@@ -122,10 +123,10 @@ export async function PATCH(
     if (volunteerIds && volunteerIds.length > 0) {
       const updateData: Record<string, unknown> = { status };
       
-      if (status === "checked_in") {
+      if (status === VOLUNTEER_STATUSES.CHECKED_IN) {
         updateData.checked_in_at = new Date().toISOString();
         updateData.checked_in_by = user.id;
-      } else if (status === "checked_out") {
+      } else if (status === VOLUNTEER_STATUSES.CHECKED_OUT) {
         updateData.checked_out_at = new Date().toISOString();
       }
 

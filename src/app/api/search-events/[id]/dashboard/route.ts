@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { VOLUNTEER_STATUSES } from "@/types/volunteer.types";
 
 /**
  * GET /api/search-events/[id]/dashboard
@@ -29,7 +30,7 @@ export async function GET(
       .from("search_volunteers")
       .select("*")
       .eq("event_id", id)
-      .in("status", ["checked_in", "active"]);
+      .in("status", [VOLUNTEER_STATUSES.CHECKED_IN, VOLUNTEER_STATUSES.ACTIVE]);
 
     // Fetch zones with findings count
     const { data: zones } = await supabase
@@ -114,14 +115,14 @@ export async function GET(
 
     const stats = {
       totalRegistered: volunteerStats?.filter((v) =>
-        ["registered", "checked_in", "active", "checked_out"].includes(v.status)
+        [VOLUNTEER_STATUSES.REGISTERED, VOLUNTEER_STATUSES.CHECKED_IN, VOLUNTEER_STATUSES.ACTIVE, VOLUNTEER_STATUSES.CHECKED_OUT].includes(v.status as typeof VOLUNTEER_STATUSES[keyof typeof VOLUNTEER_STATUSES])
       ).length || 0,
       totalCheckedIn: volunteerStats?.filter((v) =>
-        ["checked_in", "active", "checked_out"].includes(v.status)
+        [VOLUNTEER_STATUSES.CHECKED_IN, VOLUNTEER_STATUSES.ACTIVE, VOLUNTEER_STATUSES.CHECKED_OUT].includes(v.status as typeof VOLUNTEER_STATUSES[keyof typeof VOLUNTEER_STATUSES])
       ).length || 0,
-      totalActive: volunteerStats?.filter((v) => v.status === "active").length || 0,
-      totalCheckedOut: volunteerStats?.filter((v) => v.status === "checked_out").length || 0,
-      totalNoShow: volunteerStats?.filter((v) => v.status === "no_show").length || 0,
+      totalActive: volunteerStats?.filter((v) => v.status === VOLUNTEER_STATUSES.ACTIVE).length || 0,
+      totalCheckedOut: volunteerStats?.filter((v) => v.status === VOLUNTEER_STATUSES.CHECKED_OUT).length || 0,
+      totalNoShow: volunteerStats?.filter((v) => v.status === VOLUNTEER_STATUSES.NO_SHOW).length || 0,
       zonesTotal: zones?.length || 0,
       zonesCleared: zones?.filter((z) => z.status === "cleared").length || 0,
       zonesInProgress: zones?.filter((z) => z.status === "in_progress").length || 0,

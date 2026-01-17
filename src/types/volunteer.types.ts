@@ -8,6 +8,23 @@ export type VolunteerStatus = 'registered' | 'checked_in' | 'active' | 'checked_
 export type ZoneStatus = 'unassigned' | 'assigned' | 'in_progress' | 'cleared' | 'needs_review';
 export type IncidentType = 'injury' | 'medical' | 'found_evidence' | 'possible_sighting' | 'equipment' | 'weather' | 'other';
 
+// Status constants for API use
+export const SEARCH_EVENT_STATUSES = {
+  PLANNING: 'planning' as SearchEventStatus,
+  REGISTRATION_OPEN: 'registration_open' as SearchEventStatus,
+  IN_PROGRESS: 'in_progress' as SearchEventStatus,
+  COMPLETED: 'completed' as SearchEventStatus,
+  CANCELLED: 'cancelled' as SearchEventStatus,
+};
+
+export const VOLUNTEER_STATUSES = {
+  REGISTERED: 'registered' as VolunteerStatus,
+  CHECKED_IN: 'checked_in' as VolunteerStatus,
+  ACTIVE: 'active' as VolunteerStatus,
+  CHECKED_OUT: 'checked_out' as VolunteerStatus,
+  NO_SHOW: 'no_show' as VolunteerStatus,
+};
+
 export interface SearchEvent {
   id: string;
   caseId: string;
