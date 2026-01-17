@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { IntakeLanguageSection } from "@/components/intake";
+import { IntakeLanguageSection, RiskFactorIntake } from "@/components/intake";
 import { LanguageBadge } from "@/components/ui/LanguageSelect";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { useTranslations } from "@/hooks/useTranslations";
+import type { RiskFactorInput, RiskFactorConsentInput } from "@/types";
 
 type Step =
   | "reporter"
@@ -15,6 +16,7 @@ type Step =
   | "contacts"
   | "languages"
   | "risks"
+  | "contextual-risks"
   | "review";
 
 const steps: Step[] = [
@@ -24,6 +26,7 @@ const steps: Step[] = [
   "contacts",
   "languages",
   "risks",
+  "contextual-risks",
   "review",
 ];
 
@@ -77,6 +80,17 @@ export default function NewCasePage() {
   const [subjectRespondsToLanguages, setSubjectRespondsToLanguages] = useState<string[]>([]);
   const [subjectCanCommunicateOfficial, setSubjectCanCommunicateOfficial] = useState(true);
   const [subjectOtherLanguage, setSubjectOtherLanguage] = useState("");
+  
+  // LC-M2-003: Contextual risk factors
+  const [contextualRiskFactors, setContextualRiskFactors] = useState<RiskFactorInput[]>([]);
+  const [riskFactorConsent, setRiskFactorConsent] = useState<RiskFactorConsentInput>({
+    acknowledgedNonAccusatory: false,
+    acknowledgedCorroborationRequired: false,
+    acknowledgedLimitedWeight: false,
+    acknowledgedPrivacyProtections: false,
+    acceptedSensitivityDisclaimer: false,
+    acceptedPrivacyPolicy: false,
+  });
 
   useEffect(() => {
     if (reporterLanguages.length === 0) {
@@ -285,7 +299,33 @@ export default function NewCasePage() {
         setSubmitError(payload?.error || "Failed to submit report.");
         return;
       }
+      
+      const caseId = payload?.data?.id as string | undefined;
       const caseNumber = payload?.data?.case_number as string | undefined;
+      
+      // LC-M2-003: Submit risk factors separately if provided
+      if (caseId && contextualRiskFactors.length > 0) {
+        try {
+          const riskResponse = await fetch("/api/risk-factors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              caseId,
+              factors: contextualRiskFactors,
+              consent: riskFactorConsent,
+            }),
+          });
+          
+          if (!riskResponse.ok) {
+            console.error("Failed to submit risk factors, but case was created");
+            // Don't fail the entire submission if risk factors fail
+          }
+        } catch (riskError) {
+          console.error("Error submitting risk factors:", riskError);
+          // Don't fail the entire submission if risk factors fail
+        }
+      }
+      
       const successUrl = caseNumber
         ? `/cases/success?case=${encodeURIComponent(caseNumber)}`
         : "/cases/success";
@@ -454,6 +494,14 @@ export default function NewCasePage() {
             onSuicidalRiskChange={setSuicidalRisk}
             onThreatChange={updateThreat}
             onAddThreat={addThreat}
+          />
+        )}
+        {currentStep === "contextual-risks" && (
+          <RiskFactorIntake
+            onFactorsChange={setContextualRiskFactors}
+            onConsentChange={setRiskFactorConsent}
+            initialFactors={contextualRiskFactors}
+            initialConsent={riskFactorConsent}
           />
         )}
         {currentStep === "review" && (
