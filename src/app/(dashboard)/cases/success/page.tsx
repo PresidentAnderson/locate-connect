@@ -2,12 +2,28 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import { useTranslations } from "@/hooks/useTranslations";
 
-export default function CaseSuccessPage() {
+function CaseNumberDisplay() {
   const t = useTranslations("intake");
   const searchParams = useSearchParams();
   const caseNumber = searchParams.get("case");
+
+  if (!caseNumber) return null;
+
+  return (
+    <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3">
+      <p className="text-sm text-cyan-900">
+        <span className="font-medium">{t("success.caseLabel")}</span>{" "}
+        <span className="font-mono">{caseNumber}</span>
+      </p>
+    </div>
+  );
+}
+
+export default function CaseSuccessPage() {
+  const t = useTranslations("intake");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 rounded-xl border border-gray-200 bg-white p-8">
@@ -21,14 +37,9 @@ export default function CaseSuccessPage() {
         <p className="text-sm text-gray-600">{t("success.subtitle")}</p>
       </div>
 
-      {caseNumber && (
-        <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-3">
-          <p className="text-sm text-cyan-900">
-            <span className="font-medium">{t("success.caseLabel")}</span>{" "}
-            <span className="font-mono">{caseNumber}</span>
-          </p>
-        </div>
-      )}
+      <Suspense fallback={<div className="h-12 animate-pulse rounded-lg bg-gray-100" />}>
+        <CaseNumberDisplay />
+      </Suspense>
 
       <div className="space-y-3 text-sm text-gray-600">
         <p>{t("success.nextStepsTitle")}</p>
