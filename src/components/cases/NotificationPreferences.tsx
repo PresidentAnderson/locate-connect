@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { NotificationChannel, NotificationFrequency } from "@/types";
 
 export interface NotificationPreferencesProps {
-  userId: string;
   initialPreferences?: {
     emailEnabled: boolean;
     smsEnabled: boolean;

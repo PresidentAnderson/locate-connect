@@ -161,7 +161,6 @@ export default function CasesDashboard() {
 
       {/* Notification Preferences */}
       <NotificationPreferences
-        userId="demo-user"
         initialPreferences={{
           emailEnabled: true,
           smsEnabled: false,

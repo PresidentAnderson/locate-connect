@@ -31,7 +31,6 @@ interface TimelineItemProps {
   time: string;
   event: string;
   icon: string;
-  type?: string;
 }
 
 function TimelineItem({ date, time, event, icon }: TimelineItemProps) {

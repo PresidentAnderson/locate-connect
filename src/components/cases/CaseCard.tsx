@@ -2,7 +2,9 @@
 
 import { cn } from "@/lib";
 import Link from "next/link";
-import type { CaseStatus, PriorityLevel } from "@/types";
+import type { CaseStatus } from "@/types";
+
+export type PriorityLevel = "p0_critical" | "p1_high" | "p2_medium" | "p3_low" | "p4_routine";
 
 export interface CaseCardProps {
   id: string;
