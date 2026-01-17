@@ -12,7 +12,8 @@ interface PriorityAssessment {
 
 interface AssessmentInput {
   age: number;
-  hourssMissing: number;
+  hoursMissing?: number;
+  hourssMissing?: number;
   hasMedicalCondition: boolean;
   requiresDailyMedication: boolean;
   hasMentalHealthCondition: boolean;
@@ -34,6 +35,7 @@ export function assessPriority(
 ): PriorityAssessment {
   const profile = getJurisdictionProfile(jurisdictionId);
   const weights = profile.priorityWeights;
+  const hoursMissing = input.hoursMissing ?? input.hourssMissing ?? 0;
 
   const factors: PriorityFactor[] = [];
   let totalScore = 0;
@@ -171,7 +173,7 @@ export function assessPriority(
   }
 
   // Time-based factors
-  if (input.hourssMissing >= 72) {
+  if (hoursMissing >= 72) {
     const weight = weights.missingOver72Hours;
     totalScore += weight;
     factors.push({
@@ -180,7 +182,7 @@ export function assessPriority(
       description: "Missing for 72+ hours",
       source: "time_assessment",
     });
-  } else if (input.hourssMissing >= 48) {
+  } else if (hoursMissing >= 48) {
     const weight = weights.missingOver48Hours;
     totalScore += weight;
     factors.push({
@@ -189,7 +191,7 @@ export function assessPriority(
       description: "Missing for 48+ hours",
       source: "time_assessment",
     });
-  } else if (input.hourssMissing >= 24) {
+  } else if (hoursMissing >= 24) {
     const weight = weights.missingOver24Hours;
     totalScore += weight;
     factors.push({
