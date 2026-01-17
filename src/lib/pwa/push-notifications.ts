@@ -10,9 +10,10 @@ export interface PushSubscriptionData {
   expirationTime: number | null;
 }
 
-// Extended NotificationOptions with vibrate support (ServiceWorker API)
+// Extended NotificationOptions with Service Worker notification features
 interface ExtendedNotificationOptions extends NotificationOptions {
   vibrate?: number | number[];
+  actions?: { action: string; title: string; icon?: string }[];
 }
 
 /**
