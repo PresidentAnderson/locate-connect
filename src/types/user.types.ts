@@ -36,7 +36,10 @@ export type Permission =
   | "api:access"
   | "realtime:access"
   | "media:read"
-  | "media:limited"; // Journalists get limited access
+  | "media:limited" // Journalists get limited access
+  | "morgue:read"
+  | "morgue:write"
+  | "morgue:notify"; // Sensitive notification handling
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   admin: [
@@ -46,6 +49,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "admin:settings", "admin:logs", "admin:analytics",
     "api:access", "realtime:access",
     "media:read",
+    "morgue:read", "morgue:write", "morgue:notify",
   ],
   developer: [
     "cases:read", "cases:write",
@@ -53,11 +57,13 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "users:read",
     "admin:settings", "admin:logs", "admin:analytics",
     "api:access",
+    "morgue:read", "morgue:write", "morgue:notify",
   ],
   law_enforcement: [
     "cases:read", "cases:write", "cases:assign",
     "leads:read", "leads:write", "leads:verify",
     "realtime:access",
+    "morgue:read", "morgue:write", "morgue:notify",
   ],
   journalist: [
     "cases:read",
