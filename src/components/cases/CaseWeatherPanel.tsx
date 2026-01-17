@@ -10,6 +10,7 @@ interface WeatherResponse {
     windKph: number;
     precipitationChance: number;
     condition: string;
+    isNight: boolean;
   };
   forecast: Array<{
     date: string;
@@ -70,6 +71,12 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
     .filter(Boolean)
     .join(", ");
 
+  const getRiskColor = (points: number) => {
+    if (points >= 50) return "text-red-600";
+    if (points >= 25) return "text-amber-600";
+    return "text-green-600";
+  };
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -77,6 +84,7 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
           <h2 className="text-lg font-semibold text-gray-900">Weather risk</h2>
           <p className="text-sm text-gray-500">
             {locationLabel || "Last known area"}
+            {data.current.isNight && " (Night)"}
           </p>
         </div>
         <label className="flex items-center gap-2 text-xs text-gray-600">
@@ -93,18 +101,18 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
         <div className="rounded-lg border border-gray-200 p-4">
           <p className="text-xs uppercase text-gray-400">Current</p>
           <p className="mt-1 text-2xl font-semibold text-gray-900">
-            {data.current.temperatureC}°C
+            {data.current.temperatureC}C
           </p>
           <p className="text-sm text-gray-500">{data.current.condition}</p>
           <p className="mt-2 text-xs text-gray-500">
-            Wind {data.current.windKph} km/h • Precip {Math.round(data.current.precipitationChance * 100)}%
+            Wind {data.current.windKph} km/h - Precip {Math.round(data.current.precipitationChance * 100)}%
           </p>
         </div>
 
         <div className="rounded-lg border border-gray-200 p-4">
           <p className="text-xs uppercase text-gray-400">Risk contribution</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-600">
-            {data.risk.weatherPoints} / 10
+          <p className={`mt-1 text-2xl font-semibold ${getRiskColor(data.risk.weatherPoints)}`}>
+            {data.risk.weatherPoints} pts
           </p>
           <p className="text-sm text-gray-500">
             {data.risk.weatherReasons.length > 0
@@ -123,7 +131,9 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
           ) : (
             data.alerts.map((alert) => (
               <div key={alert.title} className="mt-2">
-                <p className="text-sm font-medium text-gray-900">{alert.title}</p>
+                <p className={`text-sm font-medium ${alert.severity === "extreme" ? "text-red-700" : alert.severity === "severe" ? "text-amber-700" : "text-gray-900"}`}>
+                  {alert.title}
+                </p>
                 <p className="text-xs text-gray-500">{alert.description}</p>
               </div>
             ))
@@ -138,7 +148,7 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
             <div key={day.date} className="rounded-lg border border-gray-100 p-3">
               <p className="text-xs text-gray-500">{day.date}</p>
               <p className="text-sm font-medium text-gray-900">
-                {day.lowC}° / {day.highC}°
+                {day.lowC}C / {day.highC}C
               </p>
               <p className="text-xs text-gray-500">{day.condition}</p>
             </div>
