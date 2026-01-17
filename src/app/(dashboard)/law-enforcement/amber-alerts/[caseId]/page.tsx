@@ -46,25 +46,26 @@ export default async function AmberAlertCasePage({ params }: AmberAlertPageProps
     );
   }
 
+  const record = caseRecord as unknown as Record<string, unknown>;
   const caseData = {
-    id: caseRecord.id,
-    caseNumber: caseRecord.case_number,
-    firstName: caseRecord.first_name,
-    lastName: caseRecord.last_name,
-    age: caseRecord.age_at_disappearance ?? 0,
-    gender: caseRecord.gender ?? "unknown",
-    heightCm: caseRecord.height_cm ?? undefined,
-    weightKg: caseRecord.weight_kg ?? undefined,
-    hairColor: caseRecord.hair_color ?? undefined,
-    eyeColor: caseRecord.eye_color ?? undefined,
-    distinguishingFeatures: caseRecord.distinguishing_features ?? undefined,
-    clothingLastSeen: caseRecord.clothing_last_seen ?? undefined,
-    primaryPhotoUrl: caseRecord.primary_photo_url ?? undefined,
-    lastSeenDate: caseRecord.last_seen_date,
-    lastSeenLocation: caseRecord.last_seen_location ?? undefined,
-    lastSeenCity: caseRecord.last_seen_city ?? undefined,
-    lastSeenProvince: caseRecord.last_seen_province ?? undefined,
-    circumstances: caseRecord.circumstances ?? undefined,
+    id: record.id as string,
+    caseNumber: record.case_number as string,
+    firstName: record.first_name as string,
+    lastName: record.last_name as string,
+    age: (record.age_at_disappearance as number) ?? 0,
+    gender: (record.gender as string) ?? "unknown",
+    heightCm: record.height_cm as number | undefined,
+    weightKg: record.weight_kg as number | undefined,
+    hairColor: record.hair_color as string | undefined,
+    eyeColor: record.eye_color as string | undefined,
+    distinguishingFeatures: record.distinguishing_features as string | undefined,
+    clothingLastSeen: record.clothing_last_seen as string | undefined,
+    primaryPhotoUrl: record.primary_photo_url as string | undefined,
+    lastSeenDate: record.last_seen_date as string,
+    lastSeenLocation: record.last_seen_location as string | undefined,
+    lastSeenCity: record.last_seen_city as string | undefined,
+    lastSeenProvince: record.last_seen_province as string | undefined,
+    circumstances: record.circumstances as string | undefined,
   };
 
   return <AmberAlertRequestPanel caseData={caseData} />;

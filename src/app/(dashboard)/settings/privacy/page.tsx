@@ -5,6 +5,8 @@
  * User page for managing consent and data privacy preferences
  */
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib';
 
