@@ -1,6 +1,7 @@
-import type { MissingPerson, PriorityLevel, PriorityFactor } from "@/types";
+import type { MissingPerson, PriorityLevel, PriorityFactor, SensitiveRiskFactor } from "@/types";
 import type { JurisdictionProfile, PriorityWeightConfig } from "@/types";
 import { QC_SPVM_V1, GENERIC_PROFILE } from "@/types";
+import { calculateRiskFactorWeight } from "./risk-factor-service";
 
 interface PriorityAssessment {
   level: PriorityLevel;
@@ -24,6 +25,7 @@ interface AssessmentInput {
   hasFinancialResources: boolean;
   adverseWeather: boolean;
   weatherRiskPoints?: number;
+  sensitiveRiskFactors?: SensitiveRiskFactor[]; // LC-M2-003: Optional risk factors
 }
 
 /**
@@ -212,6 +214,25 @@ export function assessPriority(
       description: "Missing for 24+ hours",
       source: "time_assessment",
     });
+  }
+
+  // LC-M2-003: Process sensitive risk factors with low weight
+  // Only surfaces with behavioral/medical correlation
+  if (input.sensitiveRiskFactors && input.sensitiveRiskFactors.length > 0) {
+    for (const riskFactor of input.sensitiveRiskFactors) {
+      const weight = calculateRiskFactorWeight(riskFactor);
+      
+      // Only include if weight > 0 (i.e., has correlation and/or is corroborated)
+      if (weight > 0) {
+        totalScore += weight;
+        factors.push({
+          factor: `risk_${riskFactor.category}_${riskFactor.factorType}`,
+          weight,
+          description: `Contextual ${riskFactor.category} factor${riskFactor.isCorroborated ? ' (corroborated)' : ''}`,
+          source: "sensitive_risk_assessment",
+        });
+      }
+    }
   }
 
   // Calculate priority level
