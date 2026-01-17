@@ -18,3 +18,4 @@ export * from "./training.types";
 export * from "./outcome-report.types";
 export * from "./case-resolution.types";
 export * from "./evidence.types";
+export * from "./morgue-registry.types";
