@@ -177,12 +177,16 @@ export async function deriveKeyFromPassword(
 }
 
 /**
- * For simplicity in this implementation, we'll use a per-case encryption key
- * In a production system, you'd want to implement proper key management:
- * - Use per-thread keys
- * - Implement key rotation
- * - Use a proper key management service
- * - Implement end-to-end encryption with public/private key pairs
+ * Client-side encryption for secure messaging
+ * 
+ * PRODUCTION CONSIDERATIONS:
+ * - This implementation uses per-thread shared keys for simplicity
+ * - For production, consider implementing:
+ *   1. End-to-end encryption with public/private key pairs per user
+ *   2. Key exchange protocols (e.g., Signal Protocol, Double Ratchet)
+ *   3. Forward secrecy with periodic key rotation
+ *   4. Proper key management service integration
+ *   5. Hardware security module (HSM) for key storage
  */
 
 export interface EncryptionKeyMetadata {

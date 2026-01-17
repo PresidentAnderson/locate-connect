@@ -210,8 +210,11 @@ CREATE INDEX idx_message_audit_message ON message_audit_log(message_id);
 CREATE INDEX idx_message_audit_user ON message_audit_log(user_id);
 CREATE INDEX idx_message_audit_created ON message_audit_log(created_at DESC);
 
--- Full-text search on messages (for message search feature)
-CREATE INDEX idx_messages_content_search ON messages USING gin(to_tsvector('english', content_encrypted));
+-- Note: Full-text search on encrypted content is not supported
+-- In production, implement one of these approaches:
+-- 1. Client-side search after decrypting messages
+-- 2. Maintain a separate encrypted search index with special tokenization
+-- 3. Use a server-side search service with proper key management
 
 -- =============================================================================
 -- TRIGGERS

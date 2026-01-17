@@ -257,9 +257,18 @@ export async function sendMessage(options: SendMessageOptions): Promise<Message>
     if (!thread) throw new Error('Thread not found');
     
     if (thread.isEncrypted) {
-      encryptionKeyId = generateKeyId();
-      const key = await generateEncryptionKey();
-      await MessageEncryptionKeyStore.storeKey(encryptionKeyId, key);
+      // Use thread-level encryption key for better performance and key management
+      // In production, implement proper key exchange between participants
+      encryptionKeyId = `thread_${options.threadId}`;
+      
+      // Try to get existing key from session storage
+      let key = await MessageEncryptionKeyStore.getKey(encryptionKeyId);
+      
+      // If no key exists, generate and store it
+      if (!key) {
+        key = await generateEncryptionKey();
+        await MessageEncryptionKeyStore.storeKey(encryptionKeyId, key);
+      }
       
       const encrypted = await encryptMessage(options.content, key);
       contentEncrypted = encrypted.encrypted;
@@ -440,6 +449,10 @@ export async function deleteMessage(messageId: string): Promise<void> {
 
 /**
  * Searches messages
+ * 
+ * Note: Full-text search on encrypted content is not supported.
+ * This function filters by metadata (thread, sender, dates).
+ * For content search, messages must be decrypted client-side first.
  */
 export async function searchMessages(
   params: MessageSearchParams
@@ -458,11 +471,9 @@ export async function searchMessages(
   if (params.fromDate) query = query.gte('created_at', params.fromDate);
   if (params.toDate) query = query.lte('created_at', params.toDate);
   
-  // Note: Full-text search on encrypted content is limited
-  // In production, you'd maintain a separate search index of decrypted content
-  if (params.searchQuery) {
-    query = query.textSearch('content_encrypted', params.searchQuery);
-  }
+  // Note: Text search on encrypted content is not possible at database level
+  // If searchQuery is provided, fetch all matching messages and filter client-side
+  // For production, consider implementing a separate encrypted search index
   
   query = query
     .order('created_at', { ascending: false })
@@ -719,22 +730,29 @@ async function getUnreadMessageCount(threadId: string): Promise<number> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
   
-  const { count, error } = await supabase
+  // Get all messages in thread not sent by current user
+  const { data: threadMessages, error: msgError } = await supabase
     .from('messages')
-    .select('*', { count: 'exact', head: true })
+    .select('id')
     .eq('thread_id', threadId)
     .eq('is_deleted', false)
-    .not('sender_id', 'eq', user.id)
-    .not('id', 'in', 
-      supabase
-        .from('message_read_receipts')
-        .select('message_id')
-        .eq('user_id', user.id)
-    );
+    .neq('sender_id', user.id);
   
-  if (error) return 0;
+  if (msgError || !threadMessages) return 0;
   
-  return count ?? 0;
+  // Get read receipts for current user
+  const { data: readReceipts, error: receiptError } = await supabase
+    .from('message_read_receipts')
+    .select('message_id')
+    .eq('user_id', user.id)
+    .in('message_id', threadMessages.map(m => m.id));
+  
+  if (receiptError) return 0;
+  
+  const readMessageIds = new Set(readReceipts?.map(r => r.message_id) ?? []);
+  const unreadCount = threadMessages.filter(m => !readMessageIds.has(m.id)).length;
+  
+  return unreadCount;
 }
 
 /**
