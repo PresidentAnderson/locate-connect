@@ -87,7 +87,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       updated_at: string;
       modules?: ModuleData[];
     }
-    const typedTrack = track as TrackData;
+    const typedTrack = track as unknown as TrackData;
 
     // Sort modules and lessons by display_order
     if (typedTrack.modules) {

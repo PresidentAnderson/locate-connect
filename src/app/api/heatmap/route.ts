@@ -278,7 +278,7 @@ async function fetchSuggestions(supabase: ReturnType<typeof createClient> extend
 }
 
 function transformClusters(data: unknown[]): ResolutionLocationCluster[] {
-  return data.map((row: Record<string, unknown>) => ({
+  return (data as Record<string, unknown>[]).map((row) => ({
     id: row.id as string,
     clusterCenterLat: row.cluster_center_lat as number,
     clusterCenterLng: row.cluster_center_lng as number,
@@ -345,7 +345,7 @@ function transformClusters(data: unknown[]): ResolutionLocationCluster[] {
 }
 
 function transformPatterns(data: unknown[]): ResolutionPattern[] {
-  return data.map((row: Record<string, unknown>) => ({
+  return (data as Record<string, unknown>[]).map((row) => ({
     id: row.id as string,
     patternType: row.pattern_type as ResolutionPattern["patternType"],
     patternName: row.pattern_name as string,
@@ -368,7 +368,7 @@ function transformPatterns(data: unknown[]): ResolutionPattern[] {
 }
 
 function transformSuggestions(data: unknown[]): PredictiveSuggestion[] {
-  return data.map((row: Record<string, unknown>) => ({
+  return (data as Record<string, unknown>[]).map((row) => ({
     id: row.id as string,
     suggestionType: row.suggestion_type as PredictiveSuggestion["suggestionType"],
     suggestionTitle: row.suggestion_title as string,
