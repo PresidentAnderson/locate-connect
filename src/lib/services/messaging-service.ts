@@ -555,9 +555,21 @@ export async function updateThreadParticipant(
 ): Promise<MessageParticipant> {
   const supabase = createClient();
   
+  // Map camelCase to snake_case for database
+  const dbUpdates: Record<string, unknown> = {};
+  if (updates.notificationsEnabled !== undefined) {
+    dbUpdates.notifications_enabled = updates.notificationsEnabled;
+  }
+  if (updates.isMuted !== undefined) {
+    dbUpdates.is_muted = updates.isMuted;
+  }
+  if (updates.isActive !== undefined) {
+    dbUpdates.is_active = updates.isActive;
+  }
+  
   const { data, error } = await supabase
     .from('message_participants')
-    .update(updates)
+    .update(dbUpdates)
     .eq('id', participantId)
     .select()
     .single();

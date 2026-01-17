@@ -204,8 +204,17 @@ export function generateKeyId(): string {
 }
 
 /**
- * Client-side key storage helper (uses sessionStorage for security)
- * Keys are only stored for the current session
+ * Client-side key storage helper (uses sessionStorage for convenience)
+ * 
+ * SECURITY CONSIDERATIONS:
+ * - sessionStorage is accessible to any script on the same origin
+ * - For production, consider these more secure alternatives:
+ *   1. Store keys only in memory (no persistence)
+ *   2. Use IndexedDB with Web Crypto API for encrypted storage
+ *   3. Implement proper key derivation that doesn't require client storage
+ *   4. Use a secure key management service
+ * - Keys are cleared when the browser tab is closed
+ * - Never store keys in localStorage (persists across sessions)
  */
 export class MessageEncryptionKeyStore {
   private static STORAGE_PREFIX = 'msg_enc_key_';
