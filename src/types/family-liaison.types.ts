@@ -4,7 +4,7 @@
  */
 
 export type LiaisonType = 'law_enforcement' | 'social_worker' | 'volunteer' | 'advocate';
-export type ResourceCategory = 'mental_health' | 'financial' | 'legal' | 'media' | 'peer_support' | 'grief' | 'practical';
+export type FamilySupportCategory = 'mental_health' | 'financial' | 'legal' | 'media' | 'peer_support' | 'grief' | 'practical';
 export type CheckInFrequency = 'daily' | 'every_other_day' | 'weekly' | 'biweekly' | 'monthly' | 'as_needed';
 export type SupportGroupType = 'in_person' | 'virtual' | 'hybrid';
 
@@ -84,7 +84,7 @@ export interface SupportResource {
   id: string;
   name: string;
   nameFr?: string;
-  category: ResourceCategory;
+  category: FamilySupportCategory;
   subcategory?: string;
   description: string;
   descriptionFr?: string;
@@ -262,7 +262,7 @@ export const LIAISON_TYPE_LABELS: Record<LiaisonType, string> = {
   advocate: 'Victim Advocate',
 };
 
-export const RESOURCE_CATEGORY_LABELS: Record<ResourceCategory, string> = {
+export const FAMILY_SUPPORT_CATEGORY_LABELS: Record<FamilySupportCategory, string> = {
   mental_health: 'Mental Health',
   financial: 'Financial Assistance',
   legal: 'Legal Aid',
