@@ -4,6 +4,7 @@
 
 import { NextResponse } from 'next/server';
 import type { ApiResponse, PaginatedResponse } from '@/types';
+import { captureError, captureMessage, ErrorType, ErrorSeverity } from '@/lib/monitoring';
 
 /**
  * Create a successful API response
@@ -68,6 +69,19 @@ export function apiError(
   details?: Record<string, unknown>,
   headers?: Record<string, string>
 ): NextResponse {
+  // Track API errors (500+ level) to Sentry
+  if (status >= 500) {
+    captureMessage(
+      `API Error: ${message}`,
+      ErrorSeverity.ERROR,
+      {
+        type: ErrorType.API,
+        tags: { error_code: code, status_code: String(status) },
+        metadata: details,
+      }
+    );
+  }
+
   const response: ApiResponse<null> = {
     success: false,
     error: {
@@ -154,8 +168,18 @@ export function apiRateLimited(
  */
 export function apiServerError(
   message: string = 'Internal server error',
-  code: string = 'internal_error'
+  code: string = 'internal_error',
+  error?: Error | unknown
 ): NextResponse {
+  // Capture the actual error if provided
+  if (error) {
+    captureError(error, {
+      type: ErrorType.API,
+      tags: { error_code: code },
+      metadata: { message },
+    });
+  }
+  
   return apiError(message, code, 500);
 }
 
