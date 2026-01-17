@@ -23,15 +23,37 @@
 ```
 locate-connect/
 ├── src/
-│   ├── app/           # Next.js App Router pages
-│   ├── components/    # Reusable UI components
-│   ├── lib/           # Utilities and configurations
-│   │   └── supabase/  # Supabase client configuration
-│   ├── types/         # TypeScript type definitions
-│   └── hooks/         # Custom React hooks
-├── public/            # Static assets
-├── supabase/          # Supabase migrations and config
-└── docker/            # Docker configurations
+│   ├── app/                    # Next.js App Router pages
+│   ├── components/             # Reusable UI components
+│   │   ├── ui/                 # Base UI components (buttons, inputs, etc.)
+│   │   ├── layout/             # Layout components (header, footer, etc.)
+│   │   └── index.ts            # Barrel export
+│   ├── config/                 # App configuration
+│   │   ├── site.ts             # Site metadata and config
+│   │   └── index.ts            # Barrel export
+│   ├── hooks/                  # Custom React hooks
+│   │   └── index.ts            # Barrel export
+│   ├── lib/                    # Utilities and services
+│   │   ├── supabase/           # Supabase client configuration
+│   │   │   ├── client.ts       # Browser client
+│   │   │   ├── server.ts       # Server client
+│   │   │   ├── middleware.ts   # Session middleware
+│   │   │   └── index.ts        # Barrel export
+│   │   ├── utils/              # Helper functions
+│   │   │   ├── cn.ts           # Tailwind class merger
+│   │   │   └── index.ts        # Barrel export
+│   │   └── index.ts            # Main barrel export
+│   ├── types/                  # TypeScript type definitions
+│   │   ├── database.types.ts   # Supabase generated types
+│   │   └── index.ts            # Barrel export
+│   └── middleware.ts           # Next.js middleware
+├── public/                     # Static assets
+│   ├── logo.svg                # Main logo
+│   ├── logo-text.svg           # Logo with text
+│   └── favicon.svg             # Browser favicon
+├── Dockerfile                  # Docker production build
+├── docker-compose.yml          # Docker orchestration
+└── claude.md                   # Project conventions (this file)
 ```
 
 ## Code Conventions
@@ -64,6 +86,27 @@ locate-connect/
 - Types: `camelCase.types.ts`
 - Hooks: `useCamelCase.ts`
 - Pages: `page.tsx` (Next.js convention)
+
+### Import Conventions
+
+Use barrel exports for clean imports:
+
+```typescript
+// Utilities and Supabase
+import { cn, createServerClient } from "@/lib";
+
+// Components
+import { Button, Header } from "@/components";
+
+// Hooks
+import { useAuth } from "@/hooks";
+
+// Types
+import type { Database } from "@/types";
+
+// Config
+import { siteConfig } from "@/config";
+```
 
 ## Supabase Integration
 

@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     resolveAlias: {
-      canvas: { browser: "./empty-module.js" },
+      canvas: { browser: "./src/lib/utils/empty-module.js" },
     },
   },
   webpack: (config) => {
