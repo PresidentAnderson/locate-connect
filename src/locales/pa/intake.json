@@ -4,13 +4,27 @@
     "subtitle": "ਰਿਪੋਰਟ ਦਾਖਲ ਕਰਨ ਲਈ ਸਾਰੇ ਭਾਗ ਪੂਰੇ ਕਰੋ"
   },
   "steps": {
-    "reporter": { "title": "ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ" },
-    "missing-person": { "title": "ਗੁੰਮ ਵਿਅਕਤੀ" },
-    "circumstances": { "title": "ਹਾਲਾਤ" },
-    "contacts": { "title": "ਜਾਣੇ-ਪਛਾਣੇ ਸੰਪਰਕ" },
-    "languages": { "title": "ਭਾਸ਼ਾਵਾਂ" },
-    "risks": { "title": "ਜੋਖਮ ਦੇ ਕਾਰਕ" },
-    "review": { "title": "ਸਮੀਖਿਆ ਅਤੇ ਜਮ੍ਹਾਂ ਕਰੋ" }
+    "reporter": {
+      "title": "ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ"
+    },
+    "missing-person": {
+      "title": "ਗੁੰਮ ਵਿਅਕਤੀ"
+    },
+    "circumstances": {
+      "title": "ਹਾਲਾਤ"
+    },
+    "contacts": {
+      "title": "ਜਾਣੇ-ਪਛਾਣੇ ਸੰਪਰਕ"
+    },
+    "languages": {
+      "title": "ਭਾਸ਼ਾਵਾਂ"
+    },
+    "risks": {
+      "title": "ਜੋਖਮ ਦੇ ਕਾਰਕ"
+    },
+    "review": {
+      "title": "ਸਮੀਖਿਆ ਅਤੇ ਜਮ੍ਹਾਂ ਕਰੋ"
+    }
   },
   "navigation": {
     "previous": "ਪਿਛਲਾ",
@@ -77,7 +91,27 @@
     "circumstances": "ਹਾਲਾਤ",
     "circumstancesHelp": "ਵਿਅਕਤੀ ਕੀ ਕਰ ਰਿਹਾ ਸੀ? ਕੀ ਇਹ ਅਸਧਾਰਨ ਸੀ?",
     "outOfCharacter": "ਕੀ ਇਹ ਗਾਇਬ ਹੋਣਾ ਅਸਧਾਰਨ ਹੈ?",
-    "locationPlaceholder": "ਸ਼ਹਿਰ, ਸੂਬਾ"
+    "locationPlaceholder": "ਸ਼ਹਿਰ, ਸੂਬਾ",
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
   },
   "contacts": {
     "title": "ਜਾਣੇ-ਪਛਾਣੇ ਸੰਪਰਕ ਅਤੇ ਸੋਸ਼ਲ ਮੀਡੀਆ",

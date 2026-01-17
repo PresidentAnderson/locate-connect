@@ -1,1 +1,24 @@
-{}
+{
+  "circumstances": {
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
+  }
+}

@@ -250,7 +250,7 @@ export async function POST(request: Request) {
   // Update case status to cold
   await supabase
     .from('cases')
-    .update({ status: 'cold' })
+    .update({ status: 'cold', lifecycle_status: 'cold' })
     .eq('id', body.caseId);
 
   return apiCreated(data);

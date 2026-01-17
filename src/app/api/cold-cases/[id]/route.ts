@@ -323,7 +323,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   // Update case status back to active
   await supabase
     .from('cases')
-    .update({ status: 'active' })
+    .update({ status: 'active', lifecycle_status: 'revived' })
     .eq('id', coldCaseProfile.case_id);
 
   // Delete the cold case profile

@@ -4,13 +4,27 @@
     "subtitle": "Kumpletuhin ang lahat ng seksyon upang magsumite ng ulat"
   },
   "steps": {
-    "reporter": { "title": "Iyong Impormasyon" },
-    "missing-person": { "title": "Nawawalang Tao" },
-    "circumstances": { "title": "Mga Pangyayari" },
-    "contacts": { "title": "Kilalang mga Contact" },
-    "languages": { "title": "Mga Wika" },
-    "risks": { "title": "Mga Risk Factor" },
-    "review": { "title": "Suriin at Isumite" }
+    "reporter": {
+      "title": "Iyong Impormasyon"
+    },
+    "missing-person": {
+      "title": "Nawawalang Tao"
+    },
+    "circumstances": {
+      "title": "Mga Pangyayari"
+    },
+    "contacts": {
+      "title": "Kilalang mga Contact"
+    },
+    "languages": {
+      "title": "Mga Wika"
+    },
+    "risks": {
+      "title": "Mga Risk Factor"
+    },
+    "review": {
+      "title": "Suriin at Isumite"
+    }
   },
   "navigation": {
     "previous": "Nakaraan",
@@ -77,7 +91,27 @@
     "circumstances": "Mga Pangyayari",
     "circumstancesHelp": "Ano ang ginagawa ng tao? Hindi ba ito karaniwan?",
     "outOfCharacter": "Hindi ba karaniwan ang pagkawalang ito?",
-    "locationPlaceholder": "Lungsod, Lalawigan"
+    "locationPlaceholder": "Lungsod, Lalawigan",
+    "locationConfidence": "Location Confidence",
+    "confidenceOptions": {
+      "unknown": "Unknown",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "witnessType": "Last Seen Witness",
+    "witnessTypeOptions": {
+      "unknown": "Unknown",
+      "self_reported": "Self-reported",
+      "family": "Family",
+      "friend": "Friend",
+      "public": "Public",
+      "law_enforcement": "Law enforcement",
+      "camera": "Camera / CCTV",
+      "other": "Other"
+    },
+    "unverifiedNotes": "Unverified Notes",
+    "unverifiedNotesHelp": "Add observations that are unconfirmed or still being verified."
   },
   "contacts": {
     "title": "Kilalang mga Contact at Social Media",
