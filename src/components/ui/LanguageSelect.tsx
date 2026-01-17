@@ -166,6 +166,7 @@ interface LanguageMultiSelectProps {
   includeOfficial?: boolean;
   includeIndigenous?: boolean;
   placeholder?: string;
+  searchPlaceholder?: string;
   label?: string;
   maxSelections?: number;
   showSearch?: boolean;
@@ -178,6 +179,7 @@ export function LanguageMultiSelect({
   includeOfficial = true,
   includeIndigenous = true,
   placeholder = "Search languages...",
+  searchPlaceholder = "Search languages...",
   label,
   maxSelections,
   showSearch = true,
@@ -309,7 +311,7 @@ export function LanguageMultiSelect({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search languages..."
+                placeholder={searchPlaceholder}
                 className="w-full px-3 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:border-cyan-500"
                 onClick={(e) => e.stopPropagation()}
               />

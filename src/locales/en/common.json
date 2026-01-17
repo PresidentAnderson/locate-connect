@@ -23,17 +23,23 @@
     "mmiwgCases": "MMIWG Cases",
     "liaisonContacts": "Liaison Contacts",
     "resources": "Resources",
+    "developerPortal": "Developer Portal",
+    "apiDocs": "API Docs",
+    "apiSupport": "API Support",
     "adminPanel": "Admin Panel",
     "users": "Users",
     "systemLogs": "System Logs",
-    "apiKeys": "API Keys"
+    "apiKeys": "API Keys",
+    "tipVerification": "Tip Verification"
   },
   "sections": {
     "cases": "Cases",
     "lawEnforcement": "Law Enforcement",
+    "tipVerification": "Tip Verification",
     "analyticsReports": "Analytics & Reports",
     "indigenousLiaison": "Indigenous Liaison",
     "archiveResearch": "Archive & Research",
+    "developers": "Developers",
     "administration": "Administration"
   },
   "header": {

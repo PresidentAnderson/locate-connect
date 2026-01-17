@@ -15,7 +15,8 @@
   "navigation": {
     "previous": "← Précédent",
     "next": "Suivant →",
-    "submit": "Soumettre le signalement"
+    "submit": "Soumettre le signalement",
+    "submitting": "Soumission..."
   },
   "privacy": {
     "title": "Avis de confidentialité",
@@ -124,9 +125,11 @@
     "reporterDescription": "Cela nous aide à communiquer efficacement avec vous et à vous diriger vers les services appropriés.",
     "reporterLanguagesLabel": "Langues que vous parlez",
     "reporterLanguagesPlaceholder": "Sélectionnez toutes les langues dans lesquelles vous pouvez communiquer",
+    "searchPlaceholder": "Rechercher des langues...",
     "reporterPreferredLabel": "Langue de contact préférée",
     "interpreterNeeded": "Besoin d'un interprète",
     "interpreterLanguage": "Langue de l'interprète",
+    "reporterOtherLabel": "Autre langue ou dialecte (optionnel)",
     "subjectTitle": "Informations linguistiques de la personne disparue",
     "subjectDescription": "Comprendre les langues parlées par la personne disparue aide aux communications et aux efforts communautaires.",
     "subjectPrimaryLabel": "Langues principales parlées par la personne disparue",
@@ -136,6 +139,8 @@
     "subjectRespondsHelp": "Utile pour les équipes de recherche. Incluez les langues qu'elle comprend même si elle ne les parle pas couramment.",
     "subjectOfficialLabel": "Peut communiquer en français ou en anglais",
     "subjectOfficialHelp": "Cela aide à déterminer si des communications linguistiques spécifiques sont nécessaires.",
+    "subjectOtherLabel": "Autre langue ou dialecte (optionnel)",
+    "otherPlaceholder": "Indiquez la langue ou le dialecte",
     "summaryTitle": "Résumé linguistique",
     "reporterSummaryLabel": "Vos langues :",
     "subjectSummaryLabel": "Langues de la personne disparue :"
@@ -157,5 +162,19 @@
     "riskMentalLabel": "Santé mentale",
     "languageReporterLabel": "Langues du déclarant",
     "languageSubjectLabel": "Langues de la personne disparue"
+  },
+  "success": {
+    "kicker": "Signalement reçu",
+    "title": "Merci d'avoir soumis ce signalement",
+    "subtitle": "Notre équipe analysera les détails et coordonnera les prochaines étapes.",
+    "caseLabel": "Numéro de dossier :",
+    "nextStepsTitle": "Prochaines étapes :",
+    "nextSteps": {
+      "first": "Un coordonnateur validera les informations et pourrait vous contacter.",
+      "second": "Nous informerons les organismes concernés et affecterons une équipe.",
+      "third": "Vous pouvez suivre les mises à jour dans votre tableau de bord."
+    },
+    "backToCases": "Voir le tableau de bord",
+    "newReport": "Faire un autre signalement"
   }
 }

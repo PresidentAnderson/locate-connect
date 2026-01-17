@@ -11,12 +11,14 @@ interface ReporterLanguageData {
   reporter_languages: string[];
   reporter_preferred_language: string;
   reporter_needs_interpreter: boolean;
+  reporter_other_language?: string;
 }
 
 interface SubjectLanguageData {
   subject_primary_languages: string[];
   subject_responds_to_languages: string[];
   subject_can_communicate_official: boolean;
+  subject_other_language?: string;
 }
 
 interface IntakeLanguageSectionProps {
@@ -27,6 +29,8 @@ interface IntakeLanguageSectionProps {
   onReporterPreferredLanguageChange: (language: string) => void;
   reporterNeedsInterpreter: boolean;
   onReporterNeedsInterpreterChange: (needs: boolean) => void;
+  reporterOtherLanguage?: string;
+  onReporterOtherLanguageChange?: (value: string) => void;
 
   // Subject (missing person) language data
   subjectPrimaryLanguages: string[];
@@ -35,6 +39,8 @@ interface IntakeLanguageSectionProps {
   onSubjectRespondsToLanguagesChange: (languages: string[]) => void;
   subjectCanCommunicateOfficial: boolean;
   onSubjectCanCommunicateOfficialChange: (can: boolean) => void;
+  subjectOtherLanguage?: string;
+  onSubjectOtherLanguageChange?: (value: string) => void;
 }
 
 export function IntakeLanguageSection({
@@ -44,12 +50,16 @@ export function IntakeLanguageSection({
   onReporterPreferredLanguageChange,
   reporterNeedsInterpreter,
   onReporterNeedsInterpreterChange,
+  reporterOtherLanguage,
+  onReporterOtherLanguageChange,
   subjectPrimaryLanguages,
   onSubjectPrimaryLanguagesChange,
   subjectRespondsToLanguages,
   onSubjectRespondsToLanguagesChange,
   subjectCanCommunicateOfficial,
   onSubjectCanCommunicateOfficialChange,
+  subjectOtherLanguage,
+  onSubjectOtherLanguageChange,
 }: IntakeLanguageSectionProps) {
   const t = useTranslations("intake");
 
@@ -70,6 +80,7 @@ export function IntakeLanguageSection({
             onChange={onReporterLanguagesChange}
             label={t("languageSection.reporterLanguagesLabel")}
             placeholder={t("languageSection.reporterLanguagesPlaceholder")}
+            searchPlaceholder={t("languageSection.searchPlaceholder")}
             maxSelections={5}
           />
 
@@ -106,6 +117,21 @@ export function IntakeLanguageSection({
             interpreterLabel={t("languageSection.interpreterLanguage")}
             interpreterPlaceholder={t("languageSection.interpreterLanguage")}
           />
+
+          {onReporterOtherLanguageChange && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("languageSection.reporterOtherLabel")}
+              </label>
+              <input
+                type="text"
+                value={reporterOtherLanguage || ""}
+                onChange={(e) => onReporterOtherLanguageChange(e.target.value)}
+                placeholder={t("languageSection.otherPlaceholder")}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -124,6 +150,7 @@ export function IntakeLanguageSection({
             onChange={onSubjectPrimaryLanguagesChange}
             label={t("languageSection.subjectPrimaryLabel")}
             placeholder={t("languageSection.subjectPrimaryPlaceholder")}
+            searchPlaceholder={t("languageSection.searchPlaceholder")}
             maxSelections={5}
           />
 
@@ -132,6 +159,7 @@ export function IntakeLanguageSection({
             onChange={onSubjectRespondsToLanguagesChange}
             label={t("languageSection.subjectRespondsLabel")}
             placeholder={t("languageSection.subjectRespondsPlaceholder")}
+            searchPlaceholder={t("languageSection.searchPlaceholder")}
             maxSelections={5}
           />
           <p className="text-xs text-gray-500">
@@ -158,6 +186,21 @@ export function IntakeLanguageSection({
           <p className="text-xs text-gray-500 ml-6">
             {t("languageSection.subjectOfficialHelp")}
           </p>
+
+          {onSubjectOtherLanguageChange && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                {t("languageSection.subjectOtherLabel")}
+              </label>
+              <input
+                type="text"
+                value={subjectOtherLanguage || ""}
+                onChange={(e) => onSubjectOtherLanguageChange(e.target.value)}
+                placeholder={t("languageSection.otherPlaceholder")}
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            </div>
+          )}
         </div>
       </div>
 

@@ -23,17 +23,23 @@
     "mmiwgCases": "Cas FFADA",
     "liaisonContacts": "Contacts liaison",
     "resources": "Ressources",
+    "developerPortal": "Portail développeur",
+    "apiDocs": "Documentation API",
+    "apiSupport": "Support API",
     "adminPanel": "Panneau admin",
     "users": "Utilisateurs",
     "systemLogs": "Journaux système",
-    "apiKeys": "Clés API"
+    "apiKeys": "Clés API",
+    "tipVerification": "Vérification des signalements"
   },
   "sections": {
     "cases": "Dossiers",
     "lawEnforcement": "Forces de l'ordre",
+    "tipVerification": "Vérification des signalements",
     "analyticsReports": "Analytique & rapports",
     "indigenousLiaison": "Liaison autochtone",
     "archiveResearch": "Archives & recherche",
+    "developers": "Développeurs",
     "administration": "Administration"
   },
   "header": {

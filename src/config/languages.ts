@@ -507,12 +507,6 @@ export const INDIGENOUS_LANGUAGES: Language[] = [
   },
 ];
 
-// All supported languages
-export const ALL_LANGUAGES: Language[] = [
-  ...OFFICIAL_LANGUAGES,
-  ...INDIGENOUS_LANGUAGES,
-];
-
 // Common immigrant languages in Canada (for future expansion)
 export const IMMIGRANT_LANGUAGES: Language[] = [
   {
@@ -565,9 +559,17 @@ export const IMMIGRANT_LANGUAGES: Language[] = [
   },
 ];
 
+// All supported languages (including immigrant languages for multi-language support)
+export const ALL_LANGUAGES: Language[] = [
+  ...OFFICIAL_LANGUAGES,
+  ...IMMIGRANT_LANGUAGES,
+  ...INDIGENOUS_LANGUAGES,
+];
+
 // Language families for grouping in UI
 export const LANGUAGE_FAMILIES = [
   { id: "official", name: "Official Languages", nameEn: "Official Languages", nameFr: "Langues officielles" },
+  { id: "community", name: "Community Languages", nameEn: "Community Languages", nameFr: "Langues communautaires" },
   { id: "algonquian", name: "Algonquian", nameEn: "Algonquian Languages", nameFr: "Langues algonquiennes" },
   { id: "inuit", name: "Inuit", nameEn: "Inuit Languages", nameFr: "Langues inuites" },
   { id: "athabaskan", name: "Athabaskan", nameEn: "Athabaskan/Dene Languages", nameFr: "Langues athapascanes/dénées" },
@@ -580,7 +582,20 @@ export const LANGUAGE_FAMILIES = [
 
 // Helper functions
 export function getLanguageByCode(code: string): Language | undefined {
-  return ALL_LANGUAGES.find((lang) => lang.code === code);
+  // Search in all language lists
+  return ALL_LANGUAGES.find((lang) => lang.code === code) ||
+         IMMIGRANT_LANGUAGES.find((lang) => lang.code === code);
+}
+
+// Get immigrant/community languages
+export function getImmigrantLanguages(): Language[] {
+  return IMMIGRANT_LANGUAGES;
+}
+
+// Check if a language is RTL
+export function isRTLLanguage(code: string): boolean {
+  const language = getLanguageByCode(code);
+  return language?.direction === "rtl";
 }
 
 export function getIndigenousLanguages(): Language[] {
@@ -659,10 +674,11 @@ export function getLanguageDisplayName(
 export function getLanguagesGroupedByFamily(): Record<string, Language[]> {
   const groups: Record<string, Language[]> = {
     "Official Languages": OFFICIAL_LANGUAGES,
+    "Community Languages": IMMIGRANT_LANGUAGES,
   };
 
   LANGUAGE_FAMILIES.forEach((family) => {
-    if (family.id === "official") return;
+    if (family.id === "official" || family.id === "community") return;
     const familyLangs = getLanguagesByFamily(family.name);
     if (familyLangs.length > 0) {
       groups[family.nameEn] = familyLangs;
@@ -670,6 +686,19 @@ export function getLanguagesGroupedByFamily(): Record<string, Language[]> {
   });
 
   return groups;
+}
+
+// Get all languages grouped by category (official, immigrant, indigenous)
+export function getLanguagesGroupedByCategory(): {
+  official: Language[];
+  immigrant: Language[];
+  indigenous: Language[];
+} {
+  return {
+    official: OFFICIAL_LANGUAGES,
+    immigrant: IMMIGRANT_LANGUAGES,
+    indigenous: INDIGENOUS_LANGUAGES,
+  };
 }
 
 // Default export for convenience
@@ -682,11 +711,14 @@ export default {
   SYLLABICS_LANGUAGES,
   getLanguageByCode,
   getIndigenousLanguages,
+  getImmigrantLanguages,
   getLanguagesByFamily,
   getLanguagesByRegion,
   getPrimaryIndigenousLanguages,
   usesSyllabics,
   containsSyllabics,
+  isRTLLanguage,
   getLanguageDisplayName,
   getLanguagesGroupedByFamily,
+  getLanguagesGroupedByCategory,
 };
