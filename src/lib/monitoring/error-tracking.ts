@@ -269,10 +269,12 @@ export function trackPerformance(
 }
 
 /**
- * Start a transaction for performance monitoring
- * @param name Transaction name
+ * Start a span for performance monitoring
+ * Note: This wraps Sentry's startSpan API for simplified usage
+ * @param name Span name
  * @param operation Operation type
  * @param data Additional data
+ * @returns The span object that can be used to track the operation
  */
 export function startTransaction(
   name: string,
@@ -288,8 +290,11 @@ export function startTransaction(
 
 /**
  * Wrap an async function with error tracking
+ * Note: Generic constraints use `any` to allow wrapping of any async function signature.
+ * This is intentional as we want to preserve the exact function signature while adding error tracking.
  * @param fn Function to wrap
  * @param context Error context
+ * @returns Wrapped function with the same signature
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withErrorTracking<T extends (...args: any[]) => Promise<any>>(
@@ -315,16 +320,18 @@ export function getCurrentEventId(): string | undefined {
 
 /**
  * Show user feedback dialog
- * @param eventId Event ID to attach feedback to
+ * Note: This function uses type assertions because Sentry's feedback integration
+ * is not yet fully typed in the TypeScript definitions. The feedback integration
+ * is a runtime-loaded plugin that may or may not be present.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function showFeedbackDialog(eventId?: string): void {
+export function showFeedbackDialog(): void {
   if (typeof window === 'undefined') return;
 
   const client = Sentry.getClient();
   if (!client) return;
 
   // Use the Sentry feedback integration if available
+  // Type assertions are necessary as feedbackIntegration is not in the main type definitions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const feedback = client.getIntegration(Sentry.feedbackIntegration as any);
   if (feedback && 'showDialog' in feedback) {
