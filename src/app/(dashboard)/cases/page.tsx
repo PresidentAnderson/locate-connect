@@ -167,7 +167,6 @@ export default function CasesDashboard() {
           pushEnabled: true,
           defaultFrequency: "immediate"
         }}
-        onSave={(prefs) => console.log("Preferences saved:", prefs)}
       />
     </div>
   );

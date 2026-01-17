@@ -4,14 +4,16 @@ import { cn } from "@/lib";
 import { useState } from "react";
 import type { NotificationChannel, NotificationFrequency } from "@/types";
 
+export interface NotificationPreferenceValues {
+  emailEnabled: boolean;
+  smsEnabled: boolean;
+  pushEnabled: boolean;
+  defaultFrequency: NotificationFrequency;
+}
+
 export interface NotificationPreferencesProps {
-  initialPreferences?: {
-    emailEnabled: boolean;
-    smsEnabled: boolean;
-    pushEnabled: boolean;
-    defaultFrequency: NotificationFrequency;
-  };
-  onSave?: (preferences: Record<string, unknown>) => void;
+  initialPreferences?: NotificationPreferenceValues;
+  onSave?: (preferences: NotificationPreferenceValues) => void;
   className?: string;
 }
 
@@ -99,46 +101,9 @@ export function NotificationPreferences({
             <option value="daily_digest">Daily Digest</option>
             <option value="weekly_digest">Weekly Digest</option>
           </select>
-        </div>
-
-        {/* Notification Types */}
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            Notify me about
+          <p className="mt-1 text-xs text-gray-500">
+            Control when you receive notifications about case updates, leads, and timeline events
           </p>
-          <div className="space-y-2">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                defaultChecked
-                className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-              />
-              <span className="text-sm text-gray-700">Case status updates</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                defaultChecked
-                className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-              />
-              <span className="text-sm text-gray-700">New leads and tips</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                defaultChecked
-                className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-              />
-              <span className="text-sm text-gray-700">Timeline events</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-              />
-              <span className="text-sm text-gray-700">System announcements</span>
-            </label>
-          </div>
         </div>
 
         {/* Save Button */}

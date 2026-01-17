@@ -1,5 +1,5 @@
 export { CaseCard } from "./CaseCard";
-export type { CaseCardProps } from "./CaseCard";
+export type { CaseCardProps, PriorityLevel } from "./CaseCard";
 
 export { LeadItem } from "./LeadItem";
 export type { LeadItemProps } from "./LeadItem";
@@ -11,9 +11,9 @@ export { ResourceGrid } from "./ResourceGrid";
 export type { ResourceGridProps, Resource } from "./ResourceGrid";
 
 export { NotificationPreferences } from "./NotificationPreferences";
-export type { NotificationPreferencesProps } from "./NotificationPreferences";
+export type { NotificationPreferencesProps, NotificationPreferenceValues } from "./NotificationPreferences";
 
-export { CaseEvidencePanel } from "./CaseEvidencePanel";
-export { CaseResolutionPanel } from "./CaseResolutionPanel";
-export { CaseResourcesPanel } from "./CaseResourcesPanel";
-export { CaseWeatherPanel } from "./CaseWeatherPanel";
+export { default as CaseEvidencePanel } from "./CaseEvidencePanel";
+export { default as CaseResolutionPanel } from "./CaseResolutionPanel";
+export { default as CaseResourcesPanel } from "./CaseResourcesPanel";
+export { default as CaseWeatherPanel } from "./CaseWeatherPanel";
