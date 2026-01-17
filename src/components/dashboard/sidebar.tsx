@@ -35,6 +35,12 @@ const tipVerificationNavigation = [
   { key: "nav.tipVerification", href: "/tip-verification", icon: CheckBadgeIcon },
 ];
 
+const coldCaseNavigation = [
+  { key: "nav.coldCases", href: "/cold-cases", icon: SnowflakeIcon },
+  { key: "nav.coldCaseReviews", href: "/cold-cases?activeTab=reviews", icon: ClipboardCheckIcon },
+  { key: "nav.coldCaseCampaigns", href: "/cold-cases?activeTab=campaigns", icon: MegaphoneIcon },
+];
+
 const archiveNavigation = [
   { key: "nav.caseArchive", href: "/archive", icon: ArchiveBoxIcon },
   { key: "nav.caseStudies", href: "/archive/case-studies", icon: BookOpenIcon },
@@ -189,6 +195,27 @@ export function Sidebar() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.coldCases")}
+          </p>
+          {coldCaseNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith("/cold-cases")
                   ? "bg-cyan-50 text-cyan-700"
                   : "text-gray-700 hover:bg-gray-100"
               )}

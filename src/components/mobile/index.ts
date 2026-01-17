@@ -3,6 +3,9 @@
  * LC-FEAT-031: Mobile App Companion
  */
 
+// PWA Provider and utilities
+export { PWAProvider, usePWA, PWAInstallBanner, SWUpdateBanner, OfflineIndicator } from "./PWAProvider";
+
 // Camera and media capture
 export { CameraCapture } from "./CameraCapture";
 export type { CapturedMedia } from "./CameraCapture";

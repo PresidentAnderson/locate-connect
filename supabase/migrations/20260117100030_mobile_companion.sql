@@ -2,6 +2,9 @@
 -- LC-FEAT-031: PWA, Push Notifications, Offline Sync, WebAuthn
 -- Created: 2026-01-17
 
+-- Enable PostGIS for geospatial fields
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- ============================================
 -- Push Notification Subscriptions
 -- ============================================

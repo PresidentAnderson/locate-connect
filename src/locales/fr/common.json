@@ -43,6 +43,7 @@
   "sections": {
     "cases": "Dossiers",
     "lawEnforcement": "Forces de l'ordre",
+    "facialRecognition": "Reconnaissance faciale",
     "tipVerification": "Vérification des signalements",
     "analyticsReports": "Analytique & rapports",
     "indigenousLiaison": "Liaison autochtone",
