@@ -519,7 +519,7 @@ export default function NewCasePage() {
             {t("header.subtitle")}
           </p>
           {draftSaved && (
-            <p className="mt-1 text-xs text-green-600">
+            <p className="mt-1 text-xs text-green-600" role="status" aria-live="polite">
               ✓ {t("navigation.draftSaved")}
             </p>
           )}

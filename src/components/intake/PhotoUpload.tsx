@@ -3,6 +3,9 @@
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+// Maximum file size for photo uploads (10MB)
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
 interface PhotoUploadProps {
   onUploadComplete: (photoUrl: string) => void;
   currentPhotoUrl?: string;
@@ -34,8 +37,8 @@ export function PhotoUpload({
   const handleFileSelect = async (file: File) => {
     setUploadError(null);
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
       setUploadError("File size exceeds 10MB");
       return;
     }
