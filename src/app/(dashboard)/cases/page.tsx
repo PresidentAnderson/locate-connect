@@ -1,7 +1,57 @@
-import { cn } from "@/lib";
 import Link from "next/link";
+import { 
+  CaseCard, 
+  LeadItem, 
+  TimelineView, 
+  ResourceGrid,
+  NotificationPreferences 
+} from "@/components/cases";
+import type { TimelineEvent, Resource } from "@/components/cases";
 
 export default function CasesDashboard() {
+  // Mock data for demonstration
+  const timelineEvents: TimelineEvent[] = [
+    {
+      id: "1",
+      date: "Jan 17, 2024",
+      time: "10:32 AM",
+      event: "Email tracking triggered",
+      icon: "📧",
+      type: "lead"
+    },
+    {
+      id: "2",
+      date: "Jan 16, 2024",
+      time: "3:45 PM",
+      event: "Hospital check completed - No matches",
+      icon: "🏥",
+      type: "action"
+    },
+    {
+      id: "3",
+      date: "Jan 16, 2024",
+      time: "11:20 AM",
+      event: "Case escalated to Priority 0",
+      icon: "🚨",
+      type: "escalation"
+    },
+    {
+      id: "4",
+      date: "Jan 15, 2024",
+      time: "8:00 PM",
+      event: "Case reported",
+      icon: "📋",
+      type: "update"
+    }
+  ];
+
+  const resources: Resource[] = [
+    { id: "1", icon: "🏥", title: "Hospitals", count: 12, status: "Checked 6 hours ago", type: "hospital" },
+    { id: "2", icon: "🏛️", title: "Shelters", count: 8, status: "Not yet checked", type: "shelter" },
+    { id: "3", icon: "👮", title: "Police Stations", count: 4, status: "Report filed", type: "police" },
+    { id: "4", icon: "🚇", title: "Transit Hubs", count: 6, status: "Monitoring", type: "transit" }
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -41,48 +91,22 @@ export default function CasesDashboard() {
       </div>
 
       {/* Active Case Card */}
-      <div className="rounded-xl border-2 border-cyan-200 bg-cyan-50 p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="h-20 w-20 rounded-lg bg-gray-300" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-gray-900">Jamel D.</h2>
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
-                  PRIORITY 0
-                </span>
-              </div>
-              <p className="text-sm text-gray-600">Case #LC-2024-0089</p>
-              <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-                <span>Age: 34</span>
-                <span>•</span>
-                <span>Last seen: Montreal, QC</span>
-                <span>•</span>
-                <span className="font-medium text-red-600">Missing 48+ hours</span>
-              </div>
-            </div>
-          </div>
-          <Link
-            href="/cases/LC-2024-0089"
-            className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
-          >
-            View Details
-          </Link>
-        </div>
-
-        {/* Risk Factors */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-            Medical Dependency (HIV medication)
-          </span>
-          <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700">
-            Mental Health Condition
-          </span>
-          <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-            No Financial Resources
-          </span>
-        </div>
-      </div>
+      <CaseCard
+        id="LC-2024-0089"
+        caseNumber="LC-2024-0089"
+        firstName="Jamel"
+        lastName="D."
+        priorityLevel="p0_critical"
+        status="active"
+        age={34}
+        lastSeenLocation="Montreal, QC"
+        lastSeenDate="2024-01-15T20:00:00Z"
+        riskFactors={[
+          "Medical Dependency (HIV medication)",
+          "Mental Health Condition",
+          "No Financial Resources"
+        ]}
+      />
 
       {/* Recent Activity & Leads */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -120,31 +144,8 @@ export default function CasesDashboard() {
         {/* Timeline */}
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <h3 className="text-lg font-semibold text-gray-900">Case Timeline</h3>
-          <div className="mt-4 space-y-4">
-            <TimelineItem
-              date="Jan 17, 2024"
-              time="10:32 AM"
-              event="Email tracking triggered"
-              icon="📧"
-            />
-            <TimelineItem
-              date="Jan 16, 2024"
-              time="3:45 PM"
-              event="Hospital check completed - No matches"
-              icon="🏥"
-            />
-            <TimelineItem
-              date="Jan 16, 2024"
-              time="11:20 AM"
-              event="Case escalated to Priority 0"
-              icon="🚨"
-            />
-            <TimelineItem
-              date="Jan 15, 2024"
-              time="8:00 PM"
-              event="Case reported"
-              icon="📋"
-            />
+          <div className="mt-4">
+            <TimelineView events={timelineEvents} />
           </div>
         </div>
       </div>
@@ -152,133 +153,23 @@ export default function CasesDashboard() {
       {/* Nearby Resources */}
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h3 className="text-lg font-semibold text-gray-900">Nearby Resources</h3>
-        <p className="text-sm text-gray-500">Based on last known location: Montreal, QC</p>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <ResourceCard
-            icon="🏥"
-            title="Hospitals"
-            count={12}
-            status="Checked 6 hours ago"
-          />
-          <ResourceCard
-            icon="🏛️"
-            title="Shelters"
-            count={8}
-            status="Not yet checked"
-          />
-          <ResourceCard
-            icon="👮"
-            title="Police Stations"
-            count={4}
-            status="Report filed"
-          />
-          <ResourceCard
-            icon="🚇"
-            title="Transit Hubs"
-            count={6}
-            status="Monitoring"
-          />
-        </div>
+        <ResourceGrid 
+          resources={resources} 
+          location="Montreal, QC"
+        />
       </div>
-    </div>
-  );
-}
 
-function LeadItem({
-  type,
-  title,
-  description,
-  time,
-  status,
-}: {
-  type: "email" | "social" | "witness" | "location";
-  title: string;
-  description: string;
-  time: string;
-  status: "new" | "investigating" | "verified" | "dismissed";
-}) {
-  const statusConfig = {
-    new: { bg: "bg-blue-100", text: "text-blue-700", label: "New" },
-    investigating: { bg: "bg-yellow-100", text: "text-yellow-700", label: "Investigating" },
-    verified: { bg: "bg-green-100", text: "text-green-700", label: "Verified" },
-    dismissed: { bg: "bg-gray-100", text: "text-gray-700", label: "Dismissed" },
-  };
-
-  const icons = {
-    email: "📧",
-    social: "📱",
-    witness: "👁️",
-    location: "📍",
-  };
-
-  const config = statusConfig[status];
-
-  return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <div className="flex items-start gap-3">
-        <span className="text-xl">{icons[type]}</span>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium text-gray-900">{title}</h4>
-            <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", config.bg, config.text)}>
-              {config.label}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-gray-600">{description}</p>
-          <p className="mt-1 text-xs text-gray-400">{time}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TimelineItem({
-  date,
-  time,
-  event,
-  icon,
-}: {
-  date: string;
-  time: string;
-  event: string;
-  icon: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
-        <span>{icon}</span>
-      </div>
-      <div>
-        <p className="text-sm font-medium text-gray-900">{event}</p>
-        <p className="text-xs text-gray-500">
-          {date} at {time}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ResourceCard({
-  icon,
-  title,
-  count,
-  status,
-}: {
-  icon: string;
-  title: string;
-  count: number;
-  status: string;
-}) {
-  return (
-    <div className="rounded-lg border border-gray-200 p-4">
-      <div className="flex items-center gap-3">
-        <span className="text-2xl">{icon}</span>
-        <div>
-          <p className="font-medium text-gray-900">{title}</p>
-          <p className="text-sm text-gray-500">{count} nearby</p>
-        </div>
-      </div>
-      <p className="mt-2 text-xs text-gray-400">{status}</p>
+      {/* Notification Preferences */}
+      <NotificationPreferences
+        userId="demo-user"
+        initialPreferences={{
+          emailEnabled: true,
+          smsEnabled: false,
+          pushEnabled: true,
+          defaultFrequency: "immediate"
+        }}
+        onSave={(prefs) => console.log("Preferences saved:", prefs)}
+      />
     </div>
   );
 }
