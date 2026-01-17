@@ -5,6 +5,10 @@ import type {
   CaseResolutionType,
   RetentionStatus,
 } from "@/types";
+import {
+  POSITIVE_RESOLUTION_TYPES,
+  SENSITIVE_RESOLUTION_TYPES,
+} from "@/types/case-resolution.types";
 
 interface RouteParams {
   params: Promise<{ caseId: string }>;
@@ -68,6 +72,33 @@ async function getUserRole(
 
 function isLawEnforcement(role: string | null) {
   return role === "law_enforcement" || role === "admin";
+}
+
+/** Map resolution type to appropriate case status */
+function getResolutionCaseStatus(resolutionType: CaseResolutionType | null): string {
+  if (!resolutionType) return "closed";
+
+  // Positive outcomes
+  if (POSITIVE_RESOLUTION_TYPES.includes(resolutionType)) {
+    return "resolved";
+  }
+
+  // Sensitive outcomes
+  if (SENSITIVE_RESOLUTION_TYPES.includes(resolutionType)) {
+    if (resolutionType === "found_deceased") {
+      return "resolved_deceased";
+    }
+    if (resolutionType === "false_report") {
+      return "false_report";
+    }
+  }
+
+  // Other closures
+  if (resolutionType === "closed_insufficient_info") {
+    return "archived";
+  }
+
+  return "closed";
 }
 
 function mapResolution(row: Record<string, unknown> | null) {
@@ -327,6 +358,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   if (body.action === "close") {
+    const resolutionType = resolution.resolution_type as CaseResolutionType | null;
+    const isPositive = resolutionType && POSITIVE_RESOLUTION_TYPES.includes(resolutionType);
+    const isSensitive = resolutionType && SENSITIVE_RESOLUTION_TYPES.includes(resolutionType);
+
     events.push({
       case_id: resolvedCaseId,
       resolution_id: resolution.id as string,
@@ -334,6 +369,42 @@ export async function POST(request: Request, { params }: RouteParams) {
       actor_id: user.id,
       metadata: {
         resolutionType: resolution.resolution_type,
+        outcomeCategory: isPositive ? "positive" : isSensitive ? "sensitive" : "neutral",
+        successStoryConsent: resolution.success_story_consent,
+      },
+    });
+
+    // Log statistics compilation event
+    events.push({
+      case_id: resolvedCaseId,
+      resolution_id: resolution.id as string,
+      event_type: "statistics_compiled",
+      actor_id: user.id,
+      metadata: {
+        resolutionType: resolution.resolution_type,
+        closedAt: now,
+      },
+    });
+
+    // Log resource deactivation event
+    events.push({
+      case_id: resolvedCaseId,
+      resolution_id: resolution.id as string,
+      event_type: "resources_deactivated",
+      actor_id: user.id,
+      metadata: {
+        deactivatedAt: now,
+      },
+    });
+
+    // Log lead archival event
+    events.push({
+      case_id: resolvedCaseId,
+      resolution_id: resolution.id as string,
+      event_type: "leads_archived",
+      actor_id: user.id,
+      metadata: {
+        archivedAt: now,
       },
     });
   }
@@ -352,6 +423,20 @@ export async function POST(request: Request, { params }: RouteParams) {
     });
   }
 
+  // Log success story consent if provided
+  if (body.action === "close" && body.successStoryConsent) {
+    events.push({
+      case_id: resolvedCaseId,
+      resolution_id: resolution.id as string,
+      event_type: "success_story_consent_given",
+      actor_id: user.id,
+      metadata: {
+        notes: body.successStoryNotes ?? null,
+        consentedAt: now,
+      },
+    });
+  }
+
   if (events.length > 0) {
     const { error: eventError } = await supabase
       .from("case_resolution_events")
@@ -366,10 +451,13 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   if (body.action === "close") {
+    const resolutionType = resolution.resolution_type as CaseResolutionType | null;
+    const caseStatus = getResolutionCaseStatus(resolutionType);
+
     const { error: caseUpdateError } = await supabase
       .from("cases")
       .update({
-        status: "closed",
+        status: caseStatus,
         resolution_date: now,
         is_locked: true,
         locked_at: now,
