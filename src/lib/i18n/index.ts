@@ -216,7 +216,7 @@ export function getMessages(locale: Locale): Record<string, unknown> {
   (Object.keys(base) as Namespace[]).forEach((namespace) => {
     let namespaceMessages: Record<string, unknown> = {};
     localesToMerge.forEach((code) => {
-      const messages = MESSAGES[code]?.[namespace];
+      const messages = MESSAGES[code as Locale]?.[namespace];
       if (messages) {
         namespaceMessages = deepMerge(namespaceMessages, messages);
       }
