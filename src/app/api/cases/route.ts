@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendCaseConfirmationEmail } from "@/lib/services/email-service";
 
 interface CasePayload {
   reporterFirstName?: string;
@@ -135,6 +136,26 @@ export async function POST(request: Request) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Send confirmation email (non-blocking, log errors but don't fail the request)
+  if (body.reporterEmail && data.case_number) {
+    try {
+      const reporterName = `${body.reporterFirstName || ''} ${body.reporterLastName || ''}`.trim();
+      const missingPersonName = `${body.firstName} ${body.lastName}`;
+      
+      await sendCaseConfirmationEmail({
+        reporterEmail: body.reporterEmail,
+        reporterName: reporterName || 'Reporter',
+        caseNumber: data.case_number,
+        missingPersonName,
+        lastSeenDate: body.lastSeenDate || '',
+        locale: 'en', // Could be extracted from request headers or user preferences
+      });
+    } catch (emailError) {
+      // Log email error but don't fail the case creation
+      console.error('Failed to send confirmation email:', emailError);
+    }
   }
 
   return NextResponse.json({ data }, { status: 201 });

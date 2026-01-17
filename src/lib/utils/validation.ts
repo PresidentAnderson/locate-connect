@@ -159,6 +159,52 @@ export function validateMissingPersonForm(data: {
 }
 
 /**
+ * Validate list of emails
+ */
+export function validateEmailList(emailsText: string): ValidationResult {
+  if (!emailsText || emailsText.trim().length === 0) {
+    return { isValid: true }; // Optional field
+  }
+  
+  const emails = emailsText
+    .split(/[\n,]+/)
+    .map((email) => email.trim())
+    .filter(Boolean);
+  
+  for (const email of emails) {
+    const result = validateEmail(email);
+    if (!result.isValid) {
+      return { isValid: false, error: `Invalid email: ${email}` };
+    }
+  }
+  
+  return { isValid: true };
+}
+
+/**
+ * Validate list of phone numbers
+ */
+export function validatePhoneList(phonesText: string): ValidationResult {
+  if (!phonesText || phonesText.trim().length === 0) {
+    return { isValid: true }; // Optional field
+  }
+  
+  const phones = phonesText
+    .split(/[\n,]+/)
+    .map((phone) => phone.trim())
+    .filter(Boolean);
+  
+  for (const phone of phones) {
+    const result = validatePhone(phone);
+    if (!result.isValid) {
+      return { isValid: false, error: `Invalid phone: ${phone}` };
+    }
+  }
+  
+  return { isValid: true };
+}
+
+/**
  * Validate circumstances form
  */
 export interface CircumstancesValidation extends Record<string, ValidationResult> {
