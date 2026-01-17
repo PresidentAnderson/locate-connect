@@ -77,15 +77,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const body = (await request.json()) as UpdateLeadInput & {
       action?: "assign" | "verify";
-      assignedTo?: string;
+      assignToUserId?: string;
     };
 
     // Handle special actions
-    if (body.action === "assign" && body.assignedTo) {
+    if (body.action === "assign" && body.assignToUserId) {
       const { data, error } = await assignLead(
         supabase,
         id,
-        body.assignedTo
+        body.assignToUserId
       );
       if (error) {
         return NextResponse.json({ error }, { status: 500 });
@@ -101,8 +101,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ data });
     }
 
-    // Remove action from body before updating
-    const { action, ...updateData } = body;
+    // Remove action fields from body before updating
+    const { action, assignToUserId, ...updateData } = body;
 
     const { data, error } = await updateLead(supabase, id, updateData);
 

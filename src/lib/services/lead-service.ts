@@ -190,8 +190,8 @@ export async function getLeadWithDetails(
       .select(
         `
         *,
-        assigned_to_profile:profiles!leads_assigned_to_fkey(id, first_name, last_name, email),
-        verified_by_profile:profiles!leads_verified_by_fkey(id, first_name, last_name, email)
+        assigned_to_profile:profiles!assigned_to(id, first_name, last_name, email),
+        verified_by_profile:profiles!verified_by(id, first_name, last_name, email)
       `
       )
       .eq("id", leadId)
@@ -520,6 +520,25 @@ export async function verifyLead(
   userId: string
 ): Promise<{ data: Lead | null; error: string | null }> {
   try {
+    // Get current lead to validate status transition
+    const { data: currentLead, error: fetchError } = await getLeadById(
+      supabase,
+      leadId
+    );
+
+    if (fetchError || !currentLead) {
+      return { data: null, error: fetchError || "Lead not found" };
+    }
+
+    // Validate status transition to verified
+    const validation = validateStatusTransition(
+      currentLead.status,
+      "verified"
+    );
+    if (!validation.valid) {
+      return { data: null, error: validation.error || "Invalid transition" };
+    }
+
     const { data, error } = await supabase
       .from("leads")
       .update({
