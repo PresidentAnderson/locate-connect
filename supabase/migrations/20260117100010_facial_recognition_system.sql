@@ -962,9 +962,19 @@ CREATE TRIGGER update_age_progression_updated_at
   BEFORE UPDATE ON age_progression_requests
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_consent_records_updated_at
-  BEFORE UPDATE ON consent_records
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgname = 'update_consent_records_updated_at'
+  ) THEN
+    CREATE TRIGGER update_consent_records_updated_at
+      BEFORE UPDATE ON consent_records
+      FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END;
+$$;
 
 CREATE TRIGGER update_partner_databases_updated_at
   BEFORE UPDATE ON partner_databases

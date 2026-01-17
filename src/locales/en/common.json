@@ -33,11 +33,17 @@
     "tipVerification": "Tip Verification",
     "familySupport": "Family Support",
     "supportResources": "Support Resources",
-    "peerSupport": "Peer Support"
+    "peerSupport": "Peer Support",
+    "facialRecognition": "Facial Recognition",
+    "photoUpload": "Photo Upload",
+    "matchReview": "Match Review",
+    "frConsent": "Consent Manager",
+    "frAuditLogs": "Audit Logs"
   },
   "sections": {
     "cases": "Cases",
     "lawEnforcement": "Law Enforcement",
+    "facialRecognition": "Facial Recognition",
     "tipVerification": "Tip Verification",
     "analyticsReports": "Analytics & Reports",
     "indigenousLiaison": "Indigenous Liaison",

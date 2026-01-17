@@ -33,7 +33,12 @@
     "tipVerification": "Vérification des signalements",
     "familySupport": "Soutien aux familles",
     "supportResources": "Ressources de soutien",
-    "peerSupport": "Soutien par les pairs"
+    "peerSupport": "Soutien par les pairs",
+    "facialRecognition": "Reconnaissance faciale",
+    "photoUpload": "Téléversement de photos",
+    "matchReview": "Révision des correspondances",
+    "frConsent": "Gestionnaire de consentement",
+    "frAuditLogs": "Journaux d'audit"
   },
   "sections": {
     "cases": "Dossiers",
@@ -42,6 +47,7 @@
     "analyticsReports": "Analytique & rapports",
     "indigenousLiaison": "Liaison autochtone",
     "archiveResearch": "Archives & recherche",
+    "familySupport": "Soutien aux familles",
     "developers": "Développeurs",
     "administration": "Administration"
   },
