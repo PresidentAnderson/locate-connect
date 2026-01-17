@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "activeCases": "Dossiers actifs",
+    "newReport": "Nouveau signalement",
+    "leads": "Pistes",
+    "executiveDashboard": "Tableau de bord exécutif",
+    "operationsDashboard": "Tableau de bord opérations",
+    "stakeholderReports": "Rapports parties prenantes",
+    "leDashboard": "Tableau de bord LE",
+    "liveFeed": "Fil en direct",
+    "priorityCases": "Dossiers prioritaires",
+    "caseArchive": "Archive des dossiers",
+    "caseStudies": "Études de cas",
+    "statistics": "Statistiques",
+    "researchPortal": "Portail de recherche",
+    "requestAccess": "Demander l'accès",
+    "partnerships": "Partenariats",
+    "dataExports": "Exports de données",
+    "indigenousLiaison": "Liaison autochtone",
+    "organizations": "Organisations",
+    "communities": "Communautés",
+    "mmiwgCases": "Cas FFADA",
+    "liaisonContacts": "Contacts liaison",
+    "resources": "Ressources",
+    "adminPanel": "Panneau admin",
+    "users": "Utilisateurs",
+    "systemLogs": "Journaux système",
+    "apiKeys": "Clés API"
+  },
+  "sections": {
+    "cases": "Dossiers",
+    "lawEnforcement": "Forces de l'ordre",
+    "analyticsReports": "Analytique & rapports",
+    "indigenousLiaison": "Liaison autochtone",
+    "archiveResearch": "Archives & recherche",
+    "administration": "Administration"
+  },
+  "header": {
+    "searchLabel": "Rechercher des dossiers",
+    "searchPlaceholder": "Rechercher des dossiers, noms, lieux...",
+    "notifications": "Voir les notifications",
+    "live": "En direct"
+  },
+  "language": {
+    "label": "Langue",
+    "translationNotice": "Les traductions pour cette langue sont en cours. L'anglais sera affiché pour les éléments manquants."
+  }
+}

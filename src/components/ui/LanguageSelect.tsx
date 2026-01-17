@@ -458,6 +458,9 @@ interface InterpreterRequestProps {
   onNeedsInterpreterChange: (value: boolean) => void;
   interpreterLanguage?: string;
   onInterpreterLanguageChange?: (value: string) => void;
+  label?: string;
+  interpreterLabel?: string;
+  interpreterPlaceholder?: string;
   className?: string;
 }
 
@@ -466,6 +469,9 @@ export function InterpreterRequest({
   onNeedsInterpreterChange,
   interpreterLanguage,
   onInterpreterLanguageChange,
+  label,
+  interpreterLabel,
+  interpreterPlaceholder,
   className = "",
 }: InterpreterRequestProps) {
   return (
@@ -482,7 +488,7 @@ export function InterpreterRequest({
           htmlFor="needs-interpreter"
           className="text-sm font-medium text-gray-700"
         >
-          Interpreter assistance needed
+          {label ?? "Interpreter assistance needed"}
         </label>
       </div>
 
@@ -493,8 +499,8 @@ export function InterpreterRequest({
             onChange={onInterpreterLanguageChange}
             includeOfficial={true}
             includeIndigenous={true}
-            placeholder="Select interpreter language"
-            label="Interpreter language"
+            placeholder={interpreterPlaceholder ?? "Select interpreter language"}
+            label={interpreterLabel ?? "Interpreter language"}
           />
         </div>
       )}

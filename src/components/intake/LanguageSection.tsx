@@ -5,6 +5,7 @@ import {
   InterpreterRequest,
   LanguageBadge,
 } from "@/components/ui/LanguageSelect";
+import { useTranslations } from "@/hooks/useTranslations";
 
 interface ReporterLanguageData {
   reporter_languages: string[];
@@ -50,31 +51,32 @@ export function IntakeLanguageSection({
   subjectCanCommunicateOfficial,
   onSubjectCanCommunicateOfficialChange,
 }: IntakeLanguageSectionProps) {
+  const t = useTranslations("intake");
+
   return (
     <div className="space-y-8">
       {/* Reporter Language Information */}
       <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Your Language Information
+          {t("languageSection.reporterTitle")}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          This helps us communicate with you effectively and connect you with
-          appropriate support services.
+          {t("languageSection.reporterDescription")}
         </p>
 
         <div className="space-y-4">
           <LanguageMultiSelect
             value={reporterLanguages}
             onChange={onReporterLanguagesChange}
-            label="Languages you speak"
-            placeholder="Select all languages you can communicate in"
+            label={t("languageSection.reporterLanguagesLabel")}
+            placeholder={t("languageSection.reporterLanguagesPlaceholder")}
             maxSelections={5}
           />
 
           {reporterLanguages.length > 1 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Preferred contact language
+                {t("languageSection.reporterPreferredLabel")}
               </label>
               <div className="flex flex-wrap gap-2">
                 {reporterLanguages.map((code) => (
@@ -100,6 +102,9 @@ export function IntakeLanguageSection({
             onNeedsInterpreterChange={onReporterNeedsInterpreterChange}
             interpreterLanguage={reporterPreferredLanguage}
             onInterpreterLanguageChange={onReporterPreferredLanguageChange}
+            label={t("languageSection.interpreterNeeded")}
+            interpreterLabel={t("languageSection.interpreterLanguage")}
+            interpreterPlaceholder={t("languageSection.interpreterLanguage")}
           />
         </div>
       </div>
@@ -107,33 +112,30 @@ export function IntakeLanguageSection({
       {/* Missing Person Language Information */}
       <div className="bg-amber-50 rounded-lg p-6 border border-amber-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Missing Person&apos;s Language Information
+          {t("languageSection.subjectTitle")}
         </h3>
         <p className="text-sm text-gray-600 mb-4">
-          Understanding what languages the missing person speaks helps with
-          community outreach and communication if they are found.
+          {t("languageSection.subjectDescription")}
         </p>
 
         <div className="space-y-4">
           <LanguageMultiSelect
             value={subjectPrimaryLanguages}
             onChange={onSubjectPrimaryLanguagesChange}
-            label="Primary languages spoken by the missing person"
-            placeholder="Select languages the missing person speaks"
+            label={t("languageSection.subjectPrimaryLabel")}
+            placeholder={t("languageSection.subjectPrimaryPlaceholder")}
             maxSelections={5}
           />
 
           <LanguageMultiSelect
             value={subjectRespondsToLanguages}
             onChange={onSubjectRespondsToLanguagesChange}
-            label="Languages they may respond to"
-            placeholder="Select languages they might respond to if approached"
+            label={t("languageSection.subjectRespondsLabel")}
+            placeholder={t("languageSection.subjectRespondsPlaceholder")}
             maxSelections={5}
           />
           <p className="text-xs text-gray-500">
-            This is helpful for search teams and community outreach. Include
-            languages they understand even if they don&apos;t speak them
-            fluently.
+            {t("languageSection.subjectRespondsHelp")}
           </p>
 
           <div className="flex items-center gap-2 pt-2">
@@ -150,12 +152,11 @@ export function IntakeLanguageSection({
               htmlFor="can-communicate-official"
               className="text-sm text-gray-700"
             >
-              Can communicate in English or French
+              {t("languageSection.subjectOfficialLabel")}
             </label>
           </div>
           <p className="text-xs text-gray-500 ml-6">
-            This helps determine if language-specific outreach or translators
-            may be needed during the search.
+            {t("languageSection.subjectOfficialHelp")}
           </p>
         </div>
       </div>
@@ -164,12 +165,14 @@ export function IntakeLanguageSection({
       {(reporterLanguages.length > 0 || subjectPrimaryLanguages.length > 0) && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <h4 className="text-sm font-medium text-gray-700 mb-3">
-            Language Summary
+            {t("languageSection.summaryTitle")}
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             {reporterLanguages.length > 0 && (
               <div>
-                <span className="text-gray-500">Your languages: </span>
+                <span className="text-gray-500">
+                  {t("languageSection.reporterSummaryLabel")}{" "}
+                </span>
                 <span className="flex flex-wrap gap-1 mt-1">
                   {reporterLanguages.map((code) => (
                     <LanguageBadge key={code} code={code} size="sm" />
@@ -180,7 +183,7 @@ export function IntakeLanguageSection({
             {subjectPrimaryLanguages.length > 0 && (
               <div>
                 <span className="text-gray-500">
-                  Missing person&apos;s languages:{" "}
+                  {t("languageSection.subjectSummaryLabel")}{" "}
                 </span>
                 <span className="flex flex-wrap gap-1 mt-1">
                   {subjectPrimaryLanguages.map((code) => (

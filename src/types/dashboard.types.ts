@@ -459,7 +459,7 @@ export interface OperationsDashboardData {
 // =============================================================================
 
 export interface ReportGenerationRequest {
-  reportType: 'executive_summary' | 'operations' | 'case_metrics' | 'partner_engagement' | 'sla_compliance' | 'custom';
+  reportType: 'executive_summary' | 'operations' | 'case_metrics' | 'partner_engagement' | 'sla_compliance' | 'staff_productivity' | 'geographic_analysis' | 'comprehensive' | 'custom';
   dateFrom: string;
   dateTo: string;
   format: ReportFormat;

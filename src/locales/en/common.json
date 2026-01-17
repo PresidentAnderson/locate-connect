@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "activeCases": "Active Cases",
+    "newReport": "New Report",
+    "leads": "Leads",
+    "executiveDashboard": "Executive Dashboard",
+    "operationsDashboard": "Operations Dashboard",
+    "stakeholderReports": "Stakeholder Reports",
+    "leDashboard": "LE Dashboard",
+    "liveFeed": "Live Feed",
+    "priorityCases": "Priority Cases",
+    "caseArchive": "Case Archive",
+    "caseStudies": "Case Studies",
+    "statistics": "Statistics",
+    "researchPortal": "Research Portal",
+    "requestAccess": "Request Access",
+    "partnerships": "Partnerships",
+    "dataExports": "Data Exports",
+    "indigenousLiaison": "Indigenous Liaison",
+    "organizations": "Organizations",
+    "communities": "Communities",
+    "mmiwgCases": "MMIWG Cases",
+    "liaisonContacts": "Liaison Contacts",
+    "resources": "Resources",
+    "adminPanel": "Admin Panel",
+    "users": "Users",
+    "systemLogs": "System Logs",
+    "apiKeys": "API Keys"
+  },
+  "sections": {
+    "cases": "Cases",
+    "lawEnforcement": "Law Enforcement",
+    "analyticsReports": "Analytics & Reports",
+    "indigenousLiaison": "Indigenous Liaison",
+    "archiveResearch": "Archive & Research",
+    "administration": "Administration"
+  },
+  "header": {
+    "searchLabel": "Search cases",
+    "searchPlaceholder": "Search cases, names, locations...",
+    "notifications": "View notifications",
+    "live": "Live"
+  },
+  "language": {
+    "label": "Language",
+    "translationNotice": "Translations for this language are in progress. English will be shown for missing items."
+  }
+}

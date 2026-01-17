@@ -3,29 +3,59 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib";
+import { useTranslations } from "@/hooks/useTranslations";
 
 const navigation = [
-  { name: "Dashboard", href: "/cases", icon: HomeIcon },
-  { name: "Active Cases", href: "/cases/active", icon: FolderIcon },
-  { name: "New Report", href: "/cases/new", icon: PlusIcon },
-  { name: "Leads", href: "/leads", icon: SearchIcon },
+  { key: "nav.dashboard", href: "/cases", icon: HomeIcon },
+  { key: "nav.activeCases", href: "/cases/active", icon: FolderIcon },
+  { key: "nav.newReport", href: "/cases/new", icon: PlusIcon },
+  { key: "nav.leads", href: "/leads", icon: SearchIcon },
+];
+
+const dashboardNavigation = [
+  { key: "nav.executiveDashboard", href: "/dashboards/executive", icon: ChartBarIcon },
+  { key: "nav.operationsDashboard", href: "/dashboards/operations", icon: ClipboardIcon },
+  { key: "nav.stakeholderReports", href: "/dashboards/reports", icon: DocumentChartIcon },
 ];
 
 const adminNavigation = [
-  { name: "Admin Panel", href: "/admin", icon: CogIcon },
-  { name: "Users", href: "/admin/users", icon: UsersIcon },
-  { name: "System Logs", href: "/admin/logs", icon: DocumentIcon },
-  { name: "API Keys", href: "/admin/api", icon: KeyIcon },
+  { key: "nav.adminPanel", href: "/admin", icon: CogIcon },
+  { key: "nav.users", href: "/admin/users", icon: UsersIcon },
+  { key: "nav.systemLogs", href: "/admin/logs", icon: DocumentIcon },
+  { key: "nav.apiKeys", href: "/admin/api", icon: KeyIcon },
 ];
 
 const lawEnforcementNavigation = [
-  { name: "LE Dashboard", href: "/law-enforcement", icon: ShieldIcon },
-  { name: "Live Feed", href: "/law-enforcement/live", icon: BoltIcon },
-  { name: "Priority Cases", href: "/law-enforcement/priority", icon: ExclamationIcon },
+  { key: "nav.leDashboard", href: "/law-enforcement", icon: ShieldIcon },
+  { key: "nav.liveFeed", href: "/law-enforcement/live", icon: BoltIcon },
+  { key: "nav.priorityCases", href: "/law-enforcement/priority", icon: ExclamationIcon },
+];
+
+const archiveNavigation = [
+  { key: "nav.caseArchive", href: "/archive", icon: ArchiveBoxIcon },
+  { key: "nav.caseStudies", href: "/archive/case-studies", icon: BookOpenIcon },
+  { key: "nav.statistics", href: "/archive/statistics", icon: ChartPieIcon },
+];
+
+const researchNavigation = [
+  { key: "nav.researchPortal", href: "/research-portal", icon: AcademicCapIcon },
+  { key: "nav.requestAccess", href: "/research-portal/access-request", icon: KeyIcon },
+  { key: "nav.partnerships", href: "/research-portal/partnerships", icon: BuildingLibraryIcon },
+  { key: "nav.dataExports", href: "/research-portal/exports", icon: ArrowDownTrayIcon },
+];
+
+const indigenousLiaisonNavigation = [
+  { key: "nav.indigenousLiaison", href: "/indigenous-liaison", icon: HeartHandshakeIcon },
+  { key: "nav.organizations", href: "/indigenous-liaison/organizations", icon: BuildingLibraryIcon },
+  { key: "nav.communities", href: "/indigenous-liaison/communities", icon: MapPinIcon },
+  { key: "nav.mmiwgCases", href: "/indigenous-liaison/mmiwg", icon: ExclamationTriangleIcon },
+  { key: "nav.liaisonContacts", href: "/indigenous-liaison/contacts", icon: UserGroupIcon },
+  { key: "nav.resources", href: "/indigenous-liaison/resources", icon: BookOpenIcon },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("common");
 
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-64 flex-col border-r border-gray-200 bg-white lg:flex">
@@ -42,11 +72,11 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 px-3 py-4">
         <div className="space-y-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Cases
+            {t("sections.cases")}
           </p>
           {navigation.map((item) => (
             <Link
-              key={item.name}
+              key={item.key}
               href={item.href}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -56,18 +86,39 @@ export function Sidebar() {
               )}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
-              {item.name}
+              {t(item.key)}
             </Link>
           ))}
         </div>
 
         <div className="mt-6 space-y-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Law Enforcement
+            {t("sections.analyticsReports")}
+          </p>
+          {dashboardNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith(item.href)
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.lawEnforcement")}
           </p>
           {lawEnforcementNavigation.map((item) => (
             <Link
-              key={item.name}
+              key={item.key}
               href={item.href}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -77,18 +128,75 @@ export function Sidebar() {
               )}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
-              {item.name}
+              {t(item.key)}
             </Link>
           ))}
         </div>
 
         <div className="mt-6 space-y-1">
           <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-            Administration
+            {t("sections.indigenousLiaison")}
+          </p>
+          {indigenousLiaisonNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.archiveResearch")}
+          </p>
+          {archiveNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+          {researchNavigation.map((item) => (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-cyan-50 text-cyan-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              {t(item.key)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-6 space-y-1">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+            {t("sections.administration")}
           </p>
           {adminNavigation.map((item) => (
             <Link
-              key={item.name}
+              key={item.key}
               href={item.href}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -98,7 +206,7 @@ export function Sidebar() {
               )}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
-              {item.name}
+              {t(item.key)}
             </Link>
           ))}
         </div>
@@ -204,6 +312,112 @@ function ExclamationIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+    </svg>
+  );
+}
+
+function ChartBarIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+    </svg>
+  );
+}
+
+function ClipboardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+    </svg>
+  );
+}
+
+function DocumentChartIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+    </svg>
+  );
+}
+
+function ArchiveBoxIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+    </svg>
+  );
+}
+
+function BookOpenIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+    </svg>
+  );
+}
+
+function ChartPieIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+    </svg>
+  );
+}
+
+function AcademicCapIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
+    </svg>
+  );
+}
+
+function BuildingLibraryIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0 0 12 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75Z" />
+    </svg>
+  );
+}
+
+function ArrowDownTrayIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+    </svg>
+  );
+}
+
+function HeartHandshakeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+    </svg>
+  );
+}
+
+function MapPinIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+    </svg>
+  );
+}
+
+function ExclamationTriangleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+    </svg>
+  );
+}
+
+function UserGroupIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
     </svg>
   );
 }

@@ -1,0 +1,161 @@
+{
+  "header": {
+    "title": "Report a Missing Person",
+    "subtitle": "Complete all sections to file a report"
+  },
+  "steps": {
+    "reporter": { "title": "Your Information" },
+    "missingPerson": { "title": "Missing Person" },
+    "circumstances": { "title": "Circumstances" },
+    "contacts": { "title": "Known Contacts" },
+    "languages": { "title": "Languages" },
+    "risks": { "title": "Risk Factors" },
+    "review": { "title": "Review & Submit" }
+  },
+  "navigation": {
+    "previous": "Previous",
+    "next": "Next",
+    "submit": "Submit Report"
+  },
+  "privacy": {
+    "title": "Privacy Notice",
+    "body": "Information collected will be shared with law enforcement agencies as required. By submitting this form, you consent to the processing of this data in accordance with privacy laws."
+  },
+  "reporter": {
+    "title": "Your Information",
+    "subtitle": "We need your details to verify and follow up on this report",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "relationship": "Relationship to Missing Person",
+    "address": "Your Address",
+    "selectRelationship": "Select relationship",
+    "relationships": {
+      "parent": "Parent",
+      "spouse": "Spouse/Partner",
+      "sibling": "Sibling",
+      "child": "Child",
+      "friend": "Friend",
+      "employer": "Employer",
+      "coworker": "Coworker",
+      "neighbor": "Neighbor",
+      "other": "Other"
+    }
+  },
+  "missingPerson": {
+    "title": "Missing Person Details",
+    "subtitle": "Provide as much information as possible about the missing person",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "dob": "Date of Birth",
+    "gender": "Gender",
+    "height": "Height",
+    "weight": "Weight",
+    "hairColor": "Hair Color",
+    "eyeColor": "Eye Color",
+    "distinguishing": "Distinguishing Features",
+    "distinguishingHelp": "Tattoos, scars, birthmarks, clothing last seen wearing",
+    "photo": "Upload Photo",
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "heightPlaceholder": "e.g., 5'10\" or 178cm",
+    "weightPlaceholder": "e.g., 160lbs or 72kg",
+    "photoHelper": "Click to upload or drag and drop"
+  },
+  "circumstances": {
+    "title": "Circumstances of Disappearance",
+    "subtitle": "Details about when and where the person was last seen",
+    "lastSeenDate": "Date Last Seen",
+    "lastSeenTime": "Time Last Seen",
+    "lastSeenLocation": "Last Known Location",
+    "locationDetails": "Location Details",
+    "locationDetailsHelp": "Address, neighborhood, landmarks",
+    "circumstances": "Circumstances",
+    "circumstancesHelp": "What was the person doing? Was this out of character?",
+    "outOfCharacter": "Is this disappearance out of character?",
+    "locationPlaceholder": "City, Province"
+  },
+  "contacts": {
+    "title": "Known Contacts & Social Media",
+    "subtitle": "Help us locate friends and monitor online activity",
+    "emails": "Known Email Addresses",
+    "emailsHelp": "Enter each email on a new line",
+    "phones": "Known Phone Numbers",
+    "phonesHelp": "Enter each number on a new line",
+    "social": "Social Media Accounts",
+    "friends": "Close Friends/Associates",
+    "friendsHelp": "People who might know their whereabouts",
+    "addFriend": "+ Add Contact",
+    "namePlaceholder": "Name",
+    "relationshipPlaceholder": "Relationship",
+    "contactPlaceholder": "Contact"
+  },
+  "risks": {
+    "title": "Risk Assessment",
+    "subtitle": "This information helps prioritize the search",
+    "medical": "Medical Conditions",
+    "medicalHelp": "Any conditions that require ongoing treatment",
+    "medications": "Required Medications",
+    "medicationsHelp": "List medications they need to take regularly",
+    "mental": "Mental Health",
+    "mentalOptions": {
+      "none": "No known concerns",
+      "history": "History of mental health conditions",
+      "current": "Currently in treatment",
+      "crisis": "Recent mental health crisis"
+    },
+    "threats": "Potential Threats",
+    "threatsHelp": "Are there people who might want to harm this person?",
+    "threatName": "Name",
+    "threatRelation": "Relationship",
+    "threatDescription": "Description of concern",
+    "addThreat": "+ Add Person of Concern",
+    "suicidal": "Is there any concern about self-harm or suicidal ideation?",
+    "suicidalWarning": "If immediate danger, call 911",
+    "medicalPlaceholder": "e.g., HIV, diabetes, heart condition",
+    "medicationsPlaceholder": "e.g., Dovato (daily), insulin"
+  },
+  "languageSection": {
+    "reporterTitle": "Your Language Information",
+    "reporterDescription": "This helps us communicate with you effectively and connect you with appropriate support services.",
+    "reporterLanguagesLabel": "Languages you speak",
+    "reporterLanguagesPlaceholder": "Select all languages you can communicate in",
+    "reporterPreferredLabel": "Preferred contact language",
+    "interpreterNeeded": "Interpreter assistance needed",
+    "interpreterLanguage": "Interpreter language",
+    "subjectTitle": "Missing Person's Language Information",
+    "subjectDescription": "Understanding what languages the missing person speaks helps with community outreach and communication if they are found.",
+    "subjectPrimaryLabel": "Primary languages spoken by the missing person",
+    "subjectPrimaryPlaceholder": "Select languages the missing person speaks",
+    "subjectRespondsLabel": "Languages they may respond to",
+    "subjectRespondsPlaceholder": "Select languages they might respond to if approached",
+    "subjectRespondsHelp": "This is helpful for search teams and community outreach. Include languages they understand even if they don't speak them fluently.",
+    "subjectOfficialLabel": "Can communicate in English or French",
+    "subjectOfficialHelp": "This helps determine if language-specific outreach or translators may be needed during the search.",
+    "summaryTitle": "Language Summary",
+    "reporterSummaryLabel": "Your languages:",
+    "subjectSummaryLabel": "Missing person's languages:"
+  },
+  "review": {
+    "title": "Review Your Report",
+    "subtitle": "Please review all information before submitting",
+    "confirmText": "I confirm that all information provided is accurate to the best of my knowledge. I understand this report will be shared with law enforcement.",
+    "reporterTitle": "Reporter Information",
+    "missingPersonTitle": "Missing Person",
+    "riskTitle": "Risk Factors",
+    "languageTitle": "Language Information",
+    "reporterNameLabel": "Name",
+    "reporterRelationshipLabel": "Relationship",
+    "missingPersonNameLabel": "Name",
+    "missingPersonAgeLabel": "Age",
+    "missingPersonLastSeenLabel": "Last Seen",
+    "riskMedicalLabel": "Medical",
+    "riskMentalLabel": "Mental Health",
+    "languageReporterLabel": "Reporter languages",
+    "languageSubjectLabel": "Missing person languages"
+  }
+}

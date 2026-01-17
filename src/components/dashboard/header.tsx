@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { useLocale } from "@/components/i18n/LocaleProvider";
+import { useTranslations } from "@/hooks/useTranslations";
+import { isLocaleComplete } from "@/lib/i18n";
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -11,6 +15,9 @@ export function Header() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations("common");
+  const { locale } = useLocale();
+  const showTranslationNotice = !isLocaleComplete(locale);
 
   useEffect(() => {
     const getUser = async () => {
@@ -42,7 +49,7 @@ export function Header() {
         <div className="flex flex-1 items-center gap-4">
           <div className="w-full max-w-lg">
             <label htmlFor="search" className="sr-only">
-              Search cases
+              {t("header.searchLabel")}
             </label>
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -52,7 +59,7 @@ export function Header() {
                 id="search"
                 name="search"
                 type="search"
-                placeholder="Search cases, names, locations..."
+                placeholder={t("header.searchPlaceholder")}
                 className="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm placeholder:text-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
               />
             </div>
@@ -66,7 +73,7 @@ export function Header() {
             type="button"
             className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           >
-            <span className="sr-only">View notifications</span>
+            <span className="sr-only">{t("header.notifications")}</span>
             <BellIcon className="h-6 w-6" />
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
           </button>
@@ -74,16 +81,20 @@ export function Header() {
           {/* Live indicator */}
           <div className="flex items-center gap-2 rounded-full bg-green-50 px-3 py-1">
             <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs font-medium text-green-700">Live</span>
+            <span className="text-xs font-medium text-green-700">
+              {t("header.live")}
+            </span>
           </div>
 
           {/* Language toggle */}
-          <button
-            type="button"
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            EN / FR
-          </button>
+          <div className="flex flex-col items-end gap-1">
+            <LocaleSwitcher label={t("language.label")} />
+            {showTranslationNotice && (
+              <span className="max-w-[220px] text-[10px] text-amber-700">
+                {t("language.translationNotice")}
+              </span>
+            )}
+          </div>
 
           {/* User Menu */}
           <div className="relative">

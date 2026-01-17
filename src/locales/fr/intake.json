@@ -1,0 +1,161 @@
+{
+  "header": {
+    "title": "Signaler une personne disparue",
+    "subtitle": "Remplissez toutes les sections pour déposer un signalement"
+  },
+  "steps": {
+    "reporter": { "title": "Vos informations" },
+    "missingPerson": { "title": "Personne disparue" },
+    "circumstances": { "title": "Circonstances" },
+    "contacts": { "title": "Contacts connus" },
+    "languages": { "title": "Langues" },
+    "risks": { "title": "Facteurs de risque" },
+    "review": { "title": "Révision et soumission" }
+  },
+  "navigation": {
+    "previous": "← Précédent",
+    "next": "Suivant →",
+    "submit": "Soumettre le signalement"
+  },
+  "privacy": {
+    "title": "Avis de confidentialité",
+    "body": "Les informations recueillies seront partagées avec les organismes d'application de la loi selon les besoins. En soumettant ce formulaire, vous consentez au traitement de ces données conformément aux lois québécoises sur la vie privée."
+  },
+  "reporter": {
+    "title": "Vos informations",
+    "subtitle": "Nous avons besoin de vos coordonnées pour vérifier et suivre ce signalement",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "email": "Adresse courriel",
+    "phone": "Numéro de téléphone",
+    "relationship": "Lien avec la personne disparue",
+    "address": "Votre adresse",
+    "selectRelationship": "Sélectionnez le lien",
+    "relationships": {
+      "parent": "Parent",
+      "spouse": "Conjoint(e)/Partenaire",
+      "sibling": "Frère/Sœur",
+      "child": "Enfant",
+      "friend": "Ami(e)",
+      "employer": "Employeur",
+      "coworker": "Collègue",
+      "neighbor": "Voisin(e)",
+      "other": "Autre"
+    }
+  },
+  "missingPerson": {
+    "title": "Détails de la personne disparue",
+    "subtitle": "Fournissez autant d'informations que possible sur la personne disparue",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "dob": "Date de naissance",
+    "gender": "Genre",
+    "height": "Taille",
+    "weight": "Poids",
+    "hairColor": "Couleur des cheveux",
+    "eyeColor": "Couleur des yeux",
+    "distinguishing": "Signes distinctifs",
+    "distinguishingHelp": "Tatouages, cicatrices, taches de naissance, vêtements portés",
+    "photo": "Télécharger une photo",
+    "genderOptions": {
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    },
+    "heightPlaceholder": "ex: 178cm",
+    "weightPlaceholder": "ex: 72kg",
+    "photoHelper": "Cliquez pour télécharger ou glissez-déposez"
+  },
+  "circumstances": {
+    "title": "Circonstances de la disparition",
+    "subtitle": "Détails sur quand et où la personne a été vue pour la dernière fois",
+    "lastSeenDate": "Date de dernière observation",
+    "lastSeenTime": "Heure de dernière observation",
+    "lastSeenLocation": "Dernier emplacement connu",
+    "locationDetails": "Détails de l'emplacement",
+    "locationDetailsHelp": "Adresse, quartier, points de repère",
+    "circumstances": "Circonstances",
+    "circumstancesHelp": "Que faisait la personne? Était-ce inhabituel?",
+    "outOfCharacter": "Cette disparition est-elle inhabituelle?",
+    "locationPlaceholder": "Ville, Province"
+  },
+  "contacts": {
+    "title": "Contacts connus et réseaux sociaux",
+    "subtitle": "Aidez-nous à localiser les amis et surveiller l'activité en ligne",
+    "emails": "Adresses courriel connues",
+    "emailsHelp": "Entrez chaque courriel sur une nouvelle ligne",
+    "phones": "Numéros de téléphone connus",
+    "phonesHelp": "Entrez chaque numéro sur une nouvelle ligne",
+    "social": "Comptes de réseaux sociaux",
+    "friends": "Amis proches/Associés",
+    "friendsHelp": "Personnes qui pourraient connaître leur emplacement",
+    "addFriend": "+ Ajouter un contact",
+    "namePlaceholder": "Nom",
+    "relationshipPlaceholder": "Lien",
+    "contactPlaceholder": "Contact"
+  },
+  "risks": {
+    "title": "Évaluation des risques",
+    "subtitle": "Ces informations aident à prioriser la recherche",
+    "medical": "Conditions médicales",
+    "medicalHelp": "Toute condition nécessitant un traitement continu",
+    "medications": "Médicaments requis",
+    "medicationsHelp": "Listez les médicaments qu'ils doivent prendre régulièrement",
+    "mental": "Santé mentale",
+    "mentalOptions": {
+      "none": "Aucune préoccupation connue",
+      "history": "Historique de conditions de santé mentale",
+      "current": "Actuellement en traitement",
+      "crisis": "Crise de santé mentale récente"
+    },
+    "threats": "Menaces potentielles",
+    "threatsHelp": "Y a-t-il des personnes qui pourraient vouloir nuire à cette personne?",
+    "threatName": "Nom",
+    "threatRelation": "Lien",
+    "threatDescription": "Description de la préoccupation",
+    "addThreat": "+ Ajouter une personne préoccupante",
+    "suicidal": "Y a-t-il des préoccupations concernant l'automutilation ou les idées suicidaires?",
+    "suicidalWarning": "En cas de danger immédiat, appelez le 911",
+    "medicalPlaceholder": "ex: VIH, diabète, condition cardiaque",
+    "medicationsPlaceholder": "ex: Dovato (quotidien), insuline"
+  },
+  "languageSection": {
+    "reporterTitle": "Vos informations linguistiques",
+    "reporterDescription": "Cela nous aide à communiquer efficacement avec vous et à vous diriger vers les services appropriés.",
+    "reporterLanguagesLabel": "Langues que vous parlez",
+    "reporterLanguagesPlaceholder": "Sélectionnez toutes les langues dans lesquelles vous pouvez communiquer",
+    "reporterPreferredLabel": "Langue de contact préférée",
+    "interpreterNeeded": "Besoin d'un interprète",
+    "interpreterLanguage": "Langue de l'interprète",
+    "subjectTitle": "Informations linguistiques de la personne disparue",
+    "subjectDescription": "Comprendre les langues parlées par la personne disparue aide aux communications et aux efforts communautaires.",
+    "subjectPrimaryLabel": "Langues principales parlées par la personne disparue",
+    "subjectPrimaryPlaceholder": "Sélectionnez les langues parlées par la personne disparue",
+    "subjectRespondsLabel": "Langues auxquelles elle pourrait répondre",
+    "subjectRespondsPlaceholder": "Sélectionnez les langues auxquelles elle pourrait répondre",
+    "subjectRespondsHelp": "Utile pour les équipes de recherche. Incluez les langues qu'elle comprend même si elle ne les parle pas couramment.",
+    "subjectOfficialLabel": "Peut communiquer en français ou en anglais",
+    "subjectOfficialHelp": "Cela aide à déterminer si des communications linguistiques spécifiques sont nécessaires.",
+    "summaryTitle": "Résumé linguistique",
+    "reporterSummaryLabel": "Vos langues :",
+    "subjectSummaryLabel": "Langues de la personne disparue :"
+  },
+  "review": {
+    "title": "Révisez votre signalement",
+    "subtitle": "Veuillez vérifier toutes les informations avant de soumettre",
+    "confirmText": "Je confirme que toutes les informations fournies sont exactes au meilleur de ma connaissance. Je comprends que ce signalement sera partagé avec les forces de l'ordre.",
+    "reporterTitle": "Informations du déclarant",
+    "missingPersonTitle": "Personne disparue",
+    "riskTitle": "Facteurs de risque",
+    "languageTitle": "Informations linguistiques",
+    "reporterNameLabel": "Nom",
+    "reporterRelationshipLabel": "Lien",
+    "missingPersonNameLabel": "Nom",
+    "missingPersonAgeLabel": "Âge",
+    "missingPersonLastSeenLabel": "Dernière observation",
+    "riskMedicalLabel": "Médical",
+    "riskMentalLabel": "Santé mentale",
+    "languageReporterLabel": "Langues du déclarant",
+    "languageSubjectLabel": "Langues de la personne disparue"
+  }
+}
