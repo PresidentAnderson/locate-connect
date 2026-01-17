@@ -120,7 +120,7 @@ export async function PATCH(
     const { volunteerIds, status, updates } = body;
 
     if (volunteerIds && volunteerIds.length > 0) {
-      const updateData: any = { status };
+      const updateData: Record<string, unknown> = { status };
       
       if (status === "checked_in") {
         updateData.checked_in_at = new Date().toISOString();

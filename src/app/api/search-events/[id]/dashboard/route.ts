@@ -88,7 +88,7 @@ export async function GET(
 
     // Get unique latest positions per volunteer
     const latestPositionsMap = new Map();
-    gpsPositions?.forEach((pos: any) => {
+    gpsPositions?.forEach((pos) => {
       if (!latestPositionsMap.has(pos.volunteer_id)) {
         latestPositionsMap.set(pos.volunteer_id, {
           volunteerId: pos.volunteer_id,
@@ -138,17 +138,17 @@ export async function GET(
     };
 
     // Transform zones to match expected format
-    const transformedZones = zones?.map((zone: any) => ({
+    const transformedZones = zones?.map((zone) => ({
       ...zone,
       findings: [], // Full findings would need a separate query
       assignedVolunteerIds: [], // Would need to fetch from team_members
     })) || [];
 
     // Transform teams
-    const transformedTeams = teams?.map((team: any) => ({
+    const transformedTeams = teams?.map((team) => ({
       ...team,
-      memberIds: team.members?.map((m: any) => m.volunteer.id) || [],
-      assignedZoneIds: team.zone_assignments?.map((za: any) => za.zone_id) || [],
+      memberIds: team.members?.map((m) => m.volunteer.id) || [],
+      assignedZoneIds: team.zone_assignments?.map((za) => za.zone_id) || [],
     })) || [];
 
     const dashboardData = {

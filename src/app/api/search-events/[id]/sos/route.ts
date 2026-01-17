@@ -91,7 +91,7 @@ export async function PATCH(
     const body = await request.json();
     const { alertId, status, notes } = body;
 
-    const updateData: any = { status, notes };
+    const updateData: Record<string, unknown> = { status, notes };
 
     if (status === "acknowledged") {
       updateData.acknowledged_at = new Date().toISOString();
