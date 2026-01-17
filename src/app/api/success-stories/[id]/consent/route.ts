@@ -49,7 +49,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   const isStaff = profile?.role === 'admin' || profile?.role === 'law_enforcement';
   const isCreator = story.created_by === user.id;
-  const isCaseOwner = story.cases?.reporter_id === user.id;
+  const caseData = story.cases as unknown as { reporter_id: string } | null;
+  const isCaseOwner = caseData?.reporter_id === user.id;
 
   if (!isStaff && !isCreator && !isCaseOwner) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });
@@ -138,7 +139,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   const isStaff = profile?.role === 'admin' || profile?.role === 'law_enforcement';
   const isCreator = story.created_by === user.id;
-  const isCaseOwner = story.cases?.reporter_id === user.id;
+  const postCaseData = story.cases as unknown as { reporter_id: string } | null;
+  const isCaseOwner = postCaseData?.reporter_id === user.id;
 
   if (!isStaff && !isCreator && !isCaseOwner) {
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });

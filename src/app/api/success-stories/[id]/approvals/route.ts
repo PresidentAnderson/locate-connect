@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   const isStaff = profile?.role === 'admin' || profile?.role === 'law_enforcement';
   const isCreator = story.created_by === user.id;
-  const caseData = story.cases as { reporter_id: string } | null;
+  const caseData = story.cases as unknown as { reporter_id: string } | null;
   const isCaseOwner = caseData?.reporter_id === user.id;
 
   if (!isStaff && !isCreator && !isCaseOwner) {

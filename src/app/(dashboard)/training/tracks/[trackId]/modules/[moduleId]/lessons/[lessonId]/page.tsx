@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useRef } from "react";
+import React, { useState, useEffect, use, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type {
@@ -225,11 +225,11 @@ function RenderSection({ section }: { section: LessonSection }) {
       return <p className="text-gray-700 leading-relaxed mb-4">{section.content}</p>;
 
     case "heading":
-      const HeadingTag = `h${section.level || 2}` as keyof JSX.IntrinsicElements;
-      return (
-        <HeadingTag className="font-semibold text-gray-900 mt-6 mb-3">
-          {section.content}
-        </HeadingTag>
+      const HeadingTag = `h${section.level || 2}` as "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+      return React.createElement(
+        HeadingTag,
+        { className: "font-semibold text-gray-900 mt-6 mb-3" },
+        section.content
       );
 
     case "list":

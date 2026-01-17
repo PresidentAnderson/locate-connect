@@ -45,7 +45,10 @@
     "resolutionHeatMap": "Resolution Heat Map",
     "successStories": "Success Stories",
     "manageStories": "Manage Stories",
-    "successMetrics": "Success Metrics"
+    "successMetrics": "Success Metrics",
+    "training": "Training Center",
+    "myCertifications": "My Certifications",
+    "myBadges": "My Badges"
   },
   "sections": {
     "cases": "Cases",
@@ -59,7 +62,8 @@
     "developers": "Developers",
     "administration": "Administration",
     "coldCases": "Cold Cases",
-    "successStories": "Success Stories"
+    "successStories": "Success Stories",
+    "training": "Training & Onboarding"
   },
   "header": {
     "searchLabel": "Search cases",

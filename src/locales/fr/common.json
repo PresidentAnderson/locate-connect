@@ -45,7 +45,10 @@
     "resolutionHeatMap": "Carte thermique des résolutions",
     "successStories": "Histoires de succès",
     "manageStories": "Gérer les histoires",
-    "successMetrics": "Métriques de succès"
+    "successMetrics": "Métriques de succès",
+    "training": "Centre de formation",
+    "myCertifications": "Mes certifications",
+    "myBadges": "Mes badges"
   },
   "sections": {
     "cases": "Dossiers",
@@ -59,7 +62,8 @@
     "developers": "Développeurs",
     "administration": "Administration",
     "coldCases": "Cas non résolus",
-    "successStories": "Histoires de succès"
+    "successStories": "Histoires de succès",
+    "training": "Formation & intégration"
   },
   "header": {
     "searchLabel": "Rechercher des dossiers",
