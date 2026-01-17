@@ -128,6 +128,8 @@ export async function POST(request: NextRequest) {
       .eq("is_primary", true)
       .single();
 
+    // Determine primary liaison, fallback to explicitly provided or current user (who must be authorized)
+    // The current user has already been validated to have law_enforcement/admin/developer role above
     const primaryLiaisonId = body.primaryLiaisonId || liaison?.user_id || user.id;
 
     const { data, error } = await supabase

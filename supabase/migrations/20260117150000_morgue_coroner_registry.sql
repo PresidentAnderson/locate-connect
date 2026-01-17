@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS public.dna_sample_coordination (
     updated_at TIMESTAMPTZ DEFAULT now(),
     
     -- Constraints
-    CONSTRAINT consent_date_required CHECK (
+    CONSTRAINT dna_sample_coordination_consent_date_required CHECK (
         consent_obtained = false OR consent_date IS NOT NULL
     )
 );
