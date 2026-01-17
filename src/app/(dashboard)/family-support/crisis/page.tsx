@@ -5,9 +5,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib";
 
-// Force dynamic rendering to avoid useSearchParams SSR issues
-export const dynamic = "force-dynamic";
-
 interface SupportResource {
   id: string;
   name: string;
@@ -21,7 +18,7 @@ interface SupportResource {
 
 const allowedCategories = new Set(["mental_health", "grief", "peer_support"]);
 
-export default function CrisisResourcesPage() {
+function CrisisResourcesContent() {
   const searchParams = useSearchParams();
   const province = searchParams.get("province");
   const [resources, setResources] = useState<SupportResource[]>([]);
@@ -122,5 +119,31 @@ export default function CrisisResourcesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse mb-2" />
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="h-4 w-64 bg-gray-200 rounded animate-pulse mt-2" />
+      </div>
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 h-12 animate-pulse" />
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 h-24 animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function CrisisResourcesPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CrisisResourcesContent />
+    </Suspense>
   );
 }
