@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { cn } from "@/lib";
+import { cn } from "@/lib/utils";
 
 interface Resource {
   id: string;
@@ -89,6 +89,14 @@ const CONTENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function ResourcesPage() {
+  return (
+    <Suspense fallback={<div className="space-y-6"><div className="h-10 w-64 animate-pulse rounded-lg bg-gray-200" /><div className="h-40 animate-pulse rounded-xl bg-gray-100" /></div>}>
+      <ResourcesPageContent />
+    </Suspense>
+  );
+}
+
+function ResourcesPageContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "";
 

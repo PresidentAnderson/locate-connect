@@ -35,13 +35,40 @@ export default function NewCasePage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [reporterFirstName, setReporterFirstName] = useState("");
+  const [reporterLastName, setReporterLastName] = useState("");
+  const [reporterEmail, setReporterEmail] = useState("");
+  const [reporterPhone, setReporterPhone] = useState("");
+  const [reporterAddress, setReporterAddress] = useState("");
   const [reporterRelationship, setReporterRelationship] = useState("");
   const [missingFirstName, setMissingFirstName] = useState("");
   const [missingLastName, setMissingLastName] = useState("");
+  const [missingDateOfBirth, setMissingDateOfBirth] = useState("");
+  const [missingGender, setMissingGender] = useState("");
+  const [missingHeight, setMissingHeight] = useState("");
+  const [missingWeight, setMissingWeight] = useState("");
+  const [missingHairColor, setMissingHairColor] = useState("");
+  const [missingEyeColor, setMissingEyeColor] = useState("");
+  const [missingDistinguishing, setMissingDistinguishing] = useState("");
   const [lastSeenDate, setLastSeenDate] = useState("");
   const [lastSeenTime, setLastSeenTime] = useState("");
   const [lastSeenLocation, setLastSeenLocation] = useState("");
+  const [lastSeenLocationDetails, setLastSeenLocationDetails] = useState("");
+  const [outOfCharacter, setOutOfCharacter] = useState(false);
   const [circumstances, setCircumstances] = useState("");
+  const [contactEmails, setContactEmails] = useState("");
+  const [contactPhones, setContactPhones] = useState("");
+  const [socialHandles, setSocialHandles] = useState<Record<string, string>>({});
+  const [contactFriends, setContactFriends] = useState([
+    { name: "", relationship: "", contact: "" },
+  ]);
+  const [medicalConditions, setMedicalConditions] = useState("");
+  const [medications, setMedications] = useState("");
+  const [mentalHealthStatus, setMentalHealthStatus] = useState("");
+  const [suicidalRisk, setSuicidalRisk] = useState(false);
+  const [threats, setThreats] = useState([
+    { name: "", relationship: "", description: "" },
+  ]);
   const [reporterLanguages, setReporterLanguages] = useState<string[]>([]);
   const [reporterPreferredLanguage, setReporterPreferredLanguage] = useState("");
   const [reporterNeedsInterpreter, setReporterNeedsInterpreter] = useState(false);
@@ -76,6 +103,100 @@ export default function NewCasePage() {
     }
   };
 
+  const updateFriend = (
+    index: number,
+    field: "name" | "relationship" | "contact",
+    value: string
+  ) => {
+    setContactFriends((prev) =>
+      prev.map((friend, i) =>
+        i === index ? { ...friend, [field]: value } : friend
+      )
+    );
+  };
+
+  const addFriend = () => {
+    setContactFriends((prev) => [
+      ...prev,
+      { name: "", relationship: "", contact: "" },
+    ]);
+  };
+
+  const updateThreat = (
+    index: number,
+    field: "name" | "relationship" | "description",
+    value: string
+  ) => {
+    setThreats((prev) =>
+      prev.map((threat, i) =>
+        i === index ? { ...threat, [field]: value } : threat
+      )
+    );
+  };
+
+  const addThreat = () => {
+    setThreats((prev) => [
+      ...prev,
+      { name: "", relationship: "", description: "" },
+    ]);
+  };
+
+  const parseList = (value: string) =>
+    value
+      .split(/[\n,]+/)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
+  const parseHeightCm = (value: string) => {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return null;
+    const footInchMatch = trimmed.match(
+      /(\d+)\s*(?:ft|')\s*(\d+)?\s*(?:in|\"|inches)?/
+    );
+    if (footInchMatch) {
+      const feet = Number.parseInt(footInchMatch[1], 10);
+      const inches = footInchMatch[2]
+        ? Number.parseInt(footInchMatch[2], 10)
+        : 0;
+      if (!Number.isNaN(feet) && !Number.isNaN(inches)) {
+        return Math.round((feet * 12 + inches) * 2.54);
+      }
+    }
+
+    const cmMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*cm/);
+    if (cmMatch) {
+      return Math.round(Number.parseFloat(cmMatch[1]));
+    }
+
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) {
+      return Math.round(numeric);
+    }
+
+    return null;
+  };
+
+  const parseWeightKg = (value: string) => {
+    const trimmed = value.trim().toLowerCase();
+    if (!trimmed) return null;
+    const kgMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*kg/);
+    if (kgMatch) {
+      return Math.round(Number.parseFloat(kgMatch[1]));
+    }
+
+    const lbMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*lb/);
+    if (lbMatch) {
+      return Math.round(Number.parseFloat(lbMatch[1]) * 0.453592);
+    }
+
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) {
+      return Math.round(numeric);
+    }
+
+    return null;
+  };
+
   const handleSubmit = async () => {
     setSubmitError(null);
 
@@ -95,16 +216,59 @@ export default function NewCasePage() {
     }
 
     try {
+      const heightCm = parseHeightCm(missingHeight);
+      const weightKg = parseWeightKg(missingWeight);
+      const parsedMedicalConditions = parseList(medicalConditions);
+      const parsedMedications = parseList(medications);
+      const parsedContactEmails = parseList(contactEmails);
+      const parsedContactPhones = parseList(contactPhones);
+      const parsedFriends = contactFriends.filter(
+        (friend) => friend.name || friend.relationship || friend.contact
+      );
+      const parsedThreats = threats.filter(
+        (threat) => threat.name || threat.relationship || threat.description
+      );
+      const mentalHealthConditions =
+        mentalHealthStatus && mentalHealthStatus !== "none"
+          ? [mentalHealthStatus]
+          : [];
+      const socialMediaAccounts = Object.entries(socialHandles)
+        .map(([platform, handle]) => ({ platform, handle: handle.trim() }))
+        .filter((account) => account.handle);
+
       const response = await fetch("/api/cases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          reporterFirstName,
+          reporterLastName,
+          reporterEmail,
+          reporterPhone,
+          reporterAddress,
           reporterRelationship,
           firstName: missingFirstName,
           lastName: missingLastName,
+          dateOfBirth: missingDateOfBirth || null,
+          gender: missingGender || null,
+          heightCm,
+          weightKg,
+          hairColor: missingHairColor,
+          eyeColor: missingEyeColor,
+          distinguishingFeatures: missingDistinguishing,
           lastSeenDate: lastSeenDateTime.toISOString(),
           lastSeenLocation,
+          locationDetails: lastSeenLocationDetails,
+          outOfCharacter,
           circumstances,
+          medicalConditions: parsedMedicalConditions,
+          medications: parsedMedications,
+          mentalHealthConditions,
+          isSuicidalRisk: suicidalRisk,
+          contactEmails: parsedContactEmails,
+          contactPhones: parsedContactPhones,
+          contactFriends: parsedFriends,
+          socialMediaAccounts,
+          threats: parsedThreats,
           reporterLanguages,
           reporterPreferredLanguage,
           reporterNeedsInterpreter,
@@ -190,7 +354,17 @@ export default function NewCasePage() {
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         {currentStep === "reporter" && (
           <ReporterForm
+            reporterFirstName={reporterFirstName}
+            reporterLastName={reporterLastName}
+            reporterEmail={reporterEmail}
+            reporterPhone={reporterPhone}
+            reporterAddress={reporterAddress}
             reporterRelationship={reporterRelationship}
+            onReporterFirstNameChange={setReporterFirstName}
+            onReporterLastNameChange={setReporterLastName}
+            onReporterEmailChange={setReporterEmail}
+            onReporterPhoneChange={setReporterPhone}
+            onReporterAddressChange={setReporterAddress}
             onReporterRelationshipChange={setReporterRelationship}
           />
         )}
@@ -198,8 +372,22 @@ export default function NewCasePage() {
           <MissingPersonForm
             firstName={missingFirstName}
             lastName={missingLastName}
+            dateOfBirth={missingDateOfBirth}
+            gender={missingGender}
+            height={missingHeight}
+            weight={missingWeight}
+            hairColor={missingHairColor}
+            eyeColor={missingEyeColor}
+            distinguishing={missingDistinguishing}
             onFirstNameChange={setMissingFirstName}
             onLastNameChange={setMissingLastName}
+            onDateOfBirthChange={setMissingDateOfBirth}
+            onGenderChange={setMissingGender}
+            onHeightChange={setMissingHeight}
+            onWeightChange={setMissingWeight}
+            onHairColorChange={setMissingHairColor}
+            onEyeColorChange={setMissingEyeColor}
+            onDistinguishingChange={setMissingDistinguishing}
           />
         )}
         {currentStep === "circumstances" && (
@@ -207,14 +395,32 @@ export default function NewCasePage() {
             lastSeenDate={lastSeenDate}
             lastSeenTime={lastSeenTime}
             lastSeenLocation={lastSeenLocation}
+            lastSeenLocationDetails={lastSeenLocationDetails}
+            outOfCharacter={outOfCharacter}
             circumstances={circumstances}
             onLastSeenDateChange={setLastSeenDate}
             onLastSeenTimeChange={setLastSeenTime}
             onLastSeenLocationChange={setLastSeenLocation}
+            onLastSeenLocationDetailsChange={setLastSeenLocationDetails}
+            onOutOfCharacterChange={setOutOfCharacter}
             onCircumstancesChange={setCircumstances}
           />
         )}
-        {currentStep === "contacts" && <ContactsForm />}
+        {currentStep === "contacts" && (
+          <ContactsForm
+            contactEmails={contactEmails}
+            contactPhones={contactPhones}
+            socialHandles={socialHandles}
+            contactFriends={contactFriends}
+            onContactEmailsChange={setContactEmails}
+            onContactPhonesChange={setContactPhones}
+            onSocialHandleChange={(platform, value) =>
+              setSocialHandles((prev) => ({ ...prev, [platform]: value }))
+            }
+            onFriendChange={updateFriend}
+            onAddFriend={addFriend}
+          />
+        )}
         {currentStep === "languages" && (
           <IntakeLanguageSection
             reporterLanguages={reporterLanguages}
@@ -235,7 +441,21 @@ export default function NewCasePage() {
             onSubjectOtherLanguageChange={setSubjectOtherLanguage}
           />
         )}
-        {currentStep === "risks" && <RisksForm />}
+        {currentStep === "risks" && (
+          <RisksForm
+            medicalConditions={medicalConditions}
+            medications={medications}
+            mentalHealthStatus={mentalHealthStatus}
+            suicidalRisk={suicidalRisk}
+            threats={threats}
+            onMedicalConditionsChange={setMedicalConditions}
+            onMedicationsChange={setMedications}
+            onMentalHealthStatusChange={setMentalHealthStatus}
+            onSuicidalRiskChange={setSuicidalRisk}
+            onThreatChange={updateThreat}
+            onAddThreat={addThreat}
+          />
+        )}
         {currentStep === "review" && (
           <ReviewForm
             reporterLanguages={reporterLanguages}
@@ -288,10 +508,30 @@ export default function NewCasePage() {
 }
 
 function ReporterForm({
+  reporterFirstName,
+  reporterLastName,
+  reporterEmail,
+  reporterPhone,
+  reporterAddress,
   reporterRelationship,
+  onReporterFirstNameChange,
+  onReporterLastNameChange,
+  onReporterEmailChange,
+  onReporterPhoneChange,
+  onReporterAddressChange,
   onReporterRelationshipChange,
 }: {
+  reporterFirstName: string;
+  reporterLastName: string;
+  reporterEmail: string;
+  reporterPhone: string;
+  reporterAddress: string;
   reporterRelationship: string;
+  onReporterFirstNameChange: (value: string) => void;
+  onReporterLastNameChange: (value: string) => void;
+  onReporterEmailChange: (value: string) => void;
+  onReporterPhoneChange: (value: string) => void;
+  onReporterAddressChange: (value: string) => void;
   onReporterRelationshipChange: (value: string) => void;
 }) {
   const t = useTranslations("intake");
@@ -319,6 +559,8 @@ function ReporterForm({
           <label className="block text-sm font-medium text-gray-700">{t("reporter.firstName")}</label>
           <input
             type="text"
+            value={reporterFirstName}
+            onChange={(e) => onReporterFirstNameChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -326,6 +568,8 @@ function ReporterForm({
           <label className="block text-sm font-medium text-gray-700">{t("reporter.lastName")}</label>
           <input
             type="text"
+            value={reporterLastName}
+            onChange={(e) => onReporterLastNameChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -333,6 +577,8 @@ function ReporterForm({
           <label className="block text-sm font-medium text-gray-700">{t("reporter.email")}</label>
           <input
             type="email"
+            value={reporterEmail}
+            onChange={(e) => onReporterEmailChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -340,6 +586,8 @@ function ReporterForm({
           <label className="block text-sm font-medium text-gray-700">{t("reporter.phone")}</label>
           <input
             type="tel"
+            value={reporterPhone}
+            onChange={(e) => onReporterPhoneChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -362,6 +610,8 @@ function ReporterForm({
           <label className="block text-sm font-medium text-gray-700">{t("reporter.address")}</label>
           <input
             type="text"
+            value={reporterAddress}
+            onChange={(e) => onReporterAddressChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -373,13 +623,41 @@ function ReporterForm({
 function MissingPersonForm({
   firstName,
   lastName,
+  dateOfBirth,
+  gender,
+  height,
+  weight,
+  hairColor,
+  eyeColor,
+  distinguishing,
   onFirstNameChange,
   onLastNameChange,
+  onDateOfBirthChange,
+  onGenderChange,
+  onHeightChange,
+  onWeightChange,
+  onHairColorChange,
+  onEyeColorChange,
+  onDistinguishingChange,
 }: {
   firstName: string;
   lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  height: string;
+  weight: string;
+  hairColor: string;
+  eyeColor: string;
+  distinguishing: string;
   onFirstNameChange: (value: string) => void;
   onLastNameChange: (value: string) => void;
+  onDateOfBirthChange: (value: string) => void;
+  onGenderChange: (value: string) => void;
+  onHeightChange: (value: string) => void;
+  onWeightChange: (value: string) => void;
+  onHairColorChange: (value: string) => void;
+  onEyeColorChange: (value: string) => void;
+  onDistinguishingChange: (value: string) => void;
 }) {
   const t = useTranslations("intake");
   const genderOptions = ["male", "female", "other"];
@@ -414,12 +692,19 @@ function MissingPersonForm({
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.dob")}</label>
           <input
             type="date"
+            value={dateOfBirth}
+            onChange={(e) => onDateOfBirthChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.gender")}</label>
-          <select className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+          <select
+            value={gender}
+            onChange={(e) => onGenderChange(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          >
+            <option value="">{t("missingPerson.selectGender")}</option>
             {genderOptions.map((key) => (
               <option key={key} value={key}>
                 {t(`missingPerson.genderOptions.${key}`)}
@@ -432,6 +717,8 @@ function MissingPersonForm({
           <input
             type="text"
             placeholder={t("missingPerson.heightPlaceholder")}
+            value={height}
+            onChange={(e) => onHeightChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -440,6 +727,8 @@ function MissingPersonForm({
           <input
             type="text"
             placeholder={t("missingPerson.weightPlaceholder")}
+            value={weight}
+            onChange={(e) => onWeightChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -447,6 +736,8 @@ function MissingPersonForm({
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.hairColor")}</label>
           <input
             type="text"
+            value={hairColor}
+            onChange={(e) => onHairColorChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -454,6 +745,8 @@ function MissingPersonForm({
           <label className="block text-sm font-medium text-gray-700">{t("missingPerson.eyeColor")}</label>
           <input
             type="text"
+            value={eyeColor}
+            onChange={(e) => onEyeColorChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -462,6 +755,8 @@ function MissingPersonForm({
           <p className="text-xs text-gray-500">{t("missingPerson.distinguishingHelp")}</p>
           <textarea
             rows={3}
+            value={distinguishing}
+            onChange={(e) => onDistinguishingChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -485,19 +780,27 @@ function CircumstancesForm({
   lastSeenDate,
   lastSeenTime,
   lastSeenLocation,
+  lastSeenLocationDetails,
+  outOfCharacter,
   circumstances,
   onLastSeenDateChange,
   onLastSeenTimeChange,
   onLastSeenLocationChange,
+  onLastSeenLocationDetailsChange,
+  onOutOfCharacterChange,
   onCircumstancesChange,
 }: {
   lastSeenDate: string;
   lastSeenTime: string;
   lastSeenLocation: string;
+  lastSeenLocationDetails: string;
+  outOfCharacter: boolean;
   circumstances: string;
   onLastSeenDateChange: (value: string) => void;
   onLastSeenTimeChange: (value: string) => void;
   onLastSeenLocationChange: (value: string) => void;
+  onLastSeenLocationDetailsChange: (value: string) => void;
+  onOutOfCharacterChange: (value: boolean) => void;
   onCircumstancesChange: (value: string) => void;
 }) {
   const t = useTranslations("intake");
@@ -543,6 +846,8 @@ function CircumstancesForm({
           <p className="text-xs text-gray-500">{t("circumstances.locationDetailsHelp")}</p>
           <textarea
             rows={2}
+            value={lastSeenLocationDetails}
+            onChange={(e) => onLastSeenLocationDetailsChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -558,7 +863,12 @@ function CircumstancesForm({
         </div>
         <div className="sm:col-span-2">
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-cyan-600" />
+            <input
+              type="checkbox"
+              checked={outOfCharacter}
+              onChange={(e) => onOutOfCharacterChange(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-cyan-600"
+            />
             <span className="text-sm text-gray-700">{t("circumstances.outOfCharacter")}</span>
           </label>
         </div>
@@ -567,7 +877,31 @@ function CircumstancesForm({
   );
 }
 
-function ContactsForm() {
+function ContactsForm({
+  contactEmails,
+  contactPhones,
+  socialHandles,
+  contactFriends,
+  onContactEmailsChange,
+  onContactPhonesChange,
+  onSocialHandleChange,
+  onFriendChange,
+  onAddFriend,
+}: {
+  contactEmails: string;
+  contactPhones: string;
+  socialHandles: Record<string, string>;
+  contactFriends: { name: string; relationship: string; contact: string }[];
+  onContactEmailsChange: (value: string) => void;
+  onContactPhonesChange: (value: string) => void;
+  onSocialHandleChange: (platform: string, value: string) => void;
+  onFriendChange: (
+    index: number,
+    field: "name" | "relationship" | "contact",
+    value: string
+  ) => void;
+  onAddFriend: () => void;
+}) {
   const t = useTranslations("intake");
   const platforms = ["Facebook", "Instagram", "Twitter/X", "TikTok", "LinkedIn"];
 
@@ -584,6 +918,8 @@ function ContactsForm() {
           <p className="text-xs text-gray-500">{t("contacts.emailsHelp")}</p>
           <textarea
             rows={3}
+            value={contactEmails}
+            onChange={(e) => onContactEmailsChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -592,6 +928,8 @@ function ContactsForm() {
           <p className="text-xs text-gray-500">{t("contacts.phonesHelp")}</p>
           <textarea
             rows={3}
+            value={contactPhones}
+            onChange={(e) => onContactPhonesChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -604,6 +942,8 @@ function ContactsForm() {
                 <input
                   type="text"
                   placeholder="@username"
+                  value={socialHandles[platform] ?? ""}
+                  onChange={(e) => onSocialHandleChange(platform, e.target.value)}
                   className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 />
               </div>
@@ -614,32 +954,78 @@ function ContactsForm() {
           <label className="block text-sm font-medium text-gray-700">{t("contacts.friends")}</label>
           <p className="text-xs text-gray-500">{t("contacts.friendsHelp")}</p>
           <div className="mt-2 space-y-2">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder={t("contacts.namePlaceholder")}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="text"
-                placeholder={t("contacts.relationshipPlaceholder")}
-                className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="text"
-                placeholder={t("contacts.contactPlaceholder")}
-                className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
+            {contactFriends.map((friend, index) => (
+              <div key={`friend-${index}`} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={t("contacts.namePlaceholder")}
+                  value={friend.name}
+                  onChange={(e) => onFriendChange(index, "name", e.target.value)}
+                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder={t("contacts.relationshipPlaceholder")}
+                  value={friend.relationship}
+                  onChange={(e) =>
+                    onFriendChange(index, "relationship", e.target.value)
+                  }
+                  className="w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder={t("contacts.contactPlaceholder")}
+                  value={friend.contact}
+                  onChange={(e) =>
+                    onFriendChange(index, "contact", e.target.value)
+                  }
+                  className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+              </div>
+            ))}
           </div>
-          <button className="mt-2 text-sm text-cyan-600 hover:text-cyan-700">{t("contacts.addFriend")}</button>
+          <button
+            type="button"
+            onClick={onAddFriend}
+            className="mt-2 text-sm text-cyan-600 hover:text-cyan-700"
+          >
+            {t("contacts.addFriend")}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function RisksForm() {
+function RisksForm({
+  medicalConditions,
+  medications,
+  mentalHealthStatus,
+  suicidalRisk,
+  threats,
+  onMedicalConditionsChange,
+  onMedicationsChange,
+  onMentalHealthStatusChange,
+  onSuicidalRiskChange,
+  onThreatChange,
+  onAddThreat,
+}: {
+  medicalConditions: string;
+  medications: string;
+  mentalHealthStatus: string;
+  suicidalRisk: boolean;
+  threats: { name: string; relationship: string; description: string }[];
+  onMedicalConditionsChange: (value: string) => void;
+  onMedicationsChange: (value: string) => void;
+  onMentalHealthStatusChange: (value: string) => void;
+  onSuicidalRiskChange: (value: boolean) => void;
+  onThreatChange: (
+    index: number,
+    field: "name" | "relationship" | "description",
+    value: string
+  ) => void;
+  onAddThreat: () => void;
+}) {
   const t = useTranslations("intake");
   const mentalOptions = ["none", "history", "current", "crisis"];
 
@@ -657,6 +1043,8 @@ function RisksForm() {
           <textarea
             rows={2}
             placeholder={t("risks.medicalPlaceholder")}
+            value={medicalConditions}
+            onChange={(e) => onMedicalConditionsChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
@@ -667,13 +1055,19 @@ function RisksForm() {
           <textarea
             rows={2}
             placeholder={t("risks.medicationsPlaceholder")}
+            value={medications}
+            onChange={(e) => onMedicationsChange(e.target.value)}
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">{t("risks.mental")}</label>
-          <select className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+          <select
+            value={mentalHealthStatus}
+            onChange={(e) => onMentalHealthStatusChange(e.target.value)}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+          >
             {mentalOptions.map((key) => (
               <option key={key} value={key}>
                 {t(`risks.mentalOptions.${key}`)}
@@ -684,7 +1078,12 @@ function RisksForm() {
 
         <div className="rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
           <label className="flex items-start gap-2">
-            <input type="checkbox" className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600" />
+            <input
+              type="checkbox"
+              checked={suicidalRisk}
+              onChange={(e) => onSuicidalRiskChange(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-orange-600"
+            />
             <div>
               <span className="text-sm font-medium text-orange-800">{t("risks.suicidal")}</span>
               <p className="text-xs text-orange-600">{t("risks.suicidalWarning")}</p>
@@ -696,24 +1095,42 @@ function RisksForm() {
           <label className="block text-sm font-medium text-gray-700">{t("risks.threats")}</label>
           <p className="text-xs text-gray-500">{t("risks.threatsHelp")}</p>
           <div className="mt-2 rounded-lg border border-gray-200 p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <input
-                type="text"
-                placeholder={t("risks.threatName")}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="text"
-                placeholder={t("risks.threatRelation")}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-              <input
-                type="text"
-                placeholder={t("risks.threatDescription")}
-                className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
-              />
-            </div>
-            <button className="mt-3 text-sm text-cyan-600 hover:text-cyan-700">{t("risks.addThreat")}</button>
+            {threats.map((threat, index) => (
+              <div key={`threat-${index}`} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <input
+                  type="text"
+                  placeholder={t("risks.threatName")}
+                  value={threat.name}
+                  onChange={(e) => onThreatChange(index, "name", e.target.value)}
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder={t("risks.threatRelation")}
+                  value={threat.relationship}
+                  onChange={(e) =>
+                    onThreatChange(index, "relationship", e.target.value)
+                  }
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <input
+                  type="text"
+                  placeholder={t("risks.threatDescription")}
+                  value={threat.description}
+                  onChange={(e) =>
+                    onThreatChange(index, "description", e.target.value)
+                  }
+                  className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={onAddThreat}
+              className="mt-3 text-sm text-cyan-600 hover:text-cyan-700"
+            >
+              {t("risks.addThreat")}
+            </button>
           </div>
         </div>
       </div>

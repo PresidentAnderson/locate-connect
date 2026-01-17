@@ -406,6 +406,7 @@ export async function processDataErasureRequest(
   // Delete/anonymize user data in order of dependencies
 
   // 1. Notifications
+  // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
   const { count: notificationCount } = await supabase
     .from('notifications')
     .delete()
@@ -418,6 +419,7 @@ export async function processDataErasureRequest(
   }
 
   // 2. Consent records (anonymize, don't delete for compliance)
+  // @ts-expect-error - Supabase types don't match runtime behavior for select after update
   const { count: consentCount } = await supabase
     .from('consent_records')
     .update({ user_id: null })
@@ -430,6 +432,7 @@ export async function processDataErasureRequest(
   }
 
   // 3. User sessions
+  // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
   const { count: sessionCount } = await supabase
     .from('user_sessions')
     .delete()
@@ -541,6 +544,7 @@ export async function executeRetentionPolicy(policyId: string): Promise<{
       }
 
       if (policy.action_on_expiry === 'delete') {
+        // @ts-expect-error - Supabase types don't match runtime behavior for select after delete
         const { count: deleteCount } = await supabase
           .from(policy.table_name)
           .delete()

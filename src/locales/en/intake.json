@@ -51,6 +51,7 @@
     "lastName": "Last Name",
     "dob": "Date of Birth",
     "gender": "Gender",
+    "selectGender": "Select gender",
     "height": "Height",
     "weight": "Weight",
     "hairColor": "Hair Color",

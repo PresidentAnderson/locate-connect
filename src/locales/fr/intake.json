@@ -51,6 +51,7 @@
     "lastName": "Nom de famille",
     "dob": "Date de naissance",
     "gender": "Genre",
+    "selectGender": "Sélectionnez le genre",
     "height": "Taille",
     "weight": "Poids",
     "hairColor": "Couleur des cheveux",
