@@ -36,24 +36,47 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Initialize locale from storage or browser detection
+  // Initialize locale from storage, profile preference, or browser detection
   useEffect(() => {
+    let isMounted = true;
     const stored = typeof window !== "undefined"
       ? window.localStorage.getItem(STORAGE_KEY)
       : null;
 
-    let nextLocale: Locale;
-
     if (stored) {
-      // User has an explicit preference stored
-      nextLocale = normalizeLocale(stored);
-    } else {
-      // Auto-detect from browser settings using enhanced detection
-      nextLocale = detectBrowserLocale();
+      const nextLocale = normalizeLocale(stored);
+      setLocaleState(nextLocale);
+      setIsHydrated(true);
+      return () => {
+        isMounted = false;
+      };
     }
 
-    setLocaleState(nextLocale);
-    setIsHydrated(true);
+    const resolveLocale = async () => {
+      let nextLocale = detectBrowserLocale();
+
+      try {
+        const response = await fetch("/api/profile/language");
+        if (response.ok) {
+          const data = (await response.json()) as { preferred_language?: string };
+          if (data.preferred_language) {
+            nextLocale = normalizeLocale(data.preferred_language);
+          }
+        }
+      } catch {
+        // Keep browser-detected locale on failure.
+      }
+
+      if (!isMounted) return;
+      setLocaleState(nextLocale);
+      setIsHydrated(true);
+    };
+
+    void resolveLocale();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Update document attributes when locale changes
