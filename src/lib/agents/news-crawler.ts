@@ -37,7 +37,7 @@ export class NewsCrawlerAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as NewsCrawlerSettings;
+    this.settings = (config.settings as unknown) as NewsCrawlerSettings;
   }
 
   protected async execute(): Promise<{

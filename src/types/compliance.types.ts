@@ -492,7 +492,7 @@ export interface Phase2Readiness {
 export interface Jurisdiction {
   id: string;
   code: string;
-  name: Record<SupportedLanguage, string>;
+  name: Partial<Record<SupportedLanguage, string>>;
   type: "federal" | "provincial" | "territorial" | "municipal" | "indigenous";
   parentId?: string;
   country: string;

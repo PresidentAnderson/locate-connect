@@ -55,8 +55,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(roadmap);
 
       case "dashboard":
-        const dashboard = phase2GatingService.getLaunchDashboard();
-        return NextResponse.json(dashboard);
+        return NextResponse.json({
+          readiness: phase2GatingService.getReadiness(),
+          launchStatus: phase2GatingService.isReadyForLaunch(),
+          criteria: phase2GatingService.getCriteria(),
+          jurisdictions: phase2GatingService.getEnabledJurisdictions(),
+        });
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -77,16 +81,15 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "updateCriterion":
-        const { criterionId, status, progress, notes, evidence } = body;
+        const { criterionId, status, progress } = body;
         if (!criterionId) {
           return NextResponse.json({ error: "Criterion ID required" }, { status: 400 });
         }
-        const updated = phase2GatingService.updateCriterion(criterionId, {
-          status,
-          progress,
-          notes,
-          evidence,
-        });
+        const updated = phase2GatingService.updateCriterionProgress(
+          criterionId,
+          progress ?? 0,
+          status
+        );
         if (!updated) {
           return NextResponse.json({ error: "Criterion not found" }, { status: 404 });
         }
@@ -109,21 +112,34 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: disableResult });
 
       case "addJurisdiction":
-        const { id, name, region, country, languages, timezone, privacyLaws, enabled } = body;
-        if (!id || !name || !region || !country || !languages || !timezone || !privacyLaws) {
+        const {
+          code,
+          name,
+          type: jurisdictionType,
+          parentId,
+          country,
+          timezone,
+          languages,
+          privacyRegulation,
+          primaryContact,
+          enabled,
+        } = body;
+        if (!code || !name || !jurisdictionType || !country || !timezone || !languages || !privacyRegulation) {
           return NextResponse.json(
-            { error: "All jurisdiction fields required" },
+            { error: "Required jurisdiction fields missing" },
             { status: 400 }
           );
         }
         const newJurisdiction = phase2GatingService.addJurisdiction({
-          id,
+          code,
           name,
-          region,
+          type: jurisdictionType,
+          parentId,
           country,
-          languages,
           timezone,
-          privacyLaws,
+          languages,
+          privacyRegulation,
+          primaryContact,
           enabled: enabled || false,
         });
         return NextResponse.json(newJurisdiction);

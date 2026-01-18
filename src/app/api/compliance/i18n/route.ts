@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { i18nService } from "@/lib/services/i18n-service";
-import type { SupportedLanguage } from "@/types/compliance.types";
+import type { SupportedLanguage, TranslationNamespace } from "@/types/compliance.types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,9 +13,12 @@ export async function GET(request: NextRequest) {
     const action = searchParams.get("action");
     const language = (searchParams.get("language") || "en") as SupportedLanguage;
 
+    // Set the language for translations
+    i18nService.setLanguage(language);
+
     switch (action) {
       case "languages":
-        const languages = i18nService.getAvailableLanguages();
+        const languages = i18nService.getEnabledLanguages();
         return NextResponse.json(languages);
 
       case "indigenous":
@@ -28,21 +31,17 @@ export async function GET(request: NextRequest) {
         if (!key) {
           return NextResponse.json({ error: "Key required" }, { status: 400 });
         }
-        const translation = i18nService.t(namespace, key, {}, language);
+        const translation = i18nService.t(namespace as keyof TranslationNamespace, key);
         return NextResponse.json({ translation });
 
       case "namespace":
         const ns = searchParams.get("namespace") || "common";
-        const translations = i18nService.getNamespace(ns, language);
+        const translations = i18nService.getNamespace(ns as keyof TranslationNamespace);
         return NextResponse.json(translations);
 
-      case "coverage":
-        const coverage = i18nService.getTranslationCoverage(language);
-        return NextResponse.json(coverage);
-
-      case "missing":
-        const missing = i18nService.getMissingTranslations(language);
-        return NextResponse.json(missing);
+      case "config":
+        const config = i18nService.getLanguageConfig(language);
+        return NextResponse.json(config);
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -61,6 +60,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action, language, date, format, number } = body;
 
+    // Set the language for formatting
+    if (language) {
+      i18nService.setLanguage(language as SupportedLanguage);
+    }
+
     switch (action) {
       case "formatDate":
         if (!date) {
@@ -68,8 +72,7 @@ export async function POST(request: NextRequest) {
         }
         const formattedDate = i18nService.formatDate(
           new Date(date),
-          format || "long",
-          language || "en"
+          format || "long"
         );
         return NextResponse.json({ formatted: formattedDate });
 
@@ -77,19 +80,11 @@ export async function POST(request: NextRequest) {
         if (number === undefined) {
           return NextResponse.json({ error: "Number required" }, { status: 400 });
         }
-        const formattedNumber = i18nService.formatNumber(
-          number,
-          language || "en"
-        );
+        const formattedNumber = i18nService.formatNumber(number);
         return NextResponse.json({ formatted: formattedNumber });
 
-      case "detect":
-        const { text } = body;
-        if (!text) {
-          return NextResponse.json({ error: "Text required" }, { status: 400 });
-        }
-        const detected = i18nService.detectLanguage(text);
-        return NextResponse.json({ language: detected });
+      case "direction":
+        return NextResponse.json({ direction: i18nService.getDirection() });
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

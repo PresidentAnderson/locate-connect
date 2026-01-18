@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: statusResult });
 
       case "createOpportunity":
-        const { caseId, title, description, type, dateTime, duration, opportunityLocation, volunteersNeeded, skills: oppSkills, languages: oppLangs, requirements } = body;
+        const { caseId, title, description, type, dateTime, duration, opportunityLocation, volunteersNeeded, skills: oppSkills, languages: oppLangs } = body;
         if (!caseId || !title || !description || !type || !dateTime || !opportunityLocation || !volunteersNeeded) {
           return NextResponse.json(
             { error: "All required fields must be provided" },
@@ -172,7 +172,6 @@ export async function POST(request: NextRequest) {
           volunteersNeeded,
           skills: oppSkills,
           languages: oppLangs,
-          requirements,
         });
         return NextResponse.json(newOpportunity);
 

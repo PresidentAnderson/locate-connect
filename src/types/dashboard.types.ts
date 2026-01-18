@@ -8,7 +8,7 @@
 // =============================================================================
 
 export type AgentStatus = 'available' | 'busy' | 'away' | 'offline';
-export type IntegrationStatus = 'healthy' | 'degraded' | 'down' | 'unknown';
+export type DashboardIntegrationStatus = 'healthy' | 'degraded' | 'down' | 'unknown';
 export type ReportFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
 export type ReportFormat = 'pdf' | 'csv' | 'excel' | 'json';
 export type BottleneckSeverity = 'low' | 'medium' | 'high' | 'critical';
@@ -228,12 +228,12 @@ export interface SLAComplianceSummary {
 // INTEGRATION HEALTH
 // =============================================================================
 
-export interface IntegrationHealth {
+export interface DashboardIntegrationHealth {
   id: string;
   integrationName: string;
   displayName: string;
   description?: string;
-  status: IntegrationStatus;
+  status: DashboardIntegrationStatus;
   lastCheckAt?: string;
   lastSuccessAt?: string;
   lastFailureAt?: string;
@@ -448,7 +448,7 @@ export interface OperationsDashboardData {
     overdueCases: number;
   };
   agentQueue: AgentQueueStatusWithUser[];
-  integrationHealth: IntegrationHealth[];
+  integrationHealth: DashboardIntegrationHealth[];
   staffProductivity: StaffProductivitySummary[];
   slaCompliance: SLAComplianceSummary;
   bottlenecks: BottleneckTracking[];

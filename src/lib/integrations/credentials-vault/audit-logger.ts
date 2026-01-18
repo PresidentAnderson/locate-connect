@@ -159,8 +159,8 @@ export class AuditLoggerService {
   async logRevoke(
     context: AccessControlContext,
     credentialId: string,
-    credentialName?: string,
-    reason: string
+    reason: string,
+    credentialName?: string
   ): Promise<void> {
     await this.log(context, 'revoke', credentialId, true, {
       credentialName,

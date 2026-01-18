@@ -27,7 +27,7 @@ export interface MissingPerson {
   photoUrls: string[];
   medicalConditions: MedicalCondition[];
   medications: Medication[];
-  socialMedia: SocialMediaAccount[];
+  socialMedia: CaseSocialMediaAccount[];
   knownEmails: string[];
   knownPhoneNumbers: string[];
   priorityLevel: PriorityLevel;
@@ -53,7 +53,7 @@ export interface Medication {
   hoursUntilCritical?: number;
 }
 
-export interface SocialMediaAccount {
+export interface CaseSocialMediaAccount {
   platform: "facebook" | "instagram" | "twitter" | "tiktok" | "linkedin" | "other";
   username: string;
   profileUrl: string;
@@ -85,7 +85,7 @@ export interface CaseReport {
   knownAssociates: KnownAssociate[];
   potentialThreats: PotentialThreat[];
   timeline: TimelineEvent[];
-  leads: Lead[];
+  leads: CaseLead[];
   jurisdictionProfile: string;
   createdAt: string;
   updatedAt: string;
@@ -149,7 +149,7 @@ export interface TimelineEvent {
   verified: boolean;
 }
 
-export interface Lead {
+export interface CaseLead {
   id: string;
   type: "social_media" | "email_opened" | "location" | "witness" | "hospital" | "detention" | "other";
   description: string;

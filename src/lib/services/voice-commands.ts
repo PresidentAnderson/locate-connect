@@ -3,6 +3,10 @@
  * Provides hands-free voice interface for the application.
  */
 
+// Web Speech API type - use any to avoid conflicts with DOM lib types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SpeechRecognitionInstance = any;
+
 export type VoiceCommandLanguage = "en" | "fr" | "es";
 
 export interface VoiceCommand {
@@ -206,7 +210,7 @@ const WAKE_WORDS: Record<VoiceCommandLanguage, string[]> = {
 };
 
 export class VoiceCommandService {
-  private recognition: SpeechRecognition | null = null;
+  private recognition: SpeechRecognitionInstance | null = null;
   private synthesis: SpeechSynthesis | null = null;
   private config: VoiceRecognitionConfig;
   private isListening = false;
@@ -334,7 +338,8 @@ export class VoiceCommandService {
     return COMMAND_PATTERNS[this.config.language] || COMMAND_PATTERNS.en;
   }
 
-  private handleResult(event: SpeechRecognitionEvent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleResult(event: any) {
     const results = event.results;
     const lastResult = results[results.length - 1];
 
@@ -403,7 +408,8 @@ export class VoiceCommandService {
     };
   }
 
-  private handleError(event: SpeechRecognitionErrorEvent) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleError(event: any) {
     console.error("[VoiceCommands] Error:", event.error);
     this.onErrorCallback?.(event.error);
 
@@ -421,14 +427,6 @@ export class VoiceCommandService {
         this.isListening = false;
       }
     }
-  }
-}
-
-// Type declarations for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
   }
 }
 

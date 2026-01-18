@@ -565,11 +565,12 @@ class I18nService {
     const d = typeof date === "string" ? new Date(date) : date;
     const locale = this.currentLanguage === "fr" ? "fr-CA" : "en-CA";
 
-    const options: Intl.DateTimeFormatOptions = {
+    const formatOptions = {
       short: { month: "numeric", day: "numeric", year: "2-digit" },
       medium: { month: "short", day: "numeric", year: "numeric" },
       long: { month: "long", day: "numeric", year: "numeric", weekday: "long" },
-    }[format];
+    } as const;
+    const options: Intl.DateTimeFormatOptions = formatOptions[format];
 
     return d.toLocaleDateString(locale, options);
   }

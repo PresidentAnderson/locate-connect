@@ -40,6 +40,8 @@ interface NotificationGroup {
 }
 
 interface NotificationRow {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
   id: string;
   user_id: string;
   notification_type: NotificationType;

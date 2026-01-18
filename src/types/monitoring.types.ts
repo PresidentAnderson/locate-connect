@@ -105,6 +105,7 @@ export interface AlertRule {
   description?: string;
   enabled: boolean;
   serviceId?: string;
+  integrationId?: string;
   metricName?: string;
   condition: AlertCondition;
   severity: AlertSeverity;

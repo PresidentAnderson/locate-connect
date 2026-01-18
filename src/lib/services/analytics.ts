@@ -14,7 +14,7 @@ import type {
   AgentMetrics,
   SystemHealth,
   ActivityItem,
-  ExecutiveDashboardData,
+  AnalyticsExecutiveDashboardData,
   TrendDirection,
 } from '@/types/analytics.types';
 
@@ -33,7 +33,7 @@ const TIME_RANGE_HOURS: Record<TimeRange, number> = {
  */
 export async function getExecutiveDashboardData(
   timeRange: TimeRange = '30d'
-): Promise<ExecutiveDashboardData> {
+): Promise<AnalyticsExecutiveDashboardData> {
   const [
     kpis,
     caseStatusDistribution,

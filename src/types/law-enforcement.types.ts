@@ -512,7 +512,7 @@ export interface VoiceCommand {
 
 export interface VoiceCommandParameter {
   name: string;
-  type: "string" | "number" | "date" | "enum";
+  type: "string" | "number" | "date" | "enum" | "boolean";
   required: boolean;
   extractionPatterns: Record<VoiceLanguage, string[]>;
   enumValues?: string[];

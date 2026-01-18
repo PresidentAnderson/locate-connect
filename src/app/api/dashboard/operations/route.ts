@@ -4,7 +4,7 @@ import type {
   OperationsDashboardData,
   AgentQueueStatusWithUser,
   StaffProductivitySummary,
-  IntegrationHealth,
+  DashboardIntegrationHealth,
   BottleneckTracking,
   SLAComplianceSummary,
 } from "@/types/dashboard.types";
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Format integration health
-    const integrationHealth: IntegrationHealth[] = (integrationHealthResult.data || []).map((i) => ({
+    const integrationHealth: DashboardIntegrationHealth[] = (integrationHealthResult.data || []).map((i) => ({
       id: i.id,
       integrationName: i.integration_name,
       displayName: i.display_name,

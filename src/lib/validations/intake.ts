@@ -174,7 +174,7 @@ export const contactsSchema = z.object({
     .string()
     .max(500, 'Phone numbers must be less than 500 characters')
     .optional(),
-  socialHandles: z.record(z.string().max(100)).optional(),
+  socialHandles: z.record(z.string(), z.string().max(100)).optional(),
   contactFriends: z
     .array(
       z.object({
@@ -290,9 +290,9 @@ export function validateStep(
   }
 
   const errors: Record<string, string> = {};
-  result.error.errors.forEach((err) => {
-    const path = err.path.join('.');
-    errors[path] = err.message;
+  result.error.issues.forEach((issue) => {
+    const path = issue.path.join('.');
+    errors[path] = issue.message;
   });
 
   return { success: false, errors };

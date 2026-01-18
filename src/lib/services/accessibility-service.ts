@@ -230,8 +230,9 @@ class AccessibilityService {
 
   /**
    * Calculate contrast ratio between two colors
+   * Public method for use in accessibility API endpoints
    */
-  private calculateContrastRatio(color1: string, color2: string): number {
+  calculateContrastRatio(color1: string, color2: string): number {
     const lum1 = this.getRelativeLuminance(color1);
     const lum2 = this.getRelativeLuminance(color2);
 

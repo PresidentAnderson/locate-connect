@@ -17,7 +17,7 @@ export class EmailTrackingAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as EmailTrackingAgentSettings;
+    this.settings = (config.settings as unknown) as EmailTrackingAgentSettings;
   }
 
   protected async execute(): Promise<{

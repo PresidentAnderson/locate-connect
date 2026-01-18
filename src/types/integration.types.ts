@@ -287,7 +287,7 @@ export interface IntegrationMetrics {
   recordsProcessed: number;
 }
 
-export interface AlertRule {
+export interface IntegrationAlertRule {
   id: string;
   integrationId?: string; // null for global rules
   name: string;
@@ -578,6 +578,8 @@ export interface DecryptedCredential {
 
 // Raw Credential Data (decrypted)
 export interface CredentialData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
   apiKey?: string;
   clientId?: string;
   clientSecret?: string;
@@ -609,7 +611,7 @@ export interface CredentialAccessLog {
   id: string;
   credentialId: string;
   userId: string;
-  action: "retrieve" | "rotate" | "revoke" | "create" | "update";
+  action: "retrieve" | "rotate" | "revoke" | "create" | "update" | "delete" | "access_denied" | "decrypt" | "health_check" | "list";
   success: boolean;
   ipAddress?: string;
   userAgent?: string;

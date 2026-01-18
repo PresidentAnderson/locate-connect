@@ -21,22 +21,27 @@ function buildUpdateSummary(request: AmberAlertRequest) {
   ].join(" ");
 }
 
-// Map form distribution channels to enum values
-function mapDistributionChannels(formChannels: string[]): AmberDistributionChannel[] {
-  const channelMap: Record<string, AmberDistributionChannel> = {
-    'wea': 'wea',
-    'eas': 'eas',
-    'highway': 'highway_signs',
-    'social': 'social_media',
-    'partner': 'partner_alert',
-    'email': 'email',
-    'sms': 'sms',
-    'push': 'push_notification',
-  };
+// Derive distribution channels from form boolean flags
+function deriveDistributionChannels(body: AmberAlertRequest): AmberDistributionChannel[] {
+  const channels: AmberDistributionChannel[] = [];
 
-  return formChannels
-    .map(c => channelMap[c])
-    .filter((c): c is AmberDistributionChannel => c !== undefined);
+  if (body.includeWirelessAlert) {
+    channels.push('wea');
+  }
+  if (body.includeBroadcastAlert) {
+    channels.push('eas');
+  }
+  if (body.includeHighwaySignage) {
+    channels.push('highway_signs');
+  }
+  if (body.includeSocialMedia) {
+    channels.push('social_media');
+  }
+
+  // Always include partner alerts and push notifications as defaults
+  channels.push('partner_alert', 'push_notification');
+
+  return channels;
 }
 
 /**
@@ -152,42 +157,46 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Map distribution channels from form
-  const distributionChannels = mapDistributionChannels(body.distributionChannels || []);
+  // Derive distribution channels from form boolean flags
+  const distributionChannels = deriveDistributionChannels(body);
+
+  // Build suspect name from first/last if known
+  const suspectName = body.suspectKnown && (body.suspectFirstName || body.suspectLastName)
+    ? `${body.suspectFirstName || ''} ${body.suspectLastName || ''}`.trim()
+    : undefined;
 
   // Create the AMBER alert record
   const { data: amberAlert, error: alertError } = await supabase
     .from("amber_alerts")
     .insert({
       case_id: body.caseId,
-      child_name: `${caseRecord.first_name} ${caseRecord.last_name}`,
+      child_name: `${body.childFirstName} ${body.childLastName}`,
       child_age: body.childAge,
       child_gender: body.childGender,
-      child_description: body.physicalDescription,
-      child_photo_url: caseRecord.primary_photo_url,
+      child_description: body.childDistinguishingFeatures,
+      child_photo_url: body.childPhotoUrl || caseRecord.primary_photo_url,
       abduction_date: body.abductionDate,
       abduction_time: body.abductionTime,
       abduction_location: body.abductionLocation,
       abduction_city: body.abductionCity,
       abduction_province: body.abductionProvince,
       abduction_circumstances: body.circumstances,
-      suspect_name: body.suspectName,
+      suspect_name: suspectName,
       suspect_description: body.suspectDescription,
       suspect_relationship: body.suspectRelationship,
       vehicle_involved: body.vehicleInvolved || false,
       vehicle_make: body.vehicleMake,
       vehicle_model: body.vehicleModel,
-      vehicle_year: body.vehicleYear,
+      vehicle_year: body.vehicleYear ? parseInt(body.vehicleYear) : undefined,
       vehicle_color: body.vehicleColor,
       vehicle_license_plate: body.vehicleLicensePlate,
       vehicle_license_province: body.vehicleLicenseProvince,
       target_provinces: body.targetProvinces || [],
       distribution_channels: distributionChannels,
       requesting_officer_id: user.id,
-      requesting_officer_name: body.contactName || profile.full_name,
-      requesting_officer_badge: body.badgeNumber,
-      requesting_officer_phone: body.contactPhone,
-      requesting_officer_agency: body.agency,
+      requesting_officer_name: body.lawEnforcementContact || profile.full_name,
+      requesting_officer_phone: body.lawEnforcementPhone,
+      requesting_officer_agency: body.lawEnforcementAgency,
     })
     .select()
     .single();

@@ -46,7 +46,8 @@ export async function POST(
         auth_type,
         credential_id,
         config,
-        default_headers
+        default_headers,
+        status
       `)
       .eq('id', id)
       .single();

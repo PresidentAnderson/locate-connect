@@ -6,11 +6,29 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRealtime } from './useRealtime';
-import type { Notification, NotificationPreferences } from '@/types/notification.types';
+import type { NotificationPreferences } from '@/types/notification.types';
 
 // =============================================================================
 // Types
 // =============================================================================
+
+export interface Notification {
+  id: string;
+  userId?: string;
+  type: string;
+  title: string;
+  message: string;
+  data?: Record<string, unknown> | null;
+  read: boolean;
+  dismissed?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  caseId?: string;
+  actions?: Array<{
+    label: string;
+    href: string;
+  }>;
+}
 
 interface UseNotificationsOptions {
   userId?: string;
@@ -33,6 +51,8 @@ interface UseNotificationsReturn {
 }
 
 interface NotificationRow {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
   id: string;
   user_id: string;
   type: string;

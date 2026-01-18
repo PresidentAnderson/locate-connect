@@ -13,7 +13,8 @@ import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/
 
 type PostgresChangeEvent = 'INSERT' | 'UPDATE' | 'DELETE' | '*';
 
-interface UseRealtimeOptions<T> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface UseRealtimeOptions<T extends { [key: string]: any }> {
   table: string;
   schema?: string;
   event?: PostgresChangeEvent;
@@ -38,7 +39,8 @@ interface UseRealtimeReturn {
 /**
  * Subscribe to real-time changes on a Supabase table
  */
-export function useRealtime<T extends Record<string, unknown>>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useRealtime<T extends { [key: string]: any }>({
   table,
   schema = 'public',
   event = '*',
@@ -82,7 +84,8 @@ export function useRealtime<T extends Record<string, unknown>>({
     }
 
     // Create new channel
-    const channel = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const channel = (supabase as any)
       .channel(channelName)
       .on(
         'postgres_changes',
@@ -116,7 +119,7 @@ export function useRealtime<T extends Record<string, unknown>>({
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true);
           setError(null);
@@ -346,7 +349,7 @@ export function useRealtimeBroadcast<T>({
           onMessage(payload as T);
         }
       })
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true);
           setError(null);

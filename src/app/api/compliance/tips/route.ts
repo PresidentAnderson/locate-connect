@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
 
       case "list":
         const status = searchParams.get("status") as AnonymousTip["status"] | undefined;
-        const caseId = searchParams.get("caseId") || undefined;
-        const tips = anonymousTipsService.listTips({ status, caseId });
+        const caseNumber = searchParams.get("caseNumber") || undefined;
+        const tips = anonymousTipsService.listTips({ status, caseNumber });
         return NextResponse.json(tips);
 
       case "statistics":
@@ -53,16 +53,34 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "submit":
-        const { description, caseId, location, mediaUrls, contactPreference } = body;
+        const {
+          description,
+          caseNumber: tipCaseNumber,
+          location,
+          sightingDate,
+          sightingTime,
+          personDescription,
+          vehicleDescription,
+          companionDescription,
+          attachments,
+          language = "en",
+          source = "web",
+        } = body;
         if (!description) {
           return NextResponse.json({ error: "Description required" }, { status: 400 });
         }
         const result = await anonymousTipsService.submitTip({
           description,
-          caseId,
+          caseNumber: tipCaseNumber,
           location,
-          mediaUrls,
-          contactPreference,
+          sightingDate,
+          sightingTime,
+          personDescription,
+          vehicleDescription,
+          companionDescription,
+          attachments,
+          language,
+          source,
         });
         return NextResponse.json(result);
 
@@ -84,32 +102,32 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true });
 
       case "verify":
-        const { tipId: verifyId, verifierId } = body;
-        if (!verifyId || !verifierId) {
+        const { tipId: verifyId } = body;
+        if (!verifyId) {
           return NextResponse.json(
-            { error: "Tip ID and verifier ID required" },
+            { error: "Tip ID required" },
             { status: 400 }
           );
         }
-        const verifyResult = await anonymousTipsService.verifyTip(verifyId, verifierId);
+        const verifyResult = await anonymousTipsService.updateStatus(verifyId, "verified");
         return NextResponse.json(verifyResult);
 
       case "assignCase":
-        const { tipId: assignTipId, caseId: assignCaseId } = body;
-        if (!assignTipId || !assignCaseId) {
+        const { tipId: assignTipId, caseNumber: assignCaseNumber } = body;
+        if (!assignTipId || !assignCaseNumber) {
           return NextResponse.json(
-            { error: "Tip ID and case ID required" },
+            { error: "Tip ID and case number required" },
             { status: 400 }
           );
         }
-        const assignResult = await anonymousTipsService.assignToCase(
+        const assignResult = await anonymousTipsService.linkToCase(
           assignTipId,
-          assignCaseId
+          assignCaseNumber
         );
-        return NextResponse.json(assignResult);
+        return NextResponse.json({ success: assignResult });
 
       case "updateStatus":
-        const { tipId: statusTipId, status: newStatus, note } = body;
+        const { tipId: statusTipId, status: newStatus } = body;
         if (!statusTipId || !newStatus) {
           return NextResponse.json(
             { error: "Tip ID and status required" },
@@ -118,8 +136,7 @@ export async function POST(request: NextRequest) {
         }
         const statusResult = await anonymousTipsService.updateStatus(
           statusTipId,
-          newStatus,
-          note
+          newStatus
         );
         return NextResponse.json(statusResult);
 

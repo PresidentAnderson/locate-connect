@@ -50,7 +50,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as PublicRecordsCrawlerSettings;
+    this.settings = (config.settings as unknown) as PublicRecordsCrawlerSettings;
   }
 
   protected async execute(): Promise<{

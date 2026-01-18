@@ -31,6 +31,7 @@ export {
   type IncomingLead,
   type NormalizedLead,
 } from "./lead-ingestion-pipeline";
+import { registerLeadSources } from "./lead-ingestion-pipeline";
 
 // Bulk import
 export {

@@ -5,7 +5,7 @@ import { cn } from "@/lib";
 import type {
   OperationsDashboardData,
   AgentQueueStatusWithUser,
-  IntegrationHealth,
+  DashboardIntegrationHealth,
   BottleneckTracking,
   StaffProductivitySummary,
 } from "@/types/dashboard.types";
@@ -346,7 +346,7 @@ function AgentStatusCard({ agent }: { agent: AgentQueueStatusWithUser }) {
   );
 }
 
-function IntegrationStatusCard({ integration }: { integration: IntegrationHealth }) {
+function IntegrationStatusCard({ integration }: { integration: DashboardIntegrationHealth }) {
   const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
     healthy: { bg: "bg-green-100", text: "text-green-700", label: "Healthy" },
     degraded: { bg: "bg-yellow-100", text: "text-yellow-700", label: "Degraded" },

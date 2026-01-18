@@ -39,7 +39,7 @@ export class PriorityEscalationAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as PriorityEscalationAgentSettings;
+    this.settings = (config.settings as unknown) as PriorityEscalationAgentSettings;
   }
 
   protected async execute(): Promise<{

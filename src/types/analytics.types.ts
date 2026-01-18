@@ -120,7 +120,7 @@ export interface SystemAlert {
 }
 
 // Full analytics response
-export interface ExecutiveDashboardData {
+export interface AnalyticsExecutiveDashboardData {
   kpis: DashboardKPIs;
   caseStatusDistribution: CaseStatusDistribution[];
   priorityBreakdown: PriorityBreakdown[];

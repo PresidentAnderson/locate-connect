@@ -13,6 +13,21 @@ export type NotificationType =
   | 'nearby_case_alert'
   | 'scheduled_reminder';
 
+export interface Notification {
+  id: string;
+  userId?: string;
+  type: string;
+  title: string;
+  message: string;
+  data?: Record<string, unknown> | null;
+  read: boolean;
+  dismissed?: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  caseId?: string;
+  actions?: Array<{ label: string; href: string }>;
+}
+
 export interface NotificationPreferences {
   id: string;
   userId: string;
@@ -32,6 +47,7 @@ export interface NotificationPreferences {
   channelPriority: NotificationChannel[];
   digestTime: string;
   digestDayOfWeek: number;
+  types?: Partial<Record<NotificationType, boolean>>;
   createdAt: string;
   updatedAt: string;
 }

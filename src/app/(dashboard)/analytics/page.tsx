@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type {
-  ExecutiveDashboardData,
+  AnalyticsExecutiveDashboardData,
   TimeRange,
   KPI,
   TrendDirection,
@@ -18,7 +18,7 @@ const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
 ];
 
 export default function AnalyticsDashboardPage() {
-  const [data, setData] = useState<ExecutiveDashboardData | null>(null);
+  const [data, setData] = useState<AnalyticsExecutiveDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
@@ -35,7 +35,7 @@ export default function AnalyticsDashboardPage() {
         throw new Error(errorData.error || "Failed to fetch analytics");
       }
 
-      const result: ExecutiveDashboardData = await response.json();
+      const result: AnalyticsExecutiveDashboardData = await response.json();
       setData(result);
     } catch (err) {
       console.error("Error fetching analytics:", err);

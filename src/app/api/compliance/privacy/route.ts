@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
 
       case "list":
         const status = searchParams.get("status") as PrivacyRequest["status"] | undefined;
-        const requests = privacyComplianceService.listRequests(status);
+        const type = searchParams.get("type") as PrivacyRequest["type"] | undefined;
+        const requests = privacyComplianceService.listRequests({ status, type });
         return NextResponse.json(requests);
 
       case "checklist":
@@ -34,8 +35,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(checklist);
 
       case "config":
-        const config = privacyComplianceService.getPrivacyConfig();
+        const config = privacyComplianceService.getCompliance();
         return NextResponse.json(config);
+
+      case "categories":
+        const categories = privacyComplianceService.getDataCategories();
+        return NextResponse.json(categories);
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
@@ -87,20 +92,6 @@ export async function POST(request: NextRequest) {
         const deleteResult = await privacyComplianceService.processDeletionRequest(deleteId);
         return NextResponse.json(deleteResult);
 
-      case "processCorrection":
-        const { requestId: correctId, corrections } = body;
-        if (!correctId || !corrections) {
-          return NextResponse.json(
-            { error: "Request ID and corrections required" },
-            { status: 400 }
-          );
-        }
-        const correctResult = await privacyComplianceService.processCorrectionRequest(
-          correctId,
-          corrections
-        );
-        return NextResponse.json(correctResult);
-
       case "pia":
         const { projectName, dataProcessing } = body;
         if (!projectName || !dataProcessing) {
@@ -113,19 +104,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(pia);
 
       case "recordConsent":
-        const { userId, purpose, granted } = body;
-        if (!userId || !purpose || granted === undefined) {
+        const { userId, version } = body;
+        if (!userId || !version) {
           return NextResponse.json(
-            { error: "userId, purpose, and granted required" },
+            { error: "userId and version required" },
             { status: 400 }
           );
         }
-        const consent = await privacyComplianceService.recordConsent(
-          userId,
-          purpose,
-          granted
-        );
-        return NextResponse.json(consent);
+        privacyComplianceService.recordConsent(userId, version);
+        return NextResponse.json({ success: true });
 
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

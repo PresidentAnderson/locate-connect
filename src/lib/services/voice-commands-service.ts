@@ -10,6 +10,10 @@ import type {
   VoiceCommandResult,
 } from "@/types/law-enforcement.types";
 
+// Web Speech API type - use any to avoid conflicts with DOM lib types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SpeechRecognitionInstance = any;
+
 interface VoiceRecognitionConfig {
   language: VoiceLanguage;
   continuous: boolean;
@@ -25,7 +29,7 @@ interface CommandMatch {
 
 class VoiceCommandsService {
   private commands: VoiceCommand[] = [];
-  private recognition: SpeechRecognition | null = null;
+  private recognition: SpeechRecognitionInstance | null = null;
   private currentLanguage: VoiceLanguage = "en";
   private isListening = false;
   private onResultCallback: ((result: VoiceCommandResult) => void) | null = null;
@@ -398,7 +402,8 @@ class VoiceCommandsService {
     this.onResultCallback = onResult;
     this.onErrorCallback = onError || null;
 
-    this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.recognition.onresult = (event: any) => {
       const last = event.results.length - 1;
       const transcript = event.results[last][0].transcript.toLowerCase().trim();
       const confidence = event.results[last][0].confidence;
@@ -406,7 +411,8 @@ class VoiceCommandsService {
       this.processTranscript(transcript, confidence);
     };
 
-    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.recognition.onerror = (event: any) => {
       this.onErrorCallback?.(new Error(`Speech recognition error: ${event.error}`));
     };
 
@@ -640,10 +646,3 @@ class VoiceCommandsService {
 
 export const voiceCommandsService = new VoiceCommandsService();
 
-// Type declarations for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}

@@ -6,9 +6,9 @@
 import type {
   IntegrationMetrics,
   IntegrationAlert,
-  AlertRule,
   HealthCheckResult,
 } from '@/types';
+import type { IntegrationAlertRule } from '@/types/integration.types';
 import { getConnectorFactory } from '../connector-framework';
 
 export interface MonitoringConfig {
@@ -40,7 +40,7 @@ const DEFAULT_CONFIG: MonitoringConfig = {
  */
 export class IntegrationMonitorService {
   private config: MonitoringConfig;
-  private alertRules: Map<string, AlertRule> = new Map();
+  private alertRules: Map<string, IntegrationAlertRule> = new Map();
   private activeAlerts: Map<string, IntegrationAlert> = new Map();
   private metricsBuffer: Map<string, MetricSnapshot[]> = new Map();
   private healthCheckTimers: Map<string, NodeJS.Timeout> = new Map();
@@ -197,7 +197,7 @@ export class IntegrationMonitorService {
   /**
    * Register an alert rule
    */
-  registerAlertRule(rule: AlertRule): void {
+  registerIntegrationAlertRule(rule: IntegrationAlertRule): void {
     this.alertRules.set(rule.id, rule);
     console.log(`[IntegrationMonitor] Registered alert rule: ${rule.name}`);
   }
@@ -205,14 +205,14 @@ export class IntegrationMonitorService {
   /**
    * Unregister an alert rule
    */
-  unregisterAlertRule(ruleId: string): boolean {
+  unregisterIntegrationAlertRule(ruleId: string): boolean {
     return this.alertRules.delete(ruleId);
   }
 
   /**
    * Evaluate alert rules for all integrations
    */
-  async evaluateAlertRules(): Promise<IntegrationAlert[]> {
+  async evaluateIntegrationAlertRules(): Promise<IntegrationAlert[]> {
     const newAlerts: IntegrationAlert[] = [];
 
     for (const [integrationId] of this.metricsBuffer) {
@@ -301,7 +301,7 @@ export class IntegrationMonitorService {
   /**
    * Evaluate a single rule against metrics
    */
-  private evaluateRule(rule: AlertRule, metrics: IntegrationMetrics): boolean {
+  private evaluateRule(rule: IntegrationAlertRule, metrics: IntegrationMetrics): boolean {
     let value: number;
 
     switch (rule.metric) {
@@ -342,7 +342,7 @@ export class IntegrationMonitorService {
   /**
    * Format alert message
    */
-  private formatAlertMessage(rule: AlertRule, metrics: IntegrationMetrics): string {
+  private formatAlertMessage(rule: IntegrationAlertRule, metrics: IntegrationMetrics): string {
     const metricValue = this.getMetricValue(rule.metric, metrics);
     return `${rule.metric} is ${rule.operator === 'gt' ? 'above' : 'below'} threshold: ${metricValue} (threshold: ${rule.threshold})`;
   }
@@ -350,7 +350,7 @@ export class IntegrationMonitorService {
   /**
    * Get metric value for alert message
    */
-  private getMetricValue(metric: AlertRule['metric'], metrics: IntegrationMetrics): string {
+  private getMetricValue(metric: IntegrationAlertRule['metric'], metrics: IntegrationMetrics): string {
     switch (metric) {
       case 'error_rate':
         const errorRate =
@@ -423,7 +423,7 @@ export class IntegrationMonitorService {
    */
   getStats(): {
     monitoredIntegrations: number;
-    activeAlertRules: number;
+    activeIntegrationAlertRules: number;
     activeAlerts: number;
     alertsByType: Record<string, number>;
   } {
@@ -434,7 +434,7 @@ export class IntegrationMonitorService {
 
     return {
       monitoredIntegrations: this.healthCheckTimers.size,
-      activeAlertRules: this.alertRules.size,
+      activeIntegrationAlertRules: this.alertRules.size,
       activeAlerts: this.activeAlerts.size,
       alertsByType,
     };

@@ -58,7 +58,7 @@ export class HospitalRegistryAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as HospitalRegistryAgentSettings;
+    this.settings = (config.settings as unknown) as HospitalRegistryAgentSettings;
   }
 
   protected async execute(): Promise<{

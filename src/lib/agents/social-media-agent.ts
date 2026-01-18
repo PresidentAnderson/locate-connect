@@ -18,7 +18,7 @@ export class SocialMediaAgent extends BaseAgent {
 
   constructor(config: AgentConfig) {
     super(config);
-    this.settings = config.settings as SocialMediaAgentSettings;
+    this.settings = (config.settings as unknown) as SocialMediaAgentSettings;
   }
 
   protected async execute(): Promise<{

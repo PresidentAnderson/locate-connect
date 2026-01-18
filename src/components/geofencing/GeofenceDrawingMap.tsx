@@ -64,10 +64,6 @@ const Popup = dynamic(
   () => import("react-leaflet").then((mod) => mod.Popup),
   { ssr: false }
 );
-const useMapEvents = dynamic(
-  () => import("react-leaflet").then((mod) => mod.useMapEvents),
-  { ssr: false }
-) as unknown as typeof import("react-leaflet").useMapEvents;
 
 // =============================================================================
 // Map Click Handler Component
