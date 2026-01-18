@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRealtime } from "@/hooks/useRealtime";
 
 // Notification types based on issue requirements
 type NotificationPriority = "low" | "normal" | "high" | "critical";
@@ -38,6 +39,24 @@ interface NotificationGroup {
   createdAt: string;
 }
 
+interface NotificationRow {
+  id: string;
+  user_id: string;
+  notification_type: NotificationType;
+  priority: NotificationPriority;
+  title: string;
+  message: string;
+  case_id?: string;
+  action_url?: string;
+  action_label?: string;
+  read_at?: string;
+  dismissed_at?: string;
+  created_at: string;
+  metadata?: {
+    case_number?: string;
+  };
+}
+
 const TYPE_CONFIG: Record<NotificationType, { label: string; icon: string; color: string }> = {
   new_lead: { label: "New Lead", icon: "💡", color: "bg-blue-100 text-blue-800" },
   priority_escalation: { label: "Priority Escalation", icon: "⚠️", color: "bg-red-100 text-red-800" },
@@ -70,7 +89,12 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-export function NotificationCenter() {
+interface NotificationCenterProps {
+  userId?: string;
+  enableRealtime?: boolean;
+}
+
+export function NotificationCenter({ userId, enableRealtime = true }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [groups, setGroups] = useState<NotificationGroup[]>([]);
@@ -78,8 +102,81 @@ export function NotificationCenter() {
   const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
   const [groupMode, setGroupMode] = useState(true);
   const panelRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const unreadCount = notifications.filter((n) => !n.read && !n.dismissed).length;
+
+  // Transform database row to Notification type
+  const transformNotification = useCallback((row: NotificationRow): Notification => ({
+    id: row.id,
+    type: row.notification_type,
+    priority: row.priority || "normal",
+    title: row.title,
+    message: row.message,
+    caseId: row.case_id,
+    caseNumber: row.metadata?.case_number,
+    read: !!row.read_at,
+    dismissed: !!row.dismissed_at,
+    actionUrl: row.action_url,
+    actionLabel: row.action_label,
+    createdAt: row.created_at,
+  }), []);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(() => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio("/sounds/notification.mp3");
+        audioRef.current.volume = 0.5;
+      }
+      audioRef.current.play().catch(() => {
+        // Ignore audio play errors (autoplay restrictions)
+      });
+    } catch {
+      // Ignore audio errors
+    }
+  }, []);
+
+  // Real-time subscription for new notifications
+  const { isConnected } = useRealtime<NotificationRow>({
+    table: "notifications",
+    filter: userId ? `user_id=eq.${userId}` : undefined,
+    enabled: enableRealtime && !!userId,
+    onInsert: (newRow) => {
+      const notification = transformNotification(newRow);
+      setNotifications((prev) => [notification, ...prev]);
+
+      // Play sound for high/critical priority notifications
+      if (notification.priority === "high" || notification.priority === "critical") {
+        playNotificationSound();
+      }
+
+      // Show browser notification if permission granted
+      if (Notification.permission === "granted") {
+        new Notification(notification.title, {
+          body: notification.message,
+          icon: "/icons/icon-192x192.png",
+          tag: notification.id,
+        });
+      }
+    },
+    onUpdate: ({ new: updated }) => {
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === updated.id
+            ? {
+                ...n,
+                read: !!updated.read_at,
+                dismissed: !!updated.dismissed_at,
+              }
+            : n
+        )
+      );
+    },
+    onDelete: (deleted) => {
+      setNotifications((prev) => prev.filter((n) => n.id !== deleted.id));
+    },
+  });
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
@@ -99,10 +196,45 @@ export function NotificationCenter() {
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000);
+    // Fall back to polling if real-time is disabled or not connected
+    // Use longer interval when real-time is enabled as a backup
+    const pollInterval = enableRealtime && isConnected ? 60000 : 30000;
+    const interval = setInterval(fetchNotifications, pollInterval);
     return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  }, [fetchNotifications, enableRealtime, isConnected]);
+
+  // Recompute groups when notifications change
+  useEffect(() => {
+    const groupMap = new Map<NotificationType, NotificationGroup>();
+    for (const notification of notifications.filter((n) => !n.dismissed)) {
+      const existing = groupMap.get(notification.type);
+      if (existing) {
+        existing.count++;
+        if (new Date(notification.createdAt) > new Date(existing.createdAt)) {
+          existing.latestNotification = notification;
+          existing.createdAt = notification.createdAt;
+        }
+        if (!notification.read) {
+          existing.read = false;
+        }
+      } else {
+        groupMap.set(notification.type, {
+          id: `group-${notification.type}`,
+          type: notification.type,
+          title: notification.title,
+          count: 1,
+          latestNotification: notification,
+          read: notification.read,
+          createdAt: notification.createdAt,
+        });
+      }
+    }
+    setGroups(
+      Array.from(groupMap.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+    );
+  }, [notifications]);
 
   // Close panel when clicking outside
   useEffect(() => {
@@ -193,7 +325,17 @@ export function NotificationCenter() {
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                {enableRealtime && (
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isConnected ? "bg-green-500" : "bg-yellow-500"
+                    }`}
+                    title={isConnected ? "Real-time connected" : "Connecting..."}
+                  />
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button

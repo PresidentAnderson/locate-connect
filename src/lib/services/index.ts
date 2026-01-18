@@ -5,3 +5,5 @@ export * from "./weather-service";
 // export * from "./compliance-service";
 // Note: tip-verification-engine.ts is server-only and should be imported directly in API routes
 // export * from "./tip-verification-engine";
+// Note: notifications.ts is server-only and should be imported directly in API routes
+// export * from "./notifications";
