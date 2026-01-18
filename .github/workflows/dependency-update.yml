@@ -16,23 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm ci
+
+      - name: Check for outdated packages
+        run: npm outdated || true
 
       - name: Update dependencies
-        run: pnpm update --latest
+        run: |
+          npm update
+          npm audit fix || true
 
       - name: Run tests
-        run: pnpm test --passWithNoTests || true
+        run: npm test || true
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -42,6 +43,10 @@ jobs:
           title: 'chore(deps): weekly dependency update'
           body: |
             This PR updates project dependencies to their latest versions.
+
+            ## Changes
+            - Updated npm dependencies
+            - Applied security fixes where possible
 
             Please review the changes and ensure tests pass before merging.
           branch: deps/weekly-update
