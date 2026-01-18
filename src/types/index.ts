@@ -25,3 +25,4 @@ export * from "./integration.types";
 export * from "./partner.types";
 export * from "./amber-alert.types";
 export * from "./analytics.types";
+export * from "./geofence.types";
