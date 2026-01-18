@@ -1,44 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type {
+  PartnerOrganization,
+  PartnerActivity,
+  PartnerOrgType,
+  PartnerStatus,
+  PartnerAccessLevel,
+  PARTNER_TYPE_LABELS,
+} from "@/types";
 
 export const dynamic = "force-dynamic";
 
-type PartnerType = "shelter" | "hospital" | "transit" | "school" | "business" | "nonprofit" | "government" | "other";
-type PartnerStatus = "active" | "pending" | "inactive" | "suspended";
-type AccessLevel = "view_only" | "submit_tips" | "case_updates" | "full_access";
-
-interface PartnerOrganization {
-  id: string;
-  name: string;
-  type: PartnerType;
-  status: PartnerStatus;
-  accessLevel: AccessLevel;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  address: string;
-  website?: string;
-  joinedAt: string;
-  lastActivity?: string;
-  casesAssisted: number;
-  tipsSubmitted: number;
-  description?: string;
-  logoUrl?: string;
-}
-
-interface PartnerActivity {
-  id: string;
-  partnerId: string;
-  partnerName: string;
-  type: "tip_submitted" | "case_viewed" | "resource_shared" | "alert_acknowledged";
-  description: string;
-  timestamp: string;
-  caseId?: string;
-  caseName?: string;
-}
-
-const PARTNER_TYPE_LABELS: Record<PartnerType, string> = {
+// Re-export for local use (types file has these but we need values)
+const PARTNER_TYPE_LABELS_MAP: Record<PartnerOrgType, string> = {
   shelter: "Shelter",
   hospital: "Hospital/Healthcare",
   transit: "Transit Authority",
@@ -62,7 +37,7 @@ const getStatusColor = (status: PartnerStatus) => {
   }
 };
 
-const getAccessLevelColor = (level: AccessLevel) => {
+const getAccessLevelColor = (level: PartnerAccessLevel) => {
   switch (level) {
     case "view_only":
       return "bg-gray-100 text-gray-700";
@@ -75,158 +50,137 @@ const getAccessLevelColor = (level: AccessLevel) => {
   }
 };
 
+const getActivityTypeColor = (type: string) => {
+  switch (type) {
+    case "tip_submitted":
+      return "bg-blue-100 text-blue-700";
+    case "case_viewed":
+      return "bg-purple-100 text-purple-700";
+    case "resource_shared":
+      return "bg-green-100 text-green-700";
+    case "alert_acknowledged":
+      return "bg-orange-100 text-orange-700";
+    case "login":
+      return "bg-gray-100 text-gray-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+// Map API response to UI format
+function mapPartnerToUI(p: PartnerOrganization) {
+  return {
+    ...p,
+    accessLevel: p.access_level,
+    contactName: p.contact_name,
+    contactEmail: p.contact_email,
+    contactPhone: p.contact_phone || "",
+    joinedAt: p.joined_at,
+    lastActivity: p.last_activity_at,
+    casesAssisted: p.cases_assisted_count,
+    tipsSubmitted: p.tips_submitted_count,
+    logoUrl: p.logo_url,
+  };
+}
+
 export default function PartnerPortalPage() {
   const [activeTab, setActiveTab] = useState<"partners" | "activity" | "requests" | "add">("partners");
-  const [partners, setPartners] = useState<PartnerOrganization[]>([]);
+  const [partners, setPartners] = useState<ReturnType<typeof mapPartnerToUI>[]>([]);
   const [activities, setActivities] = useState<PartnerActivity[]>([]);
-  const [selectedPartner, setSelectedPartner] = useState<PartnerOrganization | null>(null);
+  const [selectedPartner, setSelectedPartner] = useState<ReturnType<typeof mapPartnerToUI> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<PartnerType | "all">("all");
+  const [filterType, setFilterType] = useState<PartnerOrgType | "all">("all");
   const [filterStatus, setFilterStatus] = useState<PartnerStatus | "all">("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Add partner form state
   const [newPartner, setNewPartner] = useState({
     name: "",
-    type: "nonprofit" as PartnerType,
+    type: "nonprofit" as PartnerOrgType,
     contactName: "",
     contactEmail: "",
     contactPhone: "",
     address: "",
     website: "",
-    accessLevel: "submit_tips" as AccessLevel,
+    accessLevel: "submit_tips" as PartnerAccessLevel,
     description: "",
   });
 
-  useEffect(() => {
-    // Load mock partners
-    setPartners([
-      {
-        id: "partner-1",
-        name: "Hope Shelter Edmonton",
-        type: "shelter",
-        status: "active",
-        accessLevel: "case_updates",
-        contactName: "Maria Santos",
-        contactEmail: "maria@hopeshelter.org",
-        contactPhone: "780-555-0101",
-        address: "123 Main St, Edmonton, AB",
-        website: "hopeshelter.org",
-        joinedAt: "2025-06-15T00:00:00Z",
-        lastActivity: "2026-01-17T10:30:00Z",
-        casesAssisted: 34,
-        tipsSubmitted: 127,
-        description: "Emergency shelter serving the Edmonton area with 50 beds capacity.",
-      },
-      {
-        id: "partner-2",
-        name: "Royal Alexandra Hospital",
-        type: "hospital",
-        status: "active",
-        accessLevel: "full_access",
-        contactName: "Dr. James Wilson",
-        contactEmail: "jwilson@rah.ca",
-        contactPhone: "780-555-0102",
-        address: "10240 Kingsway NW, Edmonton, AB",
-        joinedAt: "2025-03-01T00:00:00Z",
-        lastActivity: "2026-01-17T14:00:00Z",
-        casesAssisted: 89,
-        tipsSubmitted: 45,
-        description: "Major trauma center and emergency department in Edmonton.",
-      },
-      {
-        id: "partner-3",
-        name: "Edmonton Transit Service",
-        type: "transit",
-        status: "active",
-        accessLevel: "submit_tips",
-        contactName: "Robert Kim",
-        contactEmail: "rkim@ets.edmonton.ca",
-        contactPhone: "780-555-0103",
-        address: "10220 103 St NW, Edmonton, AB",
-        joinedAt: "2025-08-20T00:00:00Z",
-        lastActivity: "2026-01-16T08:00:00Z",
-        casesAssisted: 12,
-        tipsSubmitted: 56,
-        description: "Public transit authority operating buses and LRT in Edmonton.",
-      },
-      {
-        id: "partner-4",
-        name: "University of Alberta",
-        type: "school",
-        status: "active",
-        accessLevel: "view_only",
-        contactName: "Sarah Thompson",
-        contactEmail: "sthompson@ualberta.ca",
-        contactPhone: "780-555-0104",
-        address: "116 St & 85 Ave, Edmonton, AB",
-        website: "ualberta.ca",
-        joinedAt: "2025-09-01T00:00:00Z",
-        lastActivity: "2026-01-15T16:30:00Z",
-        casesAssisted: 5,
-        tipsSubmitted: 18,
-        description: "Major research university with campus security collaboration.",
-      },
-      {
-        id: "partner-5",
-        name: "Community Safety Association",
-        type: "nonprofit",
-        status: "pending",
-        accessLevel: "submit_tips",
-        contactName: "Linda Chen",
-        contactEmail: "lchen@communitysafety.org",
-        contactPhone: "780-555-0105",
-        address: "456 Jasper Ave, Edmonton, AB",
-        joinedAt: "2026-01-10T00:00:00Z",
-        casesAssisted: 0,
-        tipsSubmitted: 0,
-        description: "Volunteer organization focused on community safety initiatives.",
-      },
-    ]);
+  // Fetch partners from API
+  const fetchPartners = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // Load mock activities
-    setActivities([
-      {
-        id: "act-1",
-        partnerId: "partner-1",
-        partnerName: "Hope Shelter Edmonton",
-        type: "tip_submitted",
-        description: "Submitted tip about possible sighting at shelter intake",
-        timestamp: "2026-01-17T10:30:00Z",
-        caseId: "case-1",
-        caseName: "Jane Doe",
-      },
-      {
-        id: "act-2",
-        partnerId: "partner-2",
-        partnerName: "Royal Alexandra Hospital",
-        type: "case_viewed",
-        description: "Accessed case details for patient matching",
-        timestamp: "2026-01-17T14:00:00Z",
-        caseId: "case-2",
-        caseName: "John Smith",
-      },
-      {
-        id: "act-3",
-        partnerId: "partner-3",
-        partnerName: "Edmonton Transit Service",
-        type: "alert_acknowledged",
-        description: "Acknowledged AMBER Alert distribution to transit displays",
-        timestamp: "2026-01-16T08:00:00Z",
-        caseId: "case-3",
-        caseName: "Emily Chen",
-      },
-      {
-        id: "act-4",
-        partnerId: "partner-1",
-        partnerName: "Hope Shelter Edmonton",
-        type: "resource_shared",
-        description: "Distributed missing person flyers at shelter locations",
-        timestamp: "2026-01-15T12:00:00Z",
-        caseId: "case-1",
-        caseName: "Jane Doe",
-      },
-    ]);
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("search", searchQuery);
+      if (filterType !== "all") params.set("type", filterType);
+      if (filterStatus !== "all") params.set("status", filterStatus);
+      params.set("page_size", "100");
+
+      const response = await fetch(`/api/partners?${params.toString()}`);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to fetch partners");
+      }
+
+      const data = await response.json();
+      setPartners(data.data.map(mapPartnerToUI));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch partners");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery, filterType, filterStatus]);
+
+  // Fetch activity from API
+  const fetchActivity = useCallback(async () => {
+    try {
+      // Get all partners to fetch their activity
+      const response = await fetch("/api/partners?page_size=100");
+      if (!response.ok) return;
+
+      const data = await response.json();
+      const allPartners = data.data as PartnerOrganization[];
+
+      // Fetch activity for each partner and combine
+      const activityPromises = allPartners.slice(0, 5).map(async (partner) => {
+        try {
+          const activityResponse = await fetch(`/api/partners/${partner.id}/activity?page_size=10`);
+          if (!activityResponse.ok) return [];
+          const activityData = await activityResponse.json();
+          return activityData.data.map((a: PartnerActivity) => ({
+            ...a,
+            partnerName: partner.name,
+          }));
+        } catch {
+          return [];
+        }
+      });
+
+      const allActivities = await Promise.all(activityPromises);
+      const flattenedActivities = allActivities
+        .flat()
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 20);
+
+      setActivities(flattenedActivities);
+    } catch {
+      // Silently fail for activity - not critical
+    }
   }, []);
+
+  useEffect(() => {
+    fetchPartners();
+  }, [fetchPartners]);
+
+  useEffect(() => {
+    if (activeTab === "activity") {
+      fetchActivity();
+    }
+  }, [activeTab, fetchActivity]);
 
   const filteredPartners = partners.filter((partner) => {
     const matchesSearch =
@@ -240,19 +194,124 @@ export default function PartnerPortalPage() {
   const pendingRequests = partners.filter((p) => p.status === "pending");
 
   const handleAddPartner = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setActiveTab("partners");
-    setNewPartner({
-      name: "",
-      type: "nonprofit",
-      contactName: "",
-      contactEmail: "",
-      contactPhone: "",
-      address: "",
-      website: "",
-      accessLevel: "submit_tips",
-      description: "",
-    });
+    if (!newPartner.name || !newPartner.contactName || !newPartner.contactEmail || !newPartner.address) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await fetch("/api/partners", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newPartner.name,
+          type: newPartner.type,
+          contact_name: newPartner.contactName,
+          contact_email: newPartner.contactEmail,
+          contact_phone: newPartner.contactPhone,
+          address: newPartner.address,
+          website: newPartner.website,
+          description: newPartner.description,
+          access_level: newPartner.accessLevel,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to create partner");
+      }
+
+      // Reset form and switch to partners tab
+      setNewPartner({
+        name: "",
+        type: "nonprofit",
+        contactName: "",
+        contactEmail: "",
+        contactPhone: "",
+        address: "",
+        website: "",
+        accessLevel: "submit_tips",
+        description: "",
+      });
+      setActiveTab("partners");
+      fetchPartners();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create partner");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleApprove = async (partnerId: string, accessLevel?: PartnerAccessLevel) => {
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await fetch(`/api/partners/${partnerId}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_level: accessLevel || "submit_tips" }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to approve partner");
+      }
+
+      fetchPartners();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to approve partner");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleReject = async (partnerId: string) => {
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await fetch(`/api/partners/${partnerId}/approve`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to reject partner");
+      }
+
+      fetchPartners();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reject partner");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSuspend = async (partnerId: string) => {
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await fetch(`/api/partners/${partnerId}/approve`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to suspend partner");
+      }
+
+      setSelectedPartner(null);
+      fetchPartners();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to suspend partner");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -274,23 +333,39 @@ export default function PartnerPortalPage() {
         </button>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+          <button onClick={() => setError(null)} className="ml-4 text-sm underline">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Active Partners</p>
-          <p className="text-2xl font-bold text-green-600">{partners.filter((p) => p.status === "active").length}</p>
+          <p className="text-2xl font-bold text-green-600">
+            {loading ? "-" : partners.filter((p) => p.status === "active").length}
+          </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Pending Requests</p>
-          <p className="text-2xl font-bold text-yellow-600">{pendingRequests.length}</p>
+          <p className="text-2xl font-bold text-yellow-600">{loading ? "-" : pendingRequests.length}</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Total Tips Submitted</p>
-          <p className="text-2xl font-bold text-blue-600">{partners.reduce((sum, p) => sum + p.tipsSubmitted, 0)}</p>
+          <p className="text-2xl font-bold text-blue-600">
+            {loading ? "-" : partners.reduce((sum, p) => sum + p.tipsSubmitted, 0)}
+          </p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-sm text-gray-500">Cases Assisted</p>
-          <p className="text-2xl font-bold text-gray-900">{partners.reduce((sum, p) => sum + p.casesAssisted, 0)}</p>
+          <p className="text-2xl font-bold text-gray-900">
+            {loading ? "-" : partners.reduce((sum, p) => sum + p.casesAssisted, 0)}
+          </p>
         </div>
       </div>
 
@@ -318,8 +393,16 @@ export default function PartnerPortalPage() {
         </nav>
       </div>
 
+      {/* Loading State */}
+      {loading && activeTab === "partners" && (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-500">Loading partners...</span>
+        </div>
+      )}
+
       {/* Partners Tab */}
-      {activeTab === "partners" && (
+      {activeTab === "partners" && !loading && (
         <div>
           {/* Search & Filters */}
           <div className="flex items-center gap-4 mb-6">
@@ -330,7 +413,12 @@ export default function PartnerPortalPage() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
               <input
                 type="text"
@@ -342,11 +430,11 @@ export default function PartnerPortalPage() {
             </div>
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as PartnerType | "all")}
+              onChange={(e) => setFilterType(e.target.value as PartnerOrgType | "all")}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Types</option>
-              {Object.entries(PARTNER_TYPE_LABELS).map(([key, label]) => (
+              {Object.entries(PARTNER_TYPE_LABELS_MAP).map(([key, label]) => (
                 <option key={key} value={key}>
                   {label}
                 </option>
@@ -364,6 +452,19 @@ export default function PartnerPortalPage() {
               <option value="suspended">Suspended</option>
             </select>
           </div>
+
+          {/* Empty State */}
+          {filteredPartners.length === 0 && (
+            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">No partners found</p>
+              <button
+                onClick={() => setActiveTab("add")}
+                className="mt-4 text-blue-600 hover:underline"
+              >
+                Add your first partner
+              </button>
+            </div>
+          )}
 
           {/* Partners Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -387,7 +488,7 @@ export default function PartnerPortalPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{partner.name}</h3>
-                      <p className="text-sm text-gray-500">{PARTNER_TYPE_LABELS[partner.type]}</p>
+                      <p className="text-sm text-gray-500">{PARTNER_TYPE_LABELS_MAP[partner.type]}</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -424,35 +525,35 @@ export default function PartnerPortalPage() {
       {/* Activity Tab */}
       {activeTab === "activity" && (
         <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        activity.type === "tip_submitted"
-                          ? "bg-blue-100 text-blue-700"
-                          : activity.type === "case_viewed"
-                          ? "bg-purple-100 text-purple-700"
-                          : activity.type === "resource_shared"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {activity.type.replace("_", " ")}
-                    </span>
-                    <span className="font-medium text-gray-900">{activity.partnerName}</span>
-                  </div>
-                  <p className="text-gray-700">{activity.description}</p>
-                  {activity.caseName && (
-                    <p className="text-sm text-blue-600 mt-1">Case: {activity.caseName}</p>
-                  )}
-                </div>
-                <p className="text-sm text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
-              </div>
+          {activities.length === 0 ? (
+            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+              <p className="text-gray-500">No recent activity</p>
             </div>
-          ))}
+          ) : (
+            activities.map((activity) => (
+              <div key={activity.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-1 text-xs rounded ${getActivityTypeColor(activity.activity_type)}`}>
+                        {activity.activity_type.replace(/_/g, " ")}
+                      </span>
+                      <span className="font-medium text-gray-900">
+                        {(activity as PartnerActivity & { partnerName?: string }).partnerName || "Partner"}
+                      </span>
+                    </div>
+                    <p className="text-gray-700">{activity.description}</p>
+                    {activity.case && (
+                      <p className="text-sm text-blue-600 mt-1">
+                        Case: {activity.case.first_name} {activity.case.last_name}
+                      </p>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">{new Date(activity.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -469,21 +570,34 @@ export default function PartnerPortalPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold text-gray-900">{partner.name}</h3>
-                    <p className="text-sm text-gray-500">{PARTNER_TYPE_LABELS[partner.type]}</p>
+                    <p className="text-sm text-gray-500">{PARTNER_TYPE_LABELS_MAP[partner.type]}</p>
                     <p className="text-sm text-gray-600 mt-2">{partner.description}</p>
                     <div className="mt-3 text-sm">
                       <p>Contact: {partner.contactName}</p>
-                      <p>{partner.contactEmail} &bull; {partner.contactPhone}</p>
+                      <p>
+                        {partner.contactEmail} &bull; {partner.contactPhone}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                    <button
+                      onClick={() => handleApprove(partner.id)}
+                      disabled={submitting}
+                      className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
                       Approve
                     </button>
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50">
+                    <button
+                      onClick={() => setSelectedPartner(partner)}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-50"
+                    >
                       Review
                     </button>
-                    <button className="px-4 py-2 border border-red-300 text-red-700 text-sm rounded-lg hover:bg-red-50">
+                    <button
+                      onClick={() => handleReject(partner.id)}
+                      disabled={submitting}
+                      className="px-4 py-2 border border-red-300 text-red-700 text-sm rounded-lg hover:bg-red-50 disabled:opacity-50"
+                    >
                       Reject
                     </button>
                   </div>
@@ -499,7 +613,9 @@ export default function PartnerPortalPage() {
         <div className="max-w-2xl">
           <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Organization Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={newPartner.name}
@@ -514,10 +630,10 @@ export default function PartnerPortalPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Organization Type</label>
                 <select
                   value={newPartner.type}
-                  onChange={(e) => setNewPartner({ ...newPartner, type: e.target.value as PartnerType })}
+                  onChange={(e) => setNewPartner({ ...newPartner, type: e.target.value as PartnerOrgType })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {Object.entries(PARTNER_TYPE_LABELS).map(([key, label]) => (
+                  {Object.entries(PARTNER_TYPE_LABELS_MAP).map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
                     </option>
@@ -528,7 +644,7 @@ export default function PartnerPortalPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Access Level</label>
                 <select
                   value={newPartner.accessLevel}
-                  onChange={(e) => setNewPartner({ ...newPartner, accessLevel: e.target.value as AccessLevel })}
+                  onChange={(e) => setNewPartner({ ...newPartner, accessLevel: e.target.value as PartnerAccessLevel })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="view_only">View Only</option>
@@ -540,7 +656,9 @@ export default function PartnerPortalPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Primary Contact Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Primary Contact Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={newPartner.contactName}
@@ -551,7 +669,9 @@ export default function PartnerPortalPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Email <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="email"
                   value={newPartner.contactEmail}
@@ -571,7 +691,9 @@ export default function PartnerPortalPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Address <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={newPartner.address}
@@ -605,9 +727,10 @@ export default function PartnerPortalPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleAddPartner}
-                className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={submitting}
+                className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
-                Add Partner
+                {submitting ? "Adding..." : "Add Partner"}
               </button>
               <button
                 onClick={() => setActiveTab("partners")}
@@ -638,7 +761,7 @@ export default function PartnerPortalPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">{selectedPartner.name}</h2>
-                  <p className="text-gray-500">{PARTNER_TYPE_LABELS[selectedPartner.type]}</p>
+                  <p className="text-gray-500">{PARTNER_TYPE_LABELS_MAP[selectedPartner.type]}</p>
                 </div>
               </div>
               <button onClick={() => setSelectedPartner(null)} className="text-gray-500 hover:text-gray-700">
@@ -676,9 +799,7 @@ export default function PartnerPortalPage() {
                 <div>
                   <p className="text-gray-500">Last Activity</p>
                   <p className="font-medium">
-                    {selectedPartner.lastActivity
-                      ? new Date(selectedPartner.lastActivity).toLocaleString()
-                      : "Never"}
+                    {selectedPartner.lastActivity ? new Date(selectedPartner.lastActivity).toLocaleString() : "Never"}
                   </p>
                 </div>
               </div>
@@ -703,13 +824,42 @@ export default function PartnerPortalPage() {
               </div>
             </div>
             <div className="p-6 border-t border-gray-200 flex gap-3">
-              <button className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Edit Partner</button>
-              <button className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                View Activity
-              </button>
-              <button className="py-2 px-4 border border-red-300 text-red-700 rounded-lg hover:bg-red-50">
-                Suspend
-              </button>
+              {selectedPartner.status === "pending" ? (
+                <>
+                  <button
+                    onClick={() => handleApprove(selectedPartner.id)}
+                    disabled={submitting}
+                    className="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(selectedPartner.id)}
+                    disabled={submitting}
+                    className="flex-1 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Edit Partner
+                  </button>
+                  <button className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    View Activity
+                  </button>
+                  {selectedPartner.status === "active" && (
+                    <button
+                      onClick={() => handleSuspend(selectedPartner.id)}
+                      disabled={submitting}
+                      className="py-2 px-4 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                    >
+                      Suspend
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -22,3 +22,4 @@ export * from "./email-tracking.types";
 export * from "./social-monitoring.types";
 export * from "./lead.types";
 export * from "./integration.types";
+export * from "./partner.types";
