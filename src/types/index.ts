@@ -23,3 +23,4 @@ export * from "./social-monitoring.types";
 export * from "./lead.types";
 export * from "./integration.types";
 export * from "./partner.types";
+export * from "./amber-alert.types";
