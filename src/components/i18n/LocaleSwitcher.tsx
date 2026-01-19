@@ -196,7 +196,7 @@ export function LanguageSwitcherButton({ className = "" }: LanguageSwitcherButto
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-black hover:bg-gray-50"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
