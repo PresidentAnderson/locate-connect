@@ -1,3 +1,5 @@
+import { AuthLanguageSwitcher } from "@/components/i18n/AuthLanguageSwitcher";
+
 export const dynamic = "force-dynamic";
 
 export default function AuthLayout({
@@ -28,23 +30,28 @@ export default function AuthLayout({
             with real-time coordination between families and law enforcement.
           </p>
           <div className="flex items-center gap-4 text-white/60 text-sm">
-            <span>🔒 Secure & Private</span>
-            <span>•</span>
-            <span>🌐 EN/FR Bilingual</span>
-            <span>•</span>
-            <span>⚡ Real-time Updates</span>
+            <span>Secure & Private</span>
+            <span>-</span>
+            <span>15 Languages</span>
+            <span>-</span>
+            <span>Real-time Updates</span>
           </div>
         </div>
 
         <div className="text-white/60 text-sm">
-          © 2024 Jonathan Anderson Investigational Corporation
+          2024 Jonathan Anderson Investigational Corporation
         </div>
       </div>
 
       {/* Right side - Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
-        <div className="w-full max-w-md">
-          {children}
+      <div className="flex-1 flex flex-col bg-gray-50">
+        <div className="flex justify-end p-4">
+          <AuthLanguageSwitcher />
+        </div>
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            {children}
+          </div>
         </div>
       </div>
     </div>

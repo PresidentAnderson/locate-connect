@@ -1,0 +1,215 @@
+{
+  "header": {
+    "title": "Sahsere Ónhka Tehotiriáhson",
+    "subtitle": "Kanenhrákwas akwé:kon tsi ioia'tà:wen"
+  },
+  "steps": {
+    "reporter": {
+      "title": "Í:se Tsì: Niióht"
+    },
+    "missing-person": {
+      "title": "Ónhka Tehotiriáhson"
+    },
+    "circumstances": {
+      "title": "Tsi Nahò:ten Ní:'i"
+    },
+    "contacts": {
+      "title": "Ronaterièn:take"
+    },
+    "languages": {
+      "title": "Kawenná:ke"
+    },
+    "risks": {
+      "title": "Iorihtakéhte"
+    },
+    "review": {
+      "title": "Satkáhtho ónne Sasaténhawi"
+    }
+  },
+  "navigation": {
+    "previous": "← Tsiothóhrha",
+    "next": "Tsi Ienhenwe →",
+    "submit": "Sasaténhawi Kará:reks",
+    "submitting": "Tho iòhtha..."
+  },
+  "privacy": {
+    "title": "Iontaterihwaiénhstha",
+    "body": "Ne kahníkon tsi iakotiénhon ien'iaiaterihwaiéntho ne Teiokarihwatekhwáhtha. Ne sasaténhawi, ise wakahtóntie tsi aionterihwaién:take."
+  },
+  "reporter": {
+    "title": "Í:se Tsì: Niióht",
+    "subtitle": "Teionkwatiá:wi ne aiakwaterièn:take",
+    "firstName": "Kentén:ron Kahsón:na",
+    "lastName": "Teiakotáhsawen Kahsón:na",
+    "email": "Teieiá:ton Kahsón:na",
+    "phone": "Teieiéhtha Akitón:ni",
+    "relationship": "Tsi Nahò:ten Teiontatià:ton",
+    "address": "Tsì: Tisénon",
+    "selectRelationship": "Satónhek tsi teiontatià:ton",
+    "relationships": {
+      "parent": "Niionhsénha",
+      "spouse": "Teionkwè:take",
+      "sibling": "Tenikwè:ke",
+      "child": "Eksà:'a",
+      "friend": "Iontatnòronhkwa",
+      "employer": "Ionteriwa'hión:ni",
+      "coworker": "Teionteriwaién:take",
+      "neighbor": "Akwáhi",
+      "other": "Ó:ia"
+    }
+  },
+  "missingPerson": {
+    "title": "Ónhka Tehotiriáhson Tsi Niióht",
+    "subtitle": "Takwè:ni akwé:kon tsi nahò:ten saterièn:tare",
+    "firstName": "Kentén:ron Kahsón:na",
+    "lastName": "Teiakotáhsawen Kahsón:na",
+    "dob": "Tsi Wahonnì:sake",
+    "gender": "Ónhka Nahò:ten",
+    "selectGender": "Satónhek ónhka",
+    "height": "Tsi Niiohstonhátie",
+    "weight": "Tsi Niiohstonhátie",
+    "hairColor": "Onónhsa Ohná:ken",
+    "eyeColor": "Okà:ra Ohná:ken",
+    "distinguishing": "Tsi Niiakoterihwatshérha",
+    "distinguishingHelp": "Teieiá:tons, ionhwáhstha, ahsonterí:io",
+    "photo": "Satahónnhak Teiatonhkhwáhstha",
+    "genderOptions": {
+      "male": "Rón:kwe",
+      "female": "Iakon:kwe",
+      "other": "Ó:ia"
+    },
+    "heightPlaceholder": "Ní:ioht, 5'10\" tánon 178cm",
+    "weightPlaceholder": "Ní:ioht, 160lbs tánon 72kg",
+    "photoHelper": "Satshénhien satahónnhak tánon"
+  },
+  "circumstances": {
+    "title": "Tsi Nahò:ten Né:ne Wahiatenhénhon",
+    "subtitle": "Tsi nahò:ten ónne tsì: tsi wahonwatkáhtho",
+    "lastSeenDate": "Wennisera'ténion Wahonwatkáhtho",
+    "lastSeenTime": "Tsi Nahò:ten Wahonwatkáhtho",
+    "lastSeenLocation": "Tsì: Wahonwatkáhtho",
+    "locationDetails": "Kanónhsa Tsi Niióht",
+    "locationDetailsHelp": "Kahsón:na, tsi ionteríhwake, tsi iaia'tahníron",
+    "circumstances": "Tsi Nahò:ten",
+    "circumstancesHelp": "Nahò:ten ón:wa raotiérenon? Tewatón:haon ken?",
+    "outOfCharacter": "Tewatón:haon ken né:ne wahiatenhénhon?",
+    "locationPlaceholder": "Kanataién:ne, Kahwá:tsire",
+    "locationConfidence": "Kanónhsa Iakotia'tanorónhston",
+    "confidenceOptions": {
+      "unknown": "Iahte iakòtonte",
+      "low": "Nikahiatonhse:rì:io",
+      "medium": "Áhsen Niiohwistà:ke",
+      "high": "Énska Niiohwistà:ke"
+    },
+    "witnessType": "Ónhka Wahonwatkáhtho",
+    "witnessTypeOptions": {
+      "unknown": "Iahte iakòtonte",
+      "self_reported": "Raonhá",
+      "family": "Teiontahón:ton",
+      "friend": "Iontatnòronhkwa",
+      "public": "Onkwehonwe",
+      "law_enforcement": "Teiokarihwatekhwáhtha",
+      "camera": "Teiatonhkhwáhstha",
+      "other": "Ó:ia"
+    },
+    "unverifiedNotes": "Iahte Iakotia'tanorónhston",
+    "unverifiedNotesHelp": "Tsaté:nion tsi nahò:ten iahte iakotéweienhston."
+  },
+  "contacts": {
+    "title": "Ronaterièn:take ónne Teiatonhkhwáhstha",
+    "subtitle": "Taiákwari ne iontatnòronhkwa",
+    "emails": "Teieiá:ton Kahsón:na",
+    "emailsHelp": "Iotohétstha énska oié:ri",
+    "phones": "Teieiéhtha Akitón:ni",
+    "phonesHelp": "Iotohétstha énska oié:ri",
+    "social": "Teiatonhkhwáhstha",
+    "friends": "Iontatnòronhkwa",
+    "friendsHelp": "Ónhka ken ahaterièn:take tsì: tí:ken",
+    "addFriend": "+ Saténhawi Ionterièn:take",
+    "namePlaceholder": "Kahsón:na",
+    "relationshipPlaceholder": "Tsi Teiontatià:ton",
+    "contactPlaceholder": "Ionterièn:take"
+  },
+  "risks": {
+    "title": "Iorihtakéhte Iakotehiá:ron",
+    "subtitle": "Ne kahníkon ioiánere aionterihwaién:take",
+    "medical": "Tsikoníko:wa",
+    "medicalHelp": "Ó:ni nahò:ten teionkwatiá:wi iontsennonnía:ton",
+    "medications": "Ionnonhkwa'shón:'a",
+    "medicationsHelp": "Áhsehre nahò:ten ionnonhkwa'shón:'a ratiia'tawèn:ri",
+    "mental": "Onón:kwa Iohwátsire",
+    "mentalOptions": {
+      "none": "Iahte teió:ton",
+      "history": "Aké:rat ionterihwaién:thos",
+      "current": "Nón:wa iontsennonnía:ton",
+      "crisis": "Tsi iotorí:ane onón:kwa"
+    },
+    "threats": "Ón:wen Iorihtakéhte",
+    "threatsHelp": "Ón:wen ón:wen ahatihrihontanión:ke né:ne?",
+    "threatName": "Kahsón:na",
+    "threatRelation": "Tsi Teiontatià:ton",
+    "threatDescription": "Tsi Niióht Iorihtakéhte",
+    "addThreat": "+ Saténhawi Iorihtakéhte",
+    "suicidal": "Ó:nen ken iorihtakéhte raón:wa?",
+    "suicidalWarning": "Ó:nen iorihtakéhte, teiá:thon 911",
+    "medicalPlaceholder": "Ní:ioht, aweron'ó:kon, otsi'tén:'a",
+    "medicationsPlaceholder": "Ní:ioht, insulin"
+  },
+  "languageSection": {
+    "reporterTitle": "Í:se Kawenná:ke",
+    "reporterDescription": "Ne ioiánere aiakwatériios.",
+    "reporterLanguagesLabel": "Kawenná:ke sathón:tats",
+    "reporterLanguagesPlaceholder": "Satónhek akwé:kon kawenná:ke",
+    "searchPlaceholder": "Isáhsere kawenná:ke...",
+    "reporterPreferredLabel": "Saterièn:tare kawenná:ke",
+    "interpreterNeeded": "Teionkwatiá:wi teiontathón:tat",
+    "interpreterLanguage": "Teiontathón:tat kawenná:ke",
+    "reporterOtherLabel": "Ó:ia kawenná:ke",
+    "subjectTitle": "Ónhka Tehotiriáhson Kawenná:ke",
+    "subjectDescription": "Tsi nahò:ten kawenná:ke rathón:tats ioiánere.",
+    "subjectPrimaryLabel": "Kentén:ron kawenná:ke",
+    "subjectPrimaryPlaceholder": "Satónhek kawenná:ke",
+    "subjectRespondsLabel": "Kawenná:ke ahaterihwáhta",
+    "subjectRespondsPlaceholder": "Satónhek kawenná:ke",
+    "subjectRespondsHelp": "Ne ioiánere aionterihwaién:take.",
+    "subjectOfficialLabel": "Ó:ni rathón:tats English tánon French",
+    "subjectOfficialHelp": "Ne ioiánere teiontathón:tat.",
+    "subjectOtherLabel": "Ó:ia kawenná:ke",
+    "otherPlaceholder": "Iotohétstha kawenná:ke",
+    "summaryTitle": "Kawenná:ke Iontahónhakon",
+    "reporterSummaryLabel": "Í:se kawenná:ke:",
+    "subjectSummaryLabel": "Ónhka tehotiriáhson kawenná:ke:"
+  },
+  "review": {
+    "title": "Satkáhtho Kará:reks",
+    "subtitle": "Satkáhtho akwé:kon tsi iósere sasaténhawi",
+    "confirmText": "Wakatéweienhste tsi akwé:kon tsi ioria'tanorónhstha ioká:ronte. Wakaterièn:tare né:ne kará:reks en'iaiaterihwaiéntho ne Teiokarihwatekhwáhtha.",
+    "reporterTitle": "Sahsere Tsi Niióht",
+    "missingPersonTitle": "Ónhka Tehotiriáhson",
+    "riskTitle": "Iorihtakéhte",
+    "languageTitle": "Kawenná:ke",
+    "reporterNameLabel": "Kahsón:na",
+    "reporterRelationshipLabel": "Tsi Teiontatià:ton",
+    "missingPersonNameLabel": "Kahsón:na",
+    "missingPersonAgeLabel": "Tsi Niiohserà:ke",
+    "missingPersonLastSeenLabel": "Wahonwatkáhtho",
+    "riskMedicalLabel": "Tsikoníko:wa",
+    "riskMentalLabel": "Onón:kwa",
+    "languageReporterLabel": "Sahsere kawenná:ke",
+    "languageSubjectLabel": "Ónhka kawenná:ke"
+  },
+  "success": {
+    "kicker": "Kará:reks Iakoia'tá:wen",
+    "title": "Niá:wen tsi sasaténhawi",
+    "subtitle": "Ne ionkwatériios en'ionterihwaién:take.",
+    "caseLabel": "Ionterihwaienhstáhkhwa akitón:ni:",
+    "nextStepsTitle": "Tsi Ienhenwe:",
+    "nextSteps": {
+      "first": "Ionkwatériios en'ionterihwaién:take.",
+      "second": "Ien'ionterihwaiéntho ne Teiokarihwatekhwáhtha.",
+      "third": "Sathóntat tsi ionterihwaienhstáhkhwa."
+    },
+    "backToCases": "Satkáhtho ionterihwaienhstáhkhwa",
+    "newReport": "Áse kará:reks"
+  }
+}

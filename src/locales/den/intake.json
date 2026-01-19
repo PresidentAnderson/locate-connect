@@ -1,0 +1,215 @@
+{
+  "header": {
+    "title": "Dene Edánéhdi Gokédi",
+    "subtitle": "Godéné ełkághe k'eghą beghádi"
+  },
+  "steps": {
+    "reporter": {
+      "title": "Nų Ts'ídíthé"
+    },
+    "missing-person": {
+      "title": "Dene Edánéhdi"
+    },
+    "circumstances": {
+      "title": "Edláidí Ní"
+    },
+    "contacts": {
+      "title": "Ts'ídáhdéh"
+    },
+    "languages": {
+      "title": "Dene Záágéʔ"
+    },
+    "risks": {
+      "title": "Įką Náhǫdhe"
+    },
+    "review": {
+      "title": "Náyílti ąt Yághánįhtį"
+    }
+  },
+  "navigation": {
+    "previous": "← Ndéh",
+    "next": "Hotié →",
+    "submit": "Kúghą Yághánįhtį",
+    "submitting": "Yághánįhtį..."
+  },
+  "privacy": {
+    "title": "Edánéhdi Kúghą",
+    "body": "K'eghą yághánįhtį beghádi Yatth'í. Nų yághánįhtį, segha hidé godéné."
+  },
+  "reporter": {
+    "title": "Nų Ts'ídíthé",
+    "subtitle": "Nide k'eghą beghádi ts'ídáhdéh",
+    "firstName": "Nezų́ Húlyé",
+    "lastName": "Beyé Húlyé",
+    "email": "Email Húlyé",
+    "phone": "Bek'escháéze",
+    "relationship": "Edláidí Ełká",
+    "address": "Nų Kų́ę́",
+    "selectRelationship": "Ełká húlyé",
+    "relationships": {
+      "parent": "Bemba/Beza",
+      "spouse": "Bets'éyé",
+      "sibling": "Bech'ilé",
+      "child": "Beyáze",
+      "friend": "Bek'éyáhti",
+      "employer": "Ełk'ehįht'é",
+      "coworker": "Ełkáhodi",
+      "neighbor": "Akwé",
+      "other": "Ełtsąné"
+    }
+  },
+  "missingPerson": {
+    "title": "Dene Edánéhdi Ts'ídíthé",
+    "subtitle": "Godéné ełkághe ts'ídíthé beghádi",
+    "firstName": "Nezų́ Húlyé",
+    "lastName": "Beyé Húlyé",
+    "dob": "Ts'éhodi Dzinékǫ",
+    "gender": "Dene Edláidí",
+    "selectGender": "Dene húlyé",
+    "height": "Edláidí Nézų",
+    "weight": "Edláidí Hdą",
+    "hairColor": "Betsį́gha Etthén",
+    "eyeColor": "Benáh Etthén",
+    "distinguishing": "Ts'ídíthé Náhileh",
+    "distinguishingHelp": "Ts'élki, įkǫ, ahsónt'é",
+    "photo": "Nę́ę́ Yághánįhtį",
+    "genderOptions": {
+      "male": "Deníne",
+      "female": "Ts'ékui",
+      "other": "Ełtsąné"
+    },
+    "heightPlaceholder": "Ní:ioht, 5'10\" ąt 178cm",
+    "weightPlaceholder": "Ní:ioht, 160lbs ąt 72kg",
+    "photoHelper": "Nę́ę́ yághánįhtį ąt etthén"
+  },
+  "circumstances": {
+    "title": "Edláidí Ní Edánéhdi",
+    "subtitle": "Edláidí ąt ndéh beghádi",
+    "lastSeenDate": "Dzinékǫ Góyínda",
+    "lastSeenTime": "Nóghų́ Góyínda",
+    "lastSeenLocation": "Ndéh Góyínda",
+    "locationDetails": "Kų́ę́ Ts'ídíthé",
+    "locationDetailsHelp": "Kų́ę́ húlyé, dene kų́ę́, ts'ídáhdéh",
+    "circumstances": "Edláidí Ní",
+    "circumstancesHelp": "Edláidí ráhį́nį́? Éts'éłki ken?",
+    "outOfCharacter": "Éts'éłki ken né edánéhdi?",
+    "locationPlaceholder": "Kų́ę́, Dehcho",
+    "locationConfidence": "Kų́ę́ Segha",
+    "confidenceOptions": {
+      "unknown": "Theda",
+      "low": "Ts'ą́dé",
+      "medium": "Táhé",
+      "high": "Łǫdé"
+    },
+    "witnessType": "Góyínda Dene",
+    "witnessTypeOptions": {
+      "unknown": "Theda",
+      "self_reported": "Edíni",
+      "family": "Dágóhwhe",
+      "friend": "Bek'éyáhti",
+      "public": "Dene",
+      "law_enforcement": "Yatth'í",
+      "camera": "Nę́ę́ Ts'ídíthé",
+      "other": "Ełtsąné"
+    },
+    "unverifiedNotes": "Theda Kúghą",
+    "unverifiedNotesHelp": "Náyílti theda ts'ídíthé."
+  },
+  "contacts": {
+    "title": "Ts'ídáhdéh ąt Nę́ę́ K'é",
+    "subtitle": "Ná'iddi bek'éyáhti ąt nę́ę́",
+    "emails": "Email Húlyé",
+    "emailsHelp": "Ełkághe húlyé łǫ́ǫ́ néhdi",
+    "phones": "Bek'escháéze",
+    "phonesHelp": "Ełkághe łǫ́ǫ́ néhdi",
+    "social": "Nę́ę́ K'é",
+    "friends": "Bek'éyáhti",
+    "friendsHelp": "Dene ndéh ts'ídáhdéh",
+    "addFriend": "+ Ts'ídáhdéh Yághánįhtį",
+    "namePlaceholder": "Húlyé",
+    "relationshipPlaceholder": "Ełká",
+    "contactPlaceholder": "Ts'ídáhdéh"
+  },
+  "risks": {
+    "title": "Įką Náhǫdhe Náyílti",
+    "subtitle": "K'eghą ná'iddi gokédi beghádi",
+    "medical": "Nádįhdhe",
+    "medicalHelp": "Nádįhdhe ts'éhdéné beghádi",
+    "medications": "Nádįhdhe K'é",
+    "medicationsHelp": "Nádįhdhe k'é ts'éhdéné",
+    "mental": "Edzi Nidé",
+    "mentalOptions": {
+      "none": "Theda",
+      "history": "Ndéh nádįhdhe",
+      "current": "Ts'éhdéné nádįhdhe",
+      "crisis": "Éts'ą nádįhdhe"
+    },
+    "threats": "Įką Dene",
+    "threatsHelp": "Dene beghádi įką?",
+    "threatName": "Húlyé",
+    "threatRelation": "Ełká",
+    "threatDescription": "Įką Ts'ídíthé",
+    "addThreat": "+ Įką Yághánįhtį",
+    "suicidal": "Įką edíni ken?",
+    "suicidalWarning": "Ts'éhdéné įką, 911 gots'én",
+    "medicalPlaceholder": "Ní:ioht, dzą nádįhdhe",
+    "medicationsPlaceholder": "Ní:ioht, insulin"
+  },
+  "languageSection": {
+    "reporterTitle": "Nų Dene Záágéʔ",
+    "reporterDescription": "Ná'iddi ts'ídáhdéh beghádi.",
+    "reporterLanguagesLabel": "Záágéʔ húdéhzéh",
+    "reporterLanguagesPlaceholder": "Záágéʔ húlyé",
+    "searchPlaceholder": "Záágéʔ gokédi...",
+    "reporterPreferredLabel": "Ts'ídíthé záágéʔ",
+    "interpreterNeeded": "Záágéʔ ná'iddi ts'éhdéné",
+    "interpreterLanguage": "Ná'iddi záágéʔ",
+    "reporterOtherLabel": "Ełtsąné záágéʔ",
+    "subjectTitle": "Edánéhdi Dene Záágéʔ",
+    "subjectDescription": "Záágéʔ húdéhzéh ná'iddi beghádi.",
+    "subjectPrimaryLabel": "Nezų́ záágéʔ",
+    "subjectPrimaryPlaceholder": "Záágéʔ húlyé",
+    "subjectRespondsLabel": "Záágéʔ bets'én húdéhzéh",
+    "subjectRespondsPlaceholder": "Záágéʔ húlyé",
+    "subjectRespondsHelp": "Ná'iddi gokédi beghádi.",
+    "subjectOfficialLabel": "English ąt French húdéhzéh",
+    "subjectOfficialHelp": "Ná'iddi záágéʔ beghádi.",
+    "subjectOtherLabel": "Ełtsąné záágéʔ",
+    "otherPlaceholder": "Záágéʔ húlyé",
+    "summaryTitle": "Záágéʔ Ts'ídíthé",
+    "reporterSummaryLabel": "Nų záágéʔ:",
+    "subjectSummaryLabel": "Edánéhdi dene záágéʔ:"
+  },
+  "review": {
+    "title": "Kúghą Náyílti",
+    "subtitle": "Godéné náyílti yághánįhtį tsą",
+    "confirmText": "Godéné ts'ídíthé segha hidé. Kúghą beghádi Yatth'í.",
+    "reporterTitle": "Gokédi Ts'ídíthé",
+    "missingPersonTitle": "Edánéhdi Dene",
+    "riskTitle": "Įką Náhǫdhe",
+    "languageTitle": "Dene Záágéʔ",
+    "reporterNameLabel": "Húlyé",
+    "reporterRelationshipLabel": "Ełká",
+    "missingPersonNameLabel": "Húlyé",
+    "missingPersonAgeLabel": "Edláidí Nęhéh",
+    "missingPersonLastSeenLabel": "Góyínda",
+    "riskMedicalLabel": "Nádįhdhe",
+    "riskMentalLabel": "Edzi",
+    "languageReporterLabel": "Gokédi záágéʔ",
+    "languageSubjectLabel": "Edánéhdi záágéʔ"
+  },
+  "success": {
+    "kicker": "Kúghą Yághánéhdį",
+    "title": "Mahsi kúghą yághánįhtį",
+    "subtitle": "Dene beghádi náyílti.",
+    "caseLabel": "Náhileh:",
+    "nextStepsTitle": "Hotié Ní:",
+    "nextSteps": {
+      "first": "Dene beghádi náyílti.",
+      "second": "Yatth'í ts'ídáhdéh.",
+      "third": "Náhileh k'ehtthí náyílti."
+    },
+    "backToCases": "Náhileh náyílti",
+    "newReport": "Húlyé kúghą"
+  }
+}

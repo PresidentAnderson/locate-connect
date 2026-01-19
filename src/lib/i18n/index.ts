@@ -4,6 +4,10 @@ import crCommon from "@/locales/cr/common.json";
 import iuCommon from "@/locales/iu/common.json";
 import ojCommon from "@/locales/oj/common.json";
 import micCommon from "@/locales/mic/common.json";
+// Additional Indigenous languages for Canada
+import mohCommon from "@/locales/moh/common.json";
+import denCommon from "@/locales/den/common.json";
+import blaCommon from "@/locales/bla/common.json";
 // Priority immigrant languages for Canada
 import esCommon from "@/locales/es/common.json";
 import zhCommon from "@/locales/zh/common.json";
@@ -18,6 +22,10 @@ import crIntake from "@/locales/cr/intake.json";
 import iuIntake from "@/locales/iu/intake.json";
 import ojIntake from "@/locales/oj/intake.json";
 import micIntake from "@/locales/mic/intake.json";
+// Additional Indigenous languages for Canada
+import mohIntake from "@/locales/moh/intake.json";
+import denIntake from "@/locales/den/intake.json";
+import blaIntake from "@/locales/bla/intake.json";
 // Priority immigrant languages for Canada
 import esIntake from "@/locales/es/intake.json";
 import zhIntake from "@/locales/zh/intake.json";
@@ -42,6 +50,9 @@ export const SUPPORTED_LOCALES = [
   "iu",   // Inuktitut (Indigenous)
   "oj",   // Ojibwe (Indigenous)
   "mic",  // Mi'kmaq (Indigenous)
+  "moh",  // Mohawk (Indigenous)
+  "den",  // Dene (Indigenous)
+  "bla",  // Blackfoot (Indigenous)
 ] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -73,6 +84,9 @@ export const LOCALE_METADATA: Record<Locale, LocaleMetadata> = {
   iu: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
   oj: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
   mic: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
+  moh: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
+  den: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
+  bla: { complete: false, direction: "ltr", category: "indigenous", fallbackChain: ["en"] },
 };
 
 const MESSAGES: Record<Locale, Record<Namespace, Record<string, unknown>>> = {
@@ -88,6 +102,9 @@ const MESSAGES: Record<Locale, Record<Namespace, Record<string, unknown>>> = {
   iu: { common: iuCommon, intake: iuIntake },
   oj: { common: ojCommon, intake: ojIntake },
   mic: { common: micCommon, intake: micIntake },
+  moh: { common: mohCommon, intake: mohIntake },
+  den: { common: denCommon, intake: denIntake },
+  bla: { common: blaCommon, intake: blaIntake },
 };
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -159,6 +176,9 @@ export function normalizeLocale(input: string | null | undefined): Locale {
     "iu": "iu",
     "oj": "oj",
     "mic": "mic",
+    "moh": "moh",
+    "den": "den",
+    "bla": "bla",
   };
 
   // Check for exact match first

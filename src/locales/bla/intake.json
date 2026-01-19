@@ -1,0 +1,215 @@
+{
+  "header": {
+    "title": "Nínaa Saa Óómahkaki Kará:reks",
+    "subtitle": "Ómahkaitapi akwé:kon áíhpiyi"
+  },
+  "steps": {
+    "reporter": {
+      "title": "Kitáíssinooni"
+    },
+    "missing-person": {
+      "title": "Nínaa Saa Óómahkaki"
+    },
+    "circumstances": {
+      "title": "Tánistsi Iihtsípi"
+    },
+    "contacts": {
+      "title": "Áíssinooni"
+    },
+    "languages": {
+      "title": "Sínakssin"
+    },
+    "risks": {
+      "title": "Iorihtakéhte"
+    },
+    "review": {
+      "title": "Óóhkotoki áíhpiyi Itómohpiyi"
+    }
+  },
+  "navigation": {
+    "previous": "← Ómahksiyi",
+    "next": "Nitáísski'naki →",
+    "submit": "Itómohpiyi Kará:reks",
+    "submitting": "Áíhpiyi..."
+  },
+  "privacy": {
+    "title": "Iihtsípi Sínakssin",
+    "body": "Kahníkon itómohpiyi Áákssiyi Niitáwahsini. Kitómohpiyi, kitáíssinooni segha."
+  },
+  "reporter": {
+    "title": "Kitáíssinooni",
+    "subtitle": "Teionkwatiá:wi kitáíssinooni iihtsípi",
+    "firstName": "Nitáísski'naki Kahsón:na",
+    "lastName": "Ómahksiyi Kahsón:na",
+    "email": "Áíssinooni Óóhkotoki",
+    "phone": "Áíssinooni Akitón:ni",
+    "relationship": "Tánistsi Teiontatià:ton",
+    "address": "Kitáísski'naki",
+    "selectRelationship": "Ómahkitapi teiontatià:ton",
+    "relationships": {
+      "parent": "Niionhsénha",
+      "spouse": "Nitákohkotáahsi",
+      "sibling": "Nitá'nihs",
+      "child": "Nitán",
+      "friend": "Nitákohkotáahsi",
+      "employer": "Iihtsípi",
+      "coworker": "Itsíkammotaanistsi",
+      "neighbor": "Akwé",
+      "other": "Ó:ia"
+    }
+  },
+  "missingPerson": {
+    "title": "Nínaa Saa Óómahkaki Tánistsi",
+    "subtitle": "Ómahkaitapi akwé:kon tánistsi kitáíssto'taki",
+    "firstName": "Nitáísski'naki Kahsón:na",
+    "lastName": "Ómahksiyi Kahsón:na",
+    "dob": "Ksiststsíko Wahonnì:sake",
+    "gender": "Tánistsi",
+    "selectGender": "Ómahkitapi tánistsi",
+    "height": "Nitáísskaahsi",
+    "weight": "Nitáísski",
+    "hairColor": "Ótsistsi Iihtsípi",
+    "eyeColor": "Maahksíksi Iihtsípi",
+    "distinguishing": "Íísska'siwa",
+    "distinguishingHelp": "Ts'éłki, ionhwáhstha, ahsonterí:io",
+    "photo": "Itómohpiyi Óóhkotoki",
+    "genderOptions": {
+      "male": "Nínaa",
+      "female": "Áakii",
+      "other": "Ó:ia"
+    },
+    "heightPlaceholder": "Ní:ioht, 5'10\" tánon 178cm",
+    "weightPlaceholder": "Ní:ioht, 160lbs tánon 72kg",
+    "photoHelper": "Óóhkotoki itómohpiyi"
+  },
+  "circumstances": {
+    "title": "Tánistsi Iihtsípi Saa Óómahkaki",
+    "subtitle": "Tánistsi áíhpiyi ómahksiyi óóhkotoki",
+    "lastSeenDate": "Ksiststsíko Ómahksiyi Óóhkotoki",
+    "lastSeenTime": "Tánistsi Ómahksiyi Óóhkotoki",
+    "lastSeenLocation": "Nitáísski'naki Ómahksiyi",
+    "locationDetails": "Ksáahko Tánistsi",
+    "locationDetailsHelp": "Kahsón:na, áakiiwaatsiksi, ksáahko",
+    "circumstances": "Tánistsi Iihtsípi",
+    "circumstancesHelp": "Tánistsi áíhpiyi? Éts'éłki ken?",
+    "outOfCharacter": "Éts'éłki ken saa óómahkaki?",
+    "locationPlaceholder": "Ksáahko, Alberta",
+    "locationConfidence": "Ksáahko Segha",
+    "confidenceOptions": {
+      "unknown": "Saa Iakòtonte",
+      "low": "Nikahiatonhse:rì:io",
+      "medium": "Áhsen",
+      "high": "Énska"
+    },
+    "witnessType": "Ómahksiyi Óóhkotoki Nínaa",
+    "witnessTypeOptions": {
+      "unknown": "Saa Iakòtonte",
+      "self_reported": "Áíhpiyi",
+      "family": "Áakiiwaatsiksi",
+      "friend": "Nitákohkotáahsi",
+      "public": "Niitáísski'naki",
+      "law_enforcement": "Áákssiyi",
+      "camera": "Óóhkotoki",
+      "other": "Ó:ia"
+    },
+    "unverifiedNotes": "Saa Iihtsípi Kará:reks",
+    "unverifiedNotesHelp": "Ómahkitapi tánistsi saa iihtsípi."
+  },
+  "contacts": {
+    "title": "Áíssinooni áíhpiyi Óóhkotoki",
+    "subtitle": "Ná'iddi nitákohkotáahsi áíhpiyi óóhkotoki",
+    "emails": "Áíssinooni Óóhkotoki Kahsón:na",
+    "emailsHelp": "Ómahkitapi ełkághe énska",
+    "phones": "Áíssinooni Akitón:ni",
+    "phonesHelp": "Ómahkitapi ełkághe énska",
+    "social": "Óóhkotoki Itsíkammotaanistsi",
+    "friends": "Nitákohkotáahsi",
+    "friendsHelp": "Nínaa ksáahko áíssinooni",
+    "addFriend": "+ Ómahkitapi Áíssinooni",
+    "namePlaceholder": "Kahsón:na",
+    "relationshipPlaceholder": "Teiontatià:ton",
+    "contactPlaceholder": "Áíssinooni"
+  },
+  "risks": {
+    "title": "Iorihtakéhte Iihtsípi",
+    "subtitle": "Kahníkon ná'iddi óómahkaki iihtsípi",
+    "medical": "Niitáíssinoopi Iihtsípi",
+    "medicalHelp": "Tánistsi niitáíssinoopi ts'éhdéné",
+    "medications": "Ionnonhkwa'shón:'a",
+    "medicationsHelp": "Ionnonhkwa'shón:'a ts'éhdéné",
+    "mental": "Onón:kwa Iihtsípi",
+    "mentalOptions": {
+      "none": "Saa Iakòtonte",
+      "history": "Ómahksiyi niitáíssinoopi",
+      "current": "Áíhpiyi niitáíssinoopi",
+      "crisis": "Kíístsi onón:kwa"
+    },
+    "threats": "Iorihtakéhte Nínaa",
+    "threatsHelp": "Nínaa iorihtakéhte?",
+    "threatName": "Kahsón:na",
+    "threatRelation": "Teiontatià:ton",
+    "threatDescription": "Iorihtakéhte Tánistsi",
+    "addThreat": "+ Ómahkitapi Iorihtakéhte",
+    "suicidal": "Iorihtakéhte áíhpiyi ken?",
+    "suicidalWarning": "Kíístsi iorihtakéhte, 911 áíssinooni",
+    "medicalPlaceholder": "Ní:ioht, dzą niitáíssinoopi",
+    "medicationsPlaceholder": "Ní:ioht, insulin"
+  },
+  "languageSection": {
+    "reporterTitle": "Kitá Sínakssin",
+    "reporterDescription": "Ná'iddi áíssinooni iihtsípi.",
+    "reporterLanguagesLabel": "Sínakssin kitóóhkotoki",
+    "reporterLanguagesPlaceholder": "Ómahkitapi sínakssin",
+    "searchPlaceholder": "Óómahkaki sínakssin...",
+    "reporterPreferredLabel": "Kitáíssinooni sínakssin",
+    "interpreterNeeded": "Sínakssin ná'iddi ts'éhdéné",
+    "interpreterLanguage": "Ná'iddi sínakssin",
+    "reporterOtherLabel": "Ó:ia sínakssin",
+    "subjectTitle": "Saa Óómahkaki Nínaa Sínakssin",
+    "subjectDescription": "Sínakssin áíssinooni ná'iddi iihtsípi.",
+    "subjectPrimaryLabel": "Nitáísski'naki sínakssin",
+    "subjectPrimaryPlaceholder": "Ómahkitapi sínakssin",
+    "subjectRespondsLabel": "Sínakssin áíssinooni",
+    "subjectRespondsPlaceholder": "Ómahkitapi sínakssin",
+    "subjectRespondsHelp": "Ná'iddi óómahkaki iihtsípi.",
+    "subjectOfficialLabel": "English tánon French áíssinooni",
+    "subjectOfficialHelp": "Ná'iddi sínakssin iihtsípi.",
+    "subjectOtherLabel": "Ó:ia sínakssin",
+    "otherPlaceholder": "Ómahkitapi sínakssin",
+    "summaryTitle": "Sínakssin Tánistsi",
+    "reporterSummaryLabel": "Kitá sínakssin:",
+    "subjectSummaryLabel": "Saa óómahkaki sínakssin:"
+  },
+  "review": {
+    "title": "Óóhkotoki Kará:reks",
+    "subtitle": "Óóhkotoki akwé:kon itómohpiyi tsą",
+    "confirmText": "Akwé:kon tánistsi iihtsípi segha. Kará:reks itómohpiyi Áákssiyi Niitáwahsini.",
+    "reporterTitle": "Óómahkaki Tánistsi",
+    "missingPersonTitle": "Saa Óómahkaki Nínaa",
+    "riskTitle": "Iorihtakéhte",
+    "languageTitle": "Sínakssin",
+    "reporterNameLabel": "Kahsón:na",
+    "reporterRelationshipLabel": "Teiontatià:ton",
+    "missingPersonNameLabel": "Kahsón:na",
+    "missingPersonAgeLabel": "Nitáíssinoopi",
+    "missingPersonLastSeenLabel": "Ómahksiyi Óóhkotoki",
+    "riskMedicalLabel": "Niitáíssinoopi",
+    "riskMentalLabel": "Onón:kwa",
+    "languageReporterLabel": "Óómahkaki sínakssin",
+    "languageSubjectLabel": "Saa óómahkaki sínakssin"
+  },
+  "success": {
+    "kicker": "Kará:reks Itómohpiyi",
+    "title": "Annístsi kará:reks itómohpiyi",
+    "subtitle": "Niitáwahsini áíhpiyi iihtsípi.",
+    "caseLabel": "Iihtsípaitapiiyssin:",
+    "nextStepsTitle": "Nitáísski'naki:",
+    "nextSteps": {
+      "first": "Niitáwahsini áíhpiyi iihtsípi.",
+      "second": "Áákssiyi áíssinooni.",
+      "third": "Iihtsípaitapiiyssin óóhkotoki."
+    },
+    "backToCases": "Óóhkotoki iihtsípaitapiiyssin",
+    "newReport": "Ómahkitapi kará:reks"
+  }
+}
