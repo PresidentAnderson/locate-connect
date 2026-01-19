@@ -935,3 +935,235 @@ export interface IntegrationStatusCard {
   lastSync?: string;
   nextScheduledSync?: string;
 }
+
+// =============================================================================
+// ROUTE BINDING TYPES
+// =============================================================================
+
+// Aggregation strategies for multi-integration routes
+export type AggregationStrategy =
+  | "first_success"      // Return first successful response
+  | "merge_results"      // Merge all results together
+  | "priority_order"     // Return based on priority, fallback on failure
+  | "all_parallel"       // Execute all in parallel, return aggregated
+  | "chain";             // Chain results from one to next
+
+// Transform types
+export type TransformType = "request" | "response" | "both";
+
+// HTTP Methods for routes
+export type RouteMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "ANY";
+
+// Integration Route Configuration
+export interface IntegrationRoute {
+  id: string;
+  routePath: string;
+  routeMethod: RouteMethod;
+  name: string;
+  description?: string;
+
+  // Aggregation settings
+  aggregationStrategy: AggregationStrategy;
+  timeoutMs: number;
+  failOnAnyError: boolean;
+
+  // Status
+  isEnabled: boolean;
+
+  // Metadata
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
+
+// Route to Integration Mapping
+export interface RouteIntegrationMapping {
+  id: string;
+  routeId: string;
+  integrationId: string;
+
+  // Endpoint configuration
+  endpointPath: string;
+  endpointMethod: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+  // Priority & Fallback
+  priority: number;
+  isFallback: boolean;
+
+  // Request transformation
+  requestTransform?: string;
+  requestTemplate?: Record<string, unknown>;
+  requestHeaders?: Record<string, string>;
+  queryParamsMap?: Record<string, string>;
+
+  // Response transformation
+  responseTransform?: string;
+  responseTemplate?: Record<string, unknown>;
+  responseFieldMap?: Record<string, string>;
+
+  // Caching
+  cacheEnabled: boolean;
+  cacheTtlSeconds: number;
+  cacheKeyTemplate?: string;
+
+  // Status
+  isEnabled: boolean;
+
+  // Metrics
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  avgResponseTimeMs?: number;
+  lastCalledAt?: string;
+  lastError?: string;
+  lastErrorAt?: string;
+
+  // Metadata
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Route Transformer Definition
+export interface RouteTransformer {
+  id: string;
+  name: string;
+  description?: string;
+
+  transformType: TransformType;
+  transformExpression: string;
+
+  inputSchema?: Record<string, unknown>;
+  outputSchema?: Record<string, unknown>;
+
+  isEnabled: boolean;
+  isBuiltin: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
+
+// Route Execution Log Entry
+export interface RouteExecutionLog {
+  id: string;
+  routeId: string;
+
+  requestMethod: string;
+  requestPath: string;
+  requestQuery?: Record<string, unknown>;
+  requestBodyHash?: string;
+
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+
+  integrationCalls: IntegrationCallResult[];
+
+  status: "success" | "partial" | "failure";
+  responseStatusCode?: number;
+  errorMessage?: string;
+
+  userId?: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+// Result of a single integration call within a route execution
+export interface IntegrationCallResult {
+  integrationId: string;
+  integrationName: string;
+  mappingId: string;
+  priority: number;
+
+  status: "success" | "failure" | "skipped";
+  statusCode?: number;
+  durationMs: number;
+
+  error?: string;
+  fromCache?: boolean;
+}
+
+// Resolved Route Configuration (with full integration details)
+export interface ResolvedRouteConfig {
+  routeId: string;
+  routePath: string;
+  routeMethod: RouteMethod;
+  name: string;
+  aggregationStrategy: AggregationStrategy;
+  timeoutMs: number;
+  failOnAnyError: boolean;
+
+  mappings: ResolvedRouteMapping[];
+}
+
+// Resolved mapping with integration details
+export interface ResolvedRouteMapping {
+  mappingId: string;
+  integrationId: string;
+  integrationName: string;
+  baseUrl: string;
+
+  endpointPath: string;
+  endpointMethod: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  priority: number;
+  isFallback: boolean;
+
+  requestTransform?: string;
+  requestTemplate?: Record<string, unknown>;
+  responseTransform?: string;
+  responseTemplate?: Record<string, unknown>;
+
+  cacheEnabled: boolean;
+  cacheTtlSeconds: number;
+}
+
+// Route Binding Create/Update DTOs
+export interface CreateIntegrationRouteDTO {
+  routePath: string;
+  routeMethod: RouteMethod;
+  name: string;
+  description?: string;
+  aggregationStrategy?: AggregationStrategy;
+  timeoutMs?: number;
+  failOnAnyError?: boolean;
+}
+
+export interface UpdateIntegrationRouteDTO {
+  name?: string;
+  description?: string;
+  aggregationStrategy?: AggregationStrategy;
+  timeoutMs?: number;
+  failOnAnyError?: boolean;
+  isEnabled?: boolean;
+}
+
+export interface CreateRouteMappingDTO {
+  routeId: string;
+  integrationId: string;
+  endpointPath: string;
+  endpointMethod?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  priority?: number;
+  isFallback?: boolean;
+  requestTransform?: string;
+  requestTemplate?: Record<string, unknown>;
+  requestHeaders?: Record<string, string>;
+  responseTransform?: string;
+  responseTemplate?: Record<string, unknown>;
+  cacheEnabled?: boolean;
+  cacheTtlSeconds?: number;
+}
+
+export interface UpdateRouteMappingDTO {
+  endpointPath?: string;
+  endpointMethod?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  priority?: number;
+  isFallback?: boolean;
+  requestTransform?: string;
+  requestTemplate?: Record<string, unknown>;
+  requestHeaders?: Record<string, string>;
+  responseTransform?: string;
+  responseTemplate?: Record<string, unknown>;
+  cacheEnabled?: boolean;
+  cacheTtlSeconds?: number;
+  isEnabled?: boolean;
+}

@@ -270,11 +270,7 @@ async function generateDataExport(
 
     const fileSizeBytes = Buffer.byteLength(fileContent, 'utf8');
 
-    // In production, you would:
-    // 1. Store file to secure storage (e.g., Supabase Storage with encryption)
-    // 2. Generate secure download URL
-    // For now, we'll just mark as ready
-
+    // Calculate record counts
     const recordCounts: Record<string, number> = {};
     for (const [key, value] of Object.entries(userData)) {
       if (Array.isArray(value)) {
@@ -284,7 +280,39 @@ async function generateDataExport(
       }
     }
 
-    // Update export record
+    // Determine file extension
+    const extension = format === 'csv' ? 'csv' : format === 'xml' ? 'xml' : 'json';
+    const filename = `data-export-${userId}-${exportId}.${extension}`;
+    const storagePath = `exports/${userId}/${filename}`;
+
+    // Store file to Supabase Storage
+    const fileBlob = new Blob([fileContent], {
+      type: format === 'csv' ? 'text/csv' : format === 'xml' ? 'application/xml' : 'application/json',
+    });
+
+    const { error: uploadError } = await supabase.storage
+      .from('data-portability')
+      .upload(storagePath, fileBlob, {
+        contentType: format === 'csv' ? 'text/csv' : format === 'xml' ? 'application/xml' : 'application/json',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('Error uploading export file:', uploadError);
+      throw new Error('Failed to store export file');
+    }
+
+    // Generate signed URL for download (valid for 7 days)
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('data-portability')
+      .createSignedUrl(storagePath, 7 * 24 * 60 * 60); // 7 days in seconds
+
+    if (signedUrlError) {
+      console.error('Error generating signed URL:', signedUrlError);
+      // Fall back to API download route
+    }
+
+    // Update export record with file info
     await supabase
       .from('data_portability_exports')
       .update({
@@ -293,10 +321,24 @@ async function generateDataExport(
         total_records: totalRecords,
         record_counts: recordCounts,
         file_size_bytes: fileSizeBytes,
-        // In production, set actual download URL
-        download_url: `/api/compliance/data-portability/${exportId}/download`,
+        file_path: storagePath,
+        download_url: signedUrlData?.signedUrl || `/api/compliance/data-portability/${exportId}/download`,
       })
       .eq('id', exportId);
+
+    // Log the export generation for audit
+    await supabase.from('user_activity_log').insert({
+      user_id: userId,
+      action: 'data_export_generated',
+      resource_type: 'data_portability_export',
+      resource_id: exportId,
+      details: {
+        format,
+        total_records: totalRecords,
+        file_size_bytes: fileSizeBytes,
+        tables: Object.keys(userData),
+      },
+    });
   } catch (error) {
     console.error('Error generating data export:', error);
     await supabase

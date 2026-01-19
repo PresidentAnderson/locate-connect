@@ -3,6 +3,7 @@
  * Processes and validates incoming leads from various sources
  */
 
+import { createClient } from "@/lib/supabase/server";
 import type {
   DataSource,
   DataSchema,
@@ -178,12 +179,24 @@ const resolveCaseStep: PipelineStep<Record<string, unknown>, Record<string, unkn
     const lead = data as unknown as IncomingLead;
 
     if (!lead.caseId && lead.caseNumber) {
-      // In production, lookup case ID from database
       console.log(`[LeadPipeline] Resolving case number: ${lead.caseNumber}`);
-      // lead.caseId = await lookupCaseId(lead.caseNumber);
 
-      // Placeholder - would throw if case not found
-      lead.caseId = `case_${lead.caseNumber}`;
+      const supabase = await createClient();
+
+      // Look up case ID from case number
+      const { data: caseData, error } = await supabase
+        .from("case_reports")
+        .select("id")
+        .eq("case_number", lead.caseNumber)
+        .single();
+
+      if (error || !caseData) {
+        console.error(`[LeadPipeline] Case not found: ${lead.caseNumber}`);
+        throw new Error(`Case not found: ${lead.caseNumber}`);
+      }
+
+      lead.caseId = caseData.id;
+      console.log(`[LeadPipeline] Resolved case ${lead.caseNumber} to ID ${lead.caseId}`);
     }
 
     return data;
@@ -205,17 +218,41 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
         lead.address.city,
         lead.address.state,
         lead.address.zip,
-        lead.address.country,
+        lead.address.country || "Canada", // Default to Canada
       ]
         .filter(Boolean)
         .join(", ");
 
       if (addressStr) {
         console.log(`[LeadPipeline] Geocoding address: ${addressStr}`);
-        // In production, call geocoding API
-        // const coords = await geocodeAddress(addressStr);
-        // lead.latitude = coords.lat;
-        // lead.longitude = coords.lng;
+
+        try {
+          // Use Nominatim (OpenStreetMap) geocoding API
+          const encodedAddress = encodeURIComponent(addressStr);
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1`,
+            {
+              headers: {
+                "User-Agent": "LocateConnect/1.0 (Missing Persons Assistance)",
+              },
+              signal: AbortSignal.timeout(10000),
+            }
+          );
+
+          if (response.ok) {
+            const results = (await response.json()) as Array<{ lat: string; lon: string }>;
+            if (results.length > 0) {
+              lead.latitude = parseFloat(results[0].lat);
+              lead.longitude = parseFloat(results[0].lon);
+              console.log(
+                `[LeadPipeline] Geocoded to: ${lead.latitude}, ${lead.longitude}`
+              );
+            }
+          }
+        } catch (error) {
+          console.warn(`[LeadPipeline] Geocoding failed:`, error);
+          // Continue without coordinates - not a fatal error
+        }
       }
     }
 
@@ -224,8 +261,56 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
       console.log(
         `[LeadPipeline] Reverse geocoding: ${lead.latitude}, ${lead.longitude}`
       );
-      // In production, call reverse geocoding API
-      // lead.address = await reverseGeocode(lead.latitude, lead.longitude);
+
+      try {
+        // Use Nominatim reverse geocoding
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lead.latitude}&lon=${lead.longitude}`,
+          {
+            headers: {
+              "User-Agent": "LocateConnect/1.0 (Missing Persons Assistance)",
+            },
+            signal: AbortSignal.timeout(10000),
+          }
+        );
+
+        if (response.ok) {
+          const result = (await response.json()) as {
+            address?: {
+              house_number?: string;
+              road?: string;
+              city?: string;
+              town?: string;
+              village?: string;
+              state?: string;
+              province?: string;
+              postcode?: string;
+              country?: string;
+            };
+          };
+
+          if (result.address) {
+            lead.address = {
+              street: [result.address.house_number, result.address.road]
+                .filter(Boolean)
+                .join(" "),
+              city:
+                result.address.city ||
+                result.address.town ||
+                result.address.village,
+              state: result.address.state || result.address.province,
+              zip: result.address.postcode,
+              country: result.address.country,
+            };
+            console.log(
+              `[LeadPipeline] Reverse geocoded to: ${lead.address.city}, ${lead.address.state}`
+            );
+          }
+        }
+      } catch (error) {
+        console.warn(`[LeadPipeline] Reverse geocoding failed:`, error);
+        // Continue without address - not a fatal error
+      }
     }
 
     return data;
@@ -240,18 +325,109 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
   async execute(data) {
     const lead = data as unknown as IncomingLead;
 
-    // Check for similar leads in the same case
+    if (!lead.caseId) {
+      return data as Record<string, unknown> & { _duplicateOf?: string };
+    }
+
     console.log(`[LeadPipeline] Checking for duplicates in case ${lead.caseId}`);
 
-    // In production, query database for similar leads
-    // const similar = await findSimilarLeads(lead);
-    // if (similar.length > 0) {
-    //   data._duplicateOf = similar[0].id;
-    // }
+    const supabase = await createClient();
+
+    // Look for similar leads in the last 7 days
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Build query to find potential duplicates
+    let query = supabase
+      .from("leads")
+      .select("id, title, description, submitted_at, location")
+      .eq("case_id", lead.caseId)
+      .gte("submitted_at", sevenDaysAgo);
+
+    // If we have submitter contact info, check for exact matches
+    if (lead.submitterEmail && !lead.isAnonymous) {
+      const { data: exactMatches } = await supabase
+        .from("leads")
+        .select("id")
+        .eq("case_id", lead.caseId)
+        .eq("submitter_email", lead.submitterEmail)
+        .gte("submitted_at", sevenDaysAgo)
+        .limit(1);
+
+      if (exactMatches && exactMatches.length > 0) {
+        console.log(`[LeadPipeline] Found duplicate by email: ${exactMatches[0].id}`);
+        (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = exactMatches[0].id;
+        return data as Record<string, unknown> & { _duplicateOf?: string };
+      }
+    }
+
+    // Check for similar descriptions using text search
+    const { data: recentLeads } = await query.limit(50);
+
+    if (recentLeads && recentLeads.length > 0) {
+      // Calculate similarity with each recent lead
+      const leadDescription = lead.description.toLowerCase();
+      const leadWords = new Set(leadDescription.split(/\s+/).filter((w) => w.length > 3));
+
+      for (const existing of recentLeads) {
+        const existingDescription = (existing.description || "").toLowerCase();
+        const existingWords = new Set(existingDescription.split(/\s+/).filter((w: string) => w.length > 3));
+
+        // Calculate Jaccard similarity
+        const intersection = [...leadWords].filter((w) => existingWords.has(w)).length;
+        const union = new Set([...leadWords, ...existingWords]).size;
+        const similarity = union > 0 ? intersection / union : 0;
+
+        // If similarity > 70%, consider it a potential duplicate
+        if (similarity > 0.7) {
+          console.log(`[LeadPipeline] Found similar lead (${(similarity * 100).toFixed(0)}% match): ${existing.id}`);
+          (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = existing.id;
+          break;
+        }
+
+        // Also check location proximity if coordinates available
+        if (lead.latitude && lead.longitude && existing.location) {
+          const existingLocation = existing.location as { latitude?: number; longitude?: number };
+          if (existingLocation.latitude && existingLocation.longitude) {
+            const distance = calculateDistance(
+              lead.latitude,
+              lead.longitude,
+              existingLocation.latitude,
+              existingLocation.longitude
+            );
+
+            // If within 100 meters and similar time frame, likely duplicate
+            if (distance < 0.1 && similarity > 0.3) {
+              console.log(
+                `[LeadPipeline] Found nearby lead (${distance.toFixed(2)}km, ${(similarity * 100).toFixed(0)}% text match): ${existing.id}`
+              );
+              (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = existing.id;
+              break;
+            }
+          }
+        }
+      }
+    }
 
     return data as Record<string, unknown> & { _duplicateOf?: string };
   },
 };
+
+/**
+ * Calculate distance between two points in km (Haversine formula)
+ */
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 /**
  * Step 5: Calculate confidence score

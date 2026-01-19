@@ -4,6 +4,7 @@
  */
 
 import { BaseAgent } from "./base-agent";
+import { createClient } from "@/lib/supabase/server";
 import type {
   AgentConfig,
   EscalationRule,
@@ -32,6 +33,7 @@ interface CaseForEscalation {
   lastEscalationAt?: string;
   weatherRisk?: number;
   tags: string[];
+  assignedTo?: string;
 }
 
 export class PriorityEscalationAgent extends BaseAgent {
@@ -71,8 +73,10 @@ export class PriorityEscalationAgent extends BaseAgent {
           continue;
         }
 
-        // Evaluate rules
-        for (const rule of enabledRules) {
+        // Evaluate rules (sorted by priority)
+        const sortedRules = [...enabledRules].sort((a, b) => a.priority - b.priority);
+
+        for (const rule of sortedRules) {
           if (this.evaluateRule(rule, caseData)) {
             const newPriority = this.calculateNewPriority(caseData, rule);
 
@@ -109,8 +113,128 @@ export class PriorityEscalationAgent extends BaseAgent {
   }
 
   private async getEligibleCases(): Promise<CaseForEscalation[]> {
-    // Query cases that are open and not at max priority
-    return [];
+    const supabase = await createClient();
+
+    // Query cases that are open and not at max priority (0 is highest)
+    const { data: cases, error } = await supabase
+      .from("case_reports")
+      .select(`
+        id,
+        case_number,
+        priority,
+        status,
+        created_at,
+        assigned_to,
+        tags,
+        missing_person:missing_persons(
+          date_of_birth,
+          last_seen_date,
+          medical_conditions,
+          medications,
+          mental_health_history,
+          risk_factors
+        ),
+        case_activity(
+          created_at
+        )
+      `)
+      .in("status", ["open", "active", "in_progress"])
+      .gt("priority", 0) // Not already at highest priority
+      .order("priority", { ascending: false }) // Process lower priority cases first
+      .order("created_at", { ascending: true }) // Then by oldest
+      .limit(100);
+
+    if (error) {
+      console.error("[PriorityEscalationAgent] Error fetching cases:", error);
+      return [];
+    }
+
+    if (!cases) return [];
+
+    // Get last escalation for each case
+    const caseIds = cases.map((c) => c.id);
+    const { data: escalations } = await supabase
+      .from("escalation_events")
+      .select("case_id, triggered_at")
+      .in("case_id", caseIds)
+      .order("triggered_at", { ascending: false });
+
+    // Build map of last escalation by case
+    const lastEscalationMap = new Map<string, string>();
+    if (escalations) {
+      for (const e of escalations) {
+        if (!lastEscalationMap.has(e.case_id)) {
+          lastEscalationMap.set(e.case_id, e.triggered_at);
+        }
+      }
+    }
+
+    return cases.map((c) => {
+      const missingPerson = c.missing_person as {
+        date_of_birth?: string;
+        last_seen_date?: string;
+        medical_conditions?: string;
+        medications?: string[];
+        mental_health_history?: string;
+        risk_factors?: string[];
+      } | null;
+
+      // Calculate if minor
+      let isMinor = false;
+      if (missingPerson?.date_of_birth) {
+        const dob = new Date(missingPerson.date_of_birth);
+        const age = Math.floor((Date.now() - dob.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+        isMinor = age < 18;
+      }
+
+      // Check for medical conditions
+      const hasMedicalCondition = !!(
+        missingPerson?.medical_conditions ||
+        (missingPerson?.medications && missingPerson.medications.length > 0)
+      );
+
+      // Check for suicidal risk (check risk_factors and mental_health_history)
+      const riskFactors = missingPerson?.risk_factors || [];
+      const mentalHealthHistory = (missingPerson?.mental_health_history || "").toLowerCase();
+      const isSuicidalRisk =
+        riskFactors.some((r) =>
+          r.toLowerCase().includes("suicid") ||
+          r.toLowerCase().includes("self-harm") ||
+          r.toLowerCase().includes("depression")
+        ) ||
+        mentalHealthHistory.includes("suicid") ||
+        mentalHealthHistory.includes("self-harm");
+
+      // Check for threats
+      const hasThreats = riskFactors.some((r) =>
+        r.toLowerCase().includes("threat") ||
+        r.toLowerCase().includes("danger") ||
+        r.toLowerCase().includes("abduct")
+      );
+
+      // Get most recent activity
+      const activities = c.case_activity as Array<{ created_at: string }> | null;
+      const lastActivityAt = activities && activities.length > 0
+        ? activities[0].created_at
+        : undefined;
+
+      return {
+        id: c.id,
+        caseNumber: c.case_number,
+        priority: c.priority || 3,
+        status: c.status,
+        createdAt: c.created_at,
+        lastSeenDate: missingPerson?.last_seen_date || c.created_at,
+        isMinor,
+        hasMedicalCondition,
+        isSuicidalRisk,
+        hasThreats,
+        lastActivityAt,
+        lastEscalationAt: lastEscalationMap.get(c.id),
+        tags: (c.tags as string[]) || [],
+        assignedTo: c.assigned_to,
+      };
+    });
   }
 
   private isInCooldown(caseData: CaseForEscalation): boolean {
@@ -169,10 +293,18 @@ export class PriorityEscalationAgent extends BaseAgent {
     switch (field) {
       case "hoursMissing":
         return this.calculateHoursMissing(caseData.lastSeenDate);
+      case "daysMissing":
+        return Math.floor(this.calculateHoursMissing(caseData.lastSeenDate) / 24);
       case "hoursInactive":
         return caseData.lastActivityAt
           ? this.calculateHoursSince(caseData.lastActivityAt)
           : null;
+      case "daysInactive":
+        return caseData.lastActivityAt
+          ? Math.floor(this.calculateHoursSince(caseData.lastActivityAt) / 24)
+          : null;
+      case "hoursSinceCreated":
+        return this.calculateHoursSince(caseData.createdAt);
       default:
         return (caseData as unknown as Record<string, unknown>)[field];
     }
@@ -201,9 +333,11 @@ export class PriorityEscalationAgent extends BaseAgent {
       const escalateBy = action.params.by as number | undefined;
 
       if (escalateTo !== undefined) {
-        return escalateTo;
+        // Escalate to specific level (but don't de-escalate)
+        return Math.min(caseData.priority, escalateTo);
       }
       if (escalateBy !== undefined) {
+        // Escalate by N levels (lower number = higher priority)
         return Math.max(0, caseData.priority - escalateBy);
       }
     }
@@ -216,12 +350,92 @@ export class PriorityEscalationAgent extends BaseAgent {
     rule: EscalationRule,
     newPriority: number
   ): Promise<void> {
+    const supabase = await createClient();
+
     console.log(
       `[PriorityEscalationAgent] Escalating case ${caseData.caseNumber} from P${caseData.priority} to P${newPriority} (rule: ${rule.name})`
     );
 
     // Update case priority in database
-    // Send notification
+    const { error: updateError } = await supabase
+      .from("case_reports")
+      .update({
+        priority: newPriority,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", caseData.id);
+
+    if (updateError) {
+      console.error("[PriorityEscalationAgent] Error updating priority:", updateError);
+      throw updateError;
+    }
+
+    // Create notification for assigned investigator
+    if (caseData.assignedTo) {
+      const priorityLabels: Record<number, string> = {
+        0: "Critical",
+        1: "High",
+        2: "Medium",
+        3: "Low",
+      };
+
+      await supabase.from("notifications").insert({
+        user_id: caseData.assignedTo,
+        type: "priority_escalation",
+        title: `Case Priority Escalated: ${caseData.caseNumber}`,
+        message: `Case priority has been automatically escalated from ${priorityLabels[caseData.priority] || `P${caseData.priority}`} to ${priorityLabels[newPriority] || `P${newPriority}`}. Reason: ${rule.name}`,
+        data: {
+          case_id: caseData.id,
+          case_number: caseData.caseNumber,
+          previous_priority: caseData.priority,
+          new_priority: newPriority,
+          rule_id: rule.id,
+          rule_name: rule.name,
+        },
+        priority: newPriority <= 1 ? "high" : "medium",
+      });
+    }
+
+    // Log to case activity
+    await supabase.from("case_activity").insert({
+      case_id: caseData.id,
+      activity_type: "priority_escalated",
+      description: `Priority automatically escalated from P${caseData.priority} to P${newPriority} due to: ${rule.name}`,
+      metadata: {
+        rule_id: rule.id,
+        previous_priority: caseData.priority,
+        new_priority: newPriority,
+      },
+    });
+
+    // For critical escalations (P0), notify all supervisors
+    if (newPriority === 0) {
+      const { data: supervisors } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["supervisor", "admin"]);
+
+      if (supervisors?.length) {
+        const supervisorNotifications = supervisors
+          .filter((s) => s.user_id !== caseData.assignedTo)
+          .map((s) => ({
+            user_id: s.user_id,
+            type: "critical_escalation",
+            title: `CRITICAL: Case ${caseData.caseNumber} Escalated to P0`,
+            message: `Case has been escalated to Critical priority. Reason: ${rule.name}. Immediate attention required.`,
+            data: {
+              case_id: caseData.id,
+              case_number: caseData.caseNumber,
+              rule_name: rule.name,
+            },
+            priority: "urgent",
+          }));
+
+        if (supervisorNotifications.length > 0) {
+          await supabase.from("notifications").insert(supervisorNotifications);
+        }
+      }
+    }
   }
 
   private async logEscalationEvent(
@@ -229,6 +443,8 @@ export class PriorityEscalationAgent extends BaseAgent {
     rule: EscalationRule,
     newPriority: number
   ): Promise<void> {
+    const supabase = await createClient();
+
     const event: EscalationEvent = {
       id: crypto.randomUUID(),
       caseId: caseData.id,
@@ -240,7 +456,33 @@ export class PriorityEscalationAgent extends BaseAgent {
       triggeredBy: "agent",
     };
 
-    console.log(`[PriorityEscalationAgent] Logged escalation event:`, event);
+    // Store in database
+    const { error } = await supabase.from("escalation_events").insert({
+      id: event.id,
+      case_id: event.caseId,
+      rule_id: event.ruleId,
+      previous_priority: event.previousPriority,
+      new_priority: event.newPriority,
+      reason: event.reason,
+      triggered_at: event.triggeredAt,
+      triggered_by: event.triggeredBy,
+      metadata: {
+        rule_conditions: rule.conditions,
+        case_data: {
+          isMinor: caseData.isMinor,
+          hasMedicalCondition: caseData.hasMedicalCondition,
+          isSuicidalRisk: caseData.isSuicidalRisk,
+          hasThreats: caseData.hasThreats,
+          hoursMissing: this.calculateHoursMissing(caseData.lastSeenDate),
+        },
+      },
+    });
+
+    if (error) {
+      console.error("[PriorityEscalationAgent] Error logging event:", error);
+    } else {
+      console.log(`[PriorityEscalationAgent] Logged escalation event: ${event.id}`);
+    }
   }
 
   protected clone(config: AgentConfig): BaseAgent {
@@ -290,12 +532,34 @@ export function createPriorityEscalationAgent(
       action: { type: "escalate_priority", params: { level: 0 } },
     },
     {
-      id: "72h_any",
-      name: "Any case missing 72+ hours",
+      id: "threats_any",
+      name: "Case with active threats",
       enabled: true,
       priority: 4,
       conditions: [
+        { field: "hasThreats", operator: "eq", value: true },
+        { field: "priority", operator: "gt", value: 1 },
+      ],
+      action: { type: "escalate_priority", params: { level: 1 } },
+    },
+    {
+      id: "72h_any",
+      name: "Any case missing 72+ hours",
+      enabled: true,
+      priority: 5,
+      conditions: [
         { field: "hoursMissing", operator: "gte", value: 72 },
+        { field: "priority", operator: "gt", value: 2 },
+      ],
+      action: { type: "escalate_priority", params: { by: 1 } },
+    },
+    {
+      id: "inactive_48h",
+      name: "No activity in 48+ hours",
+      enabled: true,
+      priority: 6,
+      conditions: [
+        { field: "hoursInactive", operator: "gte", value: 48 },
         { field: "priority", operator: "gt", value: 2 },
       ],
       action: { type: "escalate_priority", params: { by: 1 } },

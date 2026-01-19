@@ -3,6 +3,7 @@
  * Handles CRUD operations and workflows for case leads
  */
 
+import { createClient } from "@/lib/supabase/server";
 import type {
   Lead,
   LeadStatus,
@@ -466,11 +467,163 @@ class LeadManagementService {
   }
 
   /**
-   * Escalate a lead
+   * Escalate a lead - send notifications to investigators and supervisors
    */
   private async escalateLead(lead: Lead): Promise<void> {
     console.log(`[LeadService] Escalating critical lead ${lead.id}`);
-    // Would send notifications, etc.
+
+    const supabase = await createClient();
+
+    try {
+      // Get case details including assigned investigators
+      const { data: caseData, error: caseError } = await supabase
+        .from("case_reports")
+        .select("case_number, assigned_to, missing_person_name")
+        .eq("id", lead.caseId)
+        .single();
+
+      if (caseError || !caseData) {
+        console.error("[LeadService] Failed to fetch case for escalation:", caseError);
+        return;
+      }
+
+      // Get supervisors and investigators to notify
+      const { data: usersToNotify, error: usersError } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, role")
+        .or("role.eq.supervisor,role.eq.admin,id.eq." + (caseData.assigned_to || ""));
+
+      if (usersError || !usersToNotify?.length) {
+        console.error("[LeadService] No users to notify for escalation");
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const notificationTitle = `🚨 Critical Lead: ${lead.title}`;
+      const notificationMessage = `A critical priority lead has been submitted for case ${caseData.case_number} (${caseData.missing_person_name || "Unknown"}). ${lead.description.substring(0, 150)}...`;
+
+      // Create notifications for each user
+      const notifications = usersToNotify.map((user) => ({
+        user_id: user.id,
+        type: "lead_escalation",
+        title: notificationTitle,
+        message: notificationMessage,
+        priority: "high" as const,
+        data: {
+          lead_id: lead.id,
+          case_id: lead.caseId,
+          case_number: caseData.case_number,
+          lead_priority: lead.priority,
+          lead_source: lead.source,
+          confidence_score: lead.confidenceScore,
+        },
+        created_at: now,
+      }));
+
+      const { error: notifyError } = await supabase
+        .from("notifications")
+        .insert(notifications);
+
+      if (notifyError) {
+        console.error("[LeadService] Failed to create escalation notifications:", notifyError);
+      } else {
+        console.log(`[LeadService] Sent escalation notifications to ${notifications.length} users`);
+      }
+
+      // Log the escalation to case activity
+      await supabase.from("case_activity").insert({
+        case_id: lead.caseId,
+        activity_type: "lead_escalated",
+        description: `Critical lead "${lead.title}" has been escalated for immediate review`,
+        metadata: {
+          lead_id: lead.id,
+          lead_priority: lead.priority,
+          lead_source: lead.source,
+          confidence_score: lead.confidenceScore,
+          notified_users: usersToNotify.map((u) => u.id),
+        },
+        created_at: now,
+      });
+
+      // If location data exists, check for proximity to other sightings
+      if (lead.location?.coordinates) {
+        await this.checkProximityAlerts(lead, caseData.case_number);
+      }
+    } catch (error) {
+      console.error("[LeadService] Escalation error:", error);
+    }
+  }
+
+  /**
+   * Check if the lead's location is near other recent sightings
+   */
+  private async checkProximityAlerts(
+    lead: Lead,
+    caseNumber: string
+  ): Promise<void> {
+    if (!lead.location?.coordinates) return;
+
+    const supabase = await createClient();
+
+    // Get recent leads with locations for the same case
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: recentLeads, error } = await supabase
+      .from("leads")
+      .select("id, title, location, sighting")
+      .eq("case_id", lead.caseId)
+      .neq("id", lead.id)
+      .gte("created_at", twentyFourHoursAgo)
+      .not("location", "is", null);
+
+    if (error || !recentLeads?.length) return;
+
+    interface LeadLocation {
+      coordinates?: { lat: number; lng: number };
+    }
+
+    // Check proximity to each recent lead
+    for (const recentLead of recentLeads) {
+      const recentLocation = recentLead.location as LeadLocation | null;
+      if (!recentLocation?.coordinates) continue;
+
+      const distance = this.haversineDistance(
+        lead.location.coordinates,
+        recentLocation.coordinates
+      );
+
+      // If within 5km, create a pattern alert
+      if (distance < 5) {
+        console.log(`[LeadService] Proximity alert: Lead ${lead.id} is ${distance.toFixed(2)}km from lead ${recentLead.id}`);
+
+        // Get supervisors to notify about the pattern
+        const { data: supervisors } = await supabase
+          .from("profiles")
+          .select("id")
+          .in("role", ["supervisor", "admin"]);
+
+        if (supervisors?.length) {
+          await supabase.from("notifications").insert(
+            supervisors.map((s) => ({
+              user_id: s.id,
+              type: "pattern_detected",
+              title: "📍 Pattern Alert: Clustered Sightings",
+              message: `Multiple sighting reports within ${distance.toFixed(1)}km for case ${caseNumber}. Recent lead: "${lead.title}" is near a previous sighting: "${recentLead.title}".`,
+              priority: "high" as const,
+              data: {
+                lead_id: lead.id,
+                related_lead_id: recentLead.id,
+                case_id: lead.caseId,
+                distance_km: distance,
+                pattern_type: "proximity_cluster",
+              },
+            }))
+          );
+        }
+
+        break; // Only alert once per lead
+      }
+    }
   }
 
   /**

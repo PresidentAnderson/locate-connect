@@ -1,23 +1,7 @@
 /**
  * Route Binding Module
- * Request-to-integration mapping and orchestration
+ * Exports for integration route binding functionality
  */
 
-export {
-  RouteBindingEngine,
-  getRouteBindingEngine,
-  type BindingExecutionOptions,
-  type RegisteredBinding,
-} from './binding-engine';
-
-export {
-  DataTransformer,
-  getDataTransformer,
-  type TransformContext,
-} from './transformer';
-
-export {
-  ResponseAggregator,
-  getResponseAggregator,
-  type AggregationResult,
-} from './aggregator';
+export { executeRoute } from './route-executor';
+export type { RouteExecutionRequest, RouteExecutionResult } from './route-executor';

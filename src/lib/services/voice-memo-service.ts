@@ -268,7 +268,7 @@ class VoiceMemoService {
   }
 
   /**
-   * Queue memo for transcription
+   * Queue memo for transcription using OpenAI Whisper API
    */
   private queueTranscription(memoId: string): void {
     const memo = this.memos.get(memoId);
@@ -277,15 +277,235 @@ class VoiceMemoService {
     memo.transcriptionStatus = "processing";
     this.memos.set(memoId, memo);
 
-    // Simulate transcription (would use Whisper API or similar)
-    setTimeout(async () => {
-      await this.setTranscription(
-        memoId,
-        "[Transcription would appear here after processing]"
-      );
-    }, 5000);
+    // Process transcription asynchronously
+    this.processTranscription(memoId).catch((error) => {
+      console.error(`[VoiceMemoService] Transcription failed for memo ${memoId}:`, error);
+      const failedMemo = this.memos.get(memoId);
+      if (failedMemo) {
+        failedMemo.transcriptionStatus = "failed";
+        this.memos.set(memoId, failedMemo);
+      }
+    });
 
     console.log(`[VoiceMemoService] Queued transcription for memo ${memoId}`);
+  }
+
+  /**
+   * Process transcription using OpenAI Whisper API or fallback services
+   */
+  private async processTranscription(memoId: string): Promise<void> {
+    const memo = this.memos.get(memoId);
+    if (!memo || !memo.audioUrl) {
+      throw new Error("Memo not found or no audio URL");
+    }
+
+    // Try OpenAI Whisper API first
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    if (openaiApiKey) {
+      const transcription = await this.transcribeWithWhisper(memo.audioUrl, openaiApiKey);
+      if (transcription) {
+        await this.setTranscription(memoId, transcription);
+        return;
+      }
+    }
+
+    // Try Deepgram as fallback
+    const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
+    if (deepgramApiKey) {
+      const transcription = await this.transcribeWithDeepgram(memo.audioUrl, deepgramApiKey);
+      if (transcription) {
+        await this.setTranscription(memoId, transcription);
+        return;
+      }
+    }
+
+    // Try AssemblyAI as another fallback
+    const assemblyApiKey = process.env.ASSEMBLYAI_API_KEY;
+    if (assemblyApiKey) {
+      const transcription = await this.transcribeWithAssemblyAI(memo.audioUrl, assemblyApiKey);
+      if (transcription) {
+        await this.setTranscription(memoId, transcription);
+        return;
+      }
+    }
+
+    // No transcription service configured
+    console.warn("[VoiceMemoService] No transcription service configured");
+    await this.setTranscription(
+      memoId,
+      "[Transcription service not configured. Please set OPENAI_API_KEY, DEEPGRAM_API_KEY, or ASSEMBLYAI_API_KEY]"
+    );
+  }
+
+  /**
+   * Transcribe audio using OpenAI Whisper API
+   */
+  private async transcribeWithWhisper(audioUrl: string, apiKey: string): Promise<string | null> {
+    try {
+      console.log("[VoiceMemoService] Transcribing with OpenAI Whisper");
+
+      // Fetch the audio file
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error(`Failed to fetch audio: ${audioResponse.status}`);
+      }
+
+      const audioBlob = await audioResponse.blob();
+
+      // Create form data for Whisper API
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audio.webm");
+      formData.append("model", "whisper-1");
+      formData.append("language", "en"); // Can be made configurable
+      formData.append("response_format", "text");
+
+      // Call Whisper API
+      const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("[VoiceMemoService] Whisper API error:", error);
+        return null;
+      }
+
+      const transcription = await response.text();
+      console.log("[VoiceMemoService] Whisper transcription complete");
+      return transcription.trim();
+    } catch (error) {
+      console.error("[VoiceMemoService] Whisper transcription error:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Transcribe audio using Deepgram API
+   */
+  private async transcribeWithDeepgram(audioUrl: string, apiKey: string): Promise<string | null> {
+    try {
+      console.log("[VoiceMemoService] Transcribing with Deepgram");
+
+      // Fetch the audio file
+      const audioResponse = await fetch(audioUrl);
+      if (!audioResponse.ok) {
+        throw new Error(`Failed to fetch audio: ${audioResponse.status}`);
+      }
+
+      const audioBuffer = await audioResponse.arrayBuffer();
+
+      // Call Deepgram API
+      const response = await fetch(
+        "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true&punctuate=true",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Token ${apiKey}`,
+            "Content-Type": "audio/webm",
+          },
+          body: audioBuffer,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error("[VoiceMemoService] Deepgram API error:", error);
+        return null;
+      }
+
+      const result = (await response.json()) as {
+        results?: {
+          channels?: Array<{
+            alternatives?: Array<{ transcript?: string }>;
+          }>;
+        };
+      };
+
+      const transcription = result.results?.channels?.[0]?.alternatives?.[0]?.transcript;
+      if (transcription) {
+        console.log("[VoiceMemoService] Deepgram transcription complete");
+        return transcription;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("[VoiceMemoService] Deepgram transcription error:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Transcribe audio using AssemblyAI API
+   */
+  private async transcribeWithAssemblyAI(audioUrl: string, apiKey: string): Promise<string | null> {
+    try {
+      console.log("[VoiceMemoService] Transcribing with AssemblyAI");
+
+      // Step 1: Submit transcription request
+      const submitResponse = await fetch("https://api.assemblyai.com/v2/transcript", {
+        method: "POST",
+        headers: {
+          Authorization: apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          audio_url: audioUrl,
+          language_code: "en",
+        }),
+      });
+
+      if (!submitResponse.ok) {
+        const error = await submitResponse.text();
+        console.error("[VoiceMemoService] AssemblyAI submit error:", error);
+        return null;
+      }
+
+      const submitResult = (await submitResponse.json()) as { id: string };
+      const transcriptId = submitResult.id;
+
+      // Step 2: Poll for completion (max 5 minutes)
+      const maxAttempts = 60;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds
+
+        const pollResponse = await fetch(
+          `https://api.assemblyai.com/v2/transcript/${transcriptId}`,
+          {
+            headers: {
+              Authorization: apiKey,
+            },
+          }
+        );
+
+        if (!pollResponse.ok) continue;
+
+        const pollResult = (await pollResponse.json()) as {
+          status: string;
+          text?: string;
+          error?: string;
+        };
+
+        if (pollResult.status === "completed" && pollResult.text) {
+          console.log("[VoiceMemoService] AssemblyAI transcription complete");
+          return pollResult.text;
+        }
+
+        if (pollResult.status === "error") {
+          console.error("[VoiceMemoService] AssemblyAI error:", pollResult.error);
+          return null;
+        }
+      }
+
+      console.error("[VoiceMemoService] AssemblyAI transcription timed out");
+      return null;
+    } catch (error) {
+      console.error("[VoiceMemoService] AssemblyAI transcription error:", error);
+      return null;
+    }
   }
 
   /**

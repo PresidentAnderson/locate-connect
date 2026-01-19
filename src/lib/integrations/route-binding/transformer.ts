@@ -4,6 +4,7 @@
  */
 
 import type { TransformationRule, DataMapping, RouteCondition } from '@/types';
+import { executeInlineTransform } from './transform-executor';
 
 export interface TransformContext {
   source: Record<string, unknown>;
@@ -229,10 +230,17 @@ export class DataTransformer {
       return value;
     }
 
-    // Custom transformations would be implemented here
-    // In production, this could execute registered custom functions
-    console.warn('[DataTransformer] Custom transformations not implemented');
-    return value;
+    // Execute custom transformation using the transform executor
+    // Replace {value} with the actual value reference
+    const preparedExpression = expression.replace(/\{value\}/g, '$.value');
+
+    // Create data object with value and source context
+    const data = {
+      value,
+      ...ctx?.source,
+    };
+
+    return executeInlineTransform(preparedExpression, data);
   }
 
   /**

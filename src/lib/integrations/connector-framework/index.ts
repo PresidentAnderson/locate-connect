@@ -46,3 +46,48 @@ export {
   type OAuth2Config,
   type TokenResponse,
 } from './auth-adapters';
+
+export {
+  TokenBucketRateLimiter,
+  RateLimitTimeoutError,
+  RateLimitExceededError,
+  getRateLimiterRegistry,
+  type RateLimitConfig,
+  type RateLimitResult,
+  type RateLimitMetrics,
+} from './rate-limiter';
+
+export {
+  ResponseCache,
+  getCacheRegistry,
+  type CacheConfig,
+  type CacheEntry,
+  type CacheStats,
+  type CacheOptions,
+} from './response-cache';
+
+export {
+  InterceptorChain,
+  correlationIdInterceptor,
+  createLoggingInterceptor,
+  timingResponseInterceptor,
+  contentTypeInterceptor,
+  createUserAgentInterceptor,
+  retryHeaderInterceptor,
+  errorNormalizationInterceptor,
+  createTransformInterceptor,
+  createRedactionInterceptor,
+  createDefaultInterceptorChain,
+  type RequestContext,
+  type RequestInterceptor,
+  type ResponseInterceptor,
+  type ErrorInterceptor,
+} from './interceptors';
+
+export {
+  MockConnector,
+  createMockConnector,
+  type MockResponse,
+  type MockRoute,
+  type MockConnectorConfig,
+} from './mock-connector';

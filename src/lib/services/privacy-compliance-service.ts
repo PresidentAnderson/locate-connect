@@ -3,6 +3,8 @@
  * Quebec Law 25 and Canadian privacy law compliance
  */
 
+import { createClient } from "@/lib/supabase/server";
+import { emailService } from "@/lib/services/email-service";
 import type {
   PrivacyCompliance,
   DataCategory,
@@ -258,7 +260,7 @@ class PrivacyComplianceService {
   }
 
   /**
-   * Process access request
+   * Process access request - compile all user data for GDPR/Law 25 compliance
    */
   async processAccessRequest(requestId: string): Promise<{
     data: Record<string, unknown>;
@@ -269,19 +271,178 @@ class PrivacyComplianceService {
       throw new Error("Invalid access request");
     }
 
-    // In production, this would compile all data for the user
-    const data = {
-      personalInfo: {},
-      caseInvolvement: [],
-      activityLog: [],
-      consentHistory: [],
+    const supabase = await createClient();
+    const userId = request.requesterId;
+
+    // Compile all user data from various tables
+    const data: Record<string, unknown> = {
+      exportDate: new Date().toISOString(),
+      requestId,
+      userId,
+      categories: {},
     };
 
+    // 1. Personal Profile Information
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (profile) {
+      data.personalInfo = {
+        fullName: profile.full_name,
+        email: profile.email,
+        phone: profile.phone,
+        address: profile.address,
+        city: profile.city,
+        province: profile.province,
+        postalCode: profile.postal_code,
+        country: profile.country,
+        dateOfBirth: profile.date_of_birth,
+        createdAt: profile.created_at,
+        updatedAt: profile.updated_at,
+        role: profile.role,
+        organization: profile.organization,
+      };
+    }
+
+    // 2. Case Involvement (as reporter or assignee)
+    const { data: caseReports } = await supabase
+      .from("case_reports")
+      .select("id, case_number, status, created_at, missing_person_name")
+      .or(`reported_by.eq.${userId},assigned_to.eq.${userId}`);
+
+    data.caseInvolvement = (caseReports || []).map((c) => ({
+      caseNumber: c.case_number,
+      status: c.status,
+      createdAt: c.created_at,
+      role: "Involved party",
+      missingPersonName: c.missing_person_name,
+    }));
+
+    // 3. Leads submitted
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("id, title, description, created_at, status, case_id")
+      .eq("submitted_by", userId);
+
+    data.leadsSubmitted = (leads || []).map((l) => ({
+      title: l.title,
+      description: l.description,
+      status: l.status,
+      createdAt: l.created_at,
+    }));
+
+    // 4. Tips submitted (anonymous tips may be excluded)
+    const { data: tips } = await supabase
+      .from("anonymous_tips")
+      .select("id, content, created_at, status")
+      .eq("submitter_id", userId)
+      .eq("is_anonymous", false); // Only non-anonymous tips
+
+    data.tipsSubmitted = (tips || []).map((t) => ({
+      content: t.content,
+      status: t.status,
+      createdAt: t.created_at,
+    }));
+
+    // 5. Activity Log
+    const { data: activities } = await supabase
+      .from("user_activity_log")
+      .select("action, details, created_at, ip_address")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    data.activityLog = (activities || []).map((a) => ({
+      action: a.action,
+      details: a.details,
+      timestamp: a.created_at,
+      ipAddress: a.ip_address,
+    }));
+
+    // 6. Consent History
+    const { data: consents } = await supabase
+      .from("user_consents")
+      .select("consent_type, granted, granted_at, revoked_at, version")
+      .eq("user_id", userId);
+
+    data.consentHistory = (consents || []).map((c) => ({
+      type: c.consent_type,
+      granted: c.granted,
+      grantedAt: c.granted_at,
+      revokedAt: c.revoked_at,
+      version: c.version,
+    }));
+
+    // 7. Notifications received
+    const { data: notifications } = await supabase
+      .from("notifications")
+      .select("type, title, message, created_at, read_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    data.notifications = (notifications || []).map((n) => ({
+      type: n.type,
+      title: n.title,
+      message: n.message,
+      sentAt: n.created_at,
+      readAt: n.read_at,
+    }));
+
+    // 8. Voice memos recorded
+    const { data: memos } = await supabase
+      .from("voice_memos")
+      .select("id, title, duration, recorded_at, transcription")
+      .eq("recorded_by", userId);
+
+    data.voiceMemos = (memos || []).map((m) => ({
+      title: m.title,
+      duration: m.duration,
+      recordedAt: m.recorded_at,
+      hasTranscription: !!m.transcription,
+    }));
+
+    // 9. Files uploaded
+    const { data: files } = await supabase
+      .from("file_uploads")
+      .select("filename, file_type, file_size, uploaded_at, purpose")
+      .eq("uploaded_by", userId);
+
+    data.filesUploaded = (files || []).map((f) => ({
+      filename: f.filename,
+      type: f.file_type,
+      size: f.file_size,
+      uploadedAt: f.uploaded_at,
+      purpose: f.purpose,
+    }));
+
+    // Determine which categories have data
     const categories = this.compliance.dataCategories
       .filter((c) => c.personalData)
       .map((c) => c.name);
 
+    // Mark request as completed and store export metadata
     await this.updateRequestStatus(requestId, "completed", "Data export provided");
+
+    // Log the export for audit purposes
+    await supabase.from("data_exports").insert({
+      request_id: requestId,
+      user_id: userId,
+      export_date: new Date().toISOString(),
+      categories_exported: categories,
+      record_counts: {
+        caseInvolvement: (data.caseInvolvement as unknown[]).length,
+        leadsSubmitted: (data.leadsSubmitted as unknown[]).length,
+        tipsSubmitted: (data.tipsSubmitted as unknown[]).length,
+        activityLog: (data.activityLog as unknown[]).length,
+        notifications: (data.notifications as unknown[]).length,
+        voiceMemos: (data.voiceMemos as unknown[]).length,
+        filesUploaded: (data.filesUploaded as unknown[]).length,
+      },
+    });
 
     return { data, categories };
   }
@@ -430,23 +591,188 @@ class PrivacyComplianceService {
   }
 
   /**
-   * Notify privacy officer
+   * Notify privacy officer of new request
    */
   private async notifyPrivacyOfficer(request: PrivacyRequest): Promise<void> {
     console.log(
       `[Privacy] Notifying privacy officer of ${request.type} request ${request.id}`
     );
-    // Would send email notification
+
+    const supabase = await createClient();
+
+    // Get privacy officers (users with privacy_officer or admin role)
+    const { data: privacyOfficers, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("role", ["privacy_officer", "admin"]);
+
+    if (error || !privacyOfficers?.length) {
+      console.error("[Privacy] No privacy officers found to notify");
+      return;
+    }
+
+    const requestTypeLabels: Record<string, string> = {
+      access: "Data Access Request",
+      rectification: "Data Rectification Request",
+      deletion: "Data Deletion Request",
+      portability: "Data Portability Request",
+    };
+
+    const requestTypeLabel = requestTypeLabels[request.type] || request.type;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca";
+    const requestUrl = `${appUrl}/admin/privacy/requests/${request.id}`;
+
+    // Send email to each privacy officer
+    for (const officer of privacyOfficers) {
+      await emailService.send({
+        to: officer.email,
+        subject: `📋 New Privacy Request: ${requestTypeLabel}`,
+        html: `
+          <h2>New Privacy Request Submitted</h2>
+          <p>A new privacy request has been submitted and requires your review.</p>
+
+          <table style="border-collapse: collapse; margin: 20px 0;">
+            <tr><td style="padding: 8px; font-weight: bold;">Request ID:</td><td style="padding: 8px;">${request.id}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold;">Type:</td><td style="padding: 8px;">${requestTypeLabel}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold;">Requester Email:</td><td style="padding: 8px;">${request.requesterEmail}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold;">Status:</td><td style="padding: 8px;">${request.status}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold;">Submitted:</td><td style="padding: 8px;">${new Date(request.createdAt).toLocaleString()}</td></tr>
+            <tr><td style="padding: 8px; font-weight: bold;">Due Date:</td><td style="padding: 8px;">${new Date(request.dueDate).toLocaleString()}</td></tr>
+          </table>
+
+          <p style="margin-top: 20px;">
+            <a href="${requestUrl}" style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">
+              Review Request
+            </a>
+          </p>
+
+          <p style="color: #666; margin-top: 20px; font-size: 14px;">
+            Under Quebec Law 25, privacy requests must be responded to within 30 days.
+          </p>
+        `,
+        text: `
+New Privacy Request Submitted
+
+Type: ${requestTypeLabel}
+Requester Email: ${request.requesterEmail}
+Status: ${request.status}
+Submitted: ${new Date(request.createdAt).toLocaleString()}
+Due Date: ${new Date(request.dueDate).toLocaleString()}
+
+Review request at: ${requestUrl}
+
+Under Quebec Law 25, privacy requests must be responded to within 30 days.
+        `.trim(),
+        priority: "high",
+      });
+
+      // Also create in-app notification
+      await supabase.from("notifications").insert({
+        user_id: officer.id,
+        type: "privacy_request",
+        title: `New ${requestTypeLabel}`,
+        message: `A user (${request.requesterEmail}) has submitted a ${requestTypeLabel.toLowerCase()}. Response required within 30 days.`,
+        priority: "medium",
+        data: {
+          request_id: request.id,
+          request_type: request.type,
+          requester_email: request.requesterEmail,
+        },
+      });
+    }
+
+    console.log(`[Privacy] Notified ${privacyOfficers.length} privacy officers`);
   }
 
   /**
-   * Notify requester
+   * Notify requester of status update
    */
   private async notifyRequester(request: PrivacyRequest): Promise<void> {
     console.log(
       `[Privacy] Notifying requester ${request.requesterEmail} of status update: ${request.status}`
     );
-    // Would send email notification
+
+    const statusMessages: Record<string, { subject: string; message: string }> = {
+      pending: {
+        subject: "Your Privacy Request Has Been Received",
+        message: "We have received your privacy request and it is currently being reviewed. We will respond within 30 days as required by law.",
+      },
+      processing: {
+        subject: "Your Privacy Request Is Being Processed",
+        message: "Your privacy request is currently being processed by our team. We will notify you once it is complete.",
+      },
+      completed: {
+        subject: "Your Privacy Request Has Been Completed",
+        message: "Your privacy request has been completed. Please log in to view the results or check your email for any attachments.",
+      },
+      denied: {
+        subject: "Your Privacy Request Update",
+        message: "After careful review, we were unable to fulfill your privacy request. Please see the response for more information about the reason and your options.",
+      },
+    };
+
+    const statusInfo = statusMessages[request.status] || {
+      subject: "Privacy Request Update",
+      message: `Your privacy request status has been updated to: ${request.status}`,
+    };
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca";
+    const requestUrl = `${appUrl}/privacy/requests/${request.id}`;
+
+    const completedDate = request.completedAt ? new Date(request.completedAt).toLocaleString() : "Pending";
+
+    await emailService.send({
+      to: request.requesterEmail,
+      subject: `📋 ${statusInfo.subject}`,
+      html: `
+        <h2>${statusInfo.subject}</h2>
+
+        <p>Dear User,</p>
+
+        <p>${statusInfo.message}</p>
+
+        <table style="border-collapse: collapse; margin: 20px 0; background-color: #f9fafb; padding: 16px; border-radius: 8px;">
+          <tr><td style="padding: 8px; font-weight: bold;">Request ID:</td><td style="padding: 8px;">${request.id.substring(0, 8)}...</td></tr>
+          <tr><td style="padding: 8px; font-weight: bold;">Type:</td><td style="padding: 8px;">${request.type}</td></tr>
+          <tr><td style="padding: 8px; font-weight: bold;">Status:</td><td style="padding: 8px;">${request.status}</td></tr>
+          <tr><td style="padding: 8px; font-weight: bold;">Due Date:</td><td style="padding: 8px;">${new Date(request.dueDate).toLocaleString()}</td></tr>
+          ${request.completedAt ? `<tr><td style="padding: 8px; font-weight: bold;">Completed:</td><td style="padding: 8px;">${completedDate}</td></tr>` : ""}
+        </table>
+
+        ${request.response ? `<p style="background-color: #fef3c7; padding: 16px; border-radius: 8px;"><strong>Response:</strong><br>${request.response}</p>` : ""}
+
+        <p style="margin-top: 20px;">
+          <a href="${requestUrl}" style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">
+            View Request Details
+          </a>
+        </p>
+
+        <p style="color: #666; margin-top: 30px; font-size: 14px;">
+          If you have any questions about your privacy request, please contact our Privacy Officer at privacy@locateconnect.ca.
+        </p>
+      `,
+      text: `
+${statusInfo.subject}
+
+Dear User,
+
+${statusInfo.message}
+
+Request ID: ${request.id.substring(0, 8)}...
+Type: ${request.type}
+Status: ${request.status}
+Due Date: ${new Date(request.dueDate).toLocaleString()}
+${request.completedAt ? `Completed: ${completedDate}` : ""}
+
+${request.response ? `Response: ${request.response}` : ""}
+
+View your request at: ${requestUrl}
+
+If you have any questions about your privacy request, please contact our Privacy Officer at privacy@locateconnect.ca.
+      `.trim(),
+    });
+
+    console.log(`[Privacy] Notified requester at ${request.requesterEmail}`);
   }
 
   /**

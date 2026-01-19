@@ -8,6 +8,10 @@ import type {
   CampaignChannel,
   CampaignMetrics,
 } from "@/types/law-enforcement.types";
+import { socialService } from "@/lib/services/social-service";
+import { emailService } from "@/lib/services/email-service";
+import { smsService } from "@/lib/services/sms-service";
+import { createClient } from "@/lib/supabase/server";
 
 export interface CreateCampaignInput {
   caseId: string;
@@ -358,55 +362,258 @@ class CampaignService {
     }
   }
 
-  // Channel-specific posting methods (stubs)
+  /**
+   * Post to Facebook
+   */
   private async postToFacebook(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Facebook post: ${campaign.headline}`);
-    // Would integrate with Facebook API
+
+    const supabase = await createClient();
+
+    // Get Facebook accounts configured for campaigns
+    const { data: accounts } = await supabase
+      .from("social_media_accounts")
+      .select("id")
+      .eq("platform", "facebook")
+      .eq("is_active", true)
+      .eq("is_connected", true);
+
+    if (!accounts?.length) {
+      console.log("[CampaignService] No Facebook accounts configured");
+      return;
+    }
+
+    const message = this.formatCampaignMessage(campaign);
+    const hashtags = this.getCampaignHashtags(campaign);
+
+    for (const account of accounts) {
+      const result = await socialService.post({
+        accountId: account.id,
+        message,
+        imageUrl: campaign.imageUrls?.[0],
+        hashtags,
+      });
+
+      if (result.success) {
+        console.log(`[CampaignService] Posted to Facebook: ${result.postId}`);
+      } else {
+        console.error(`[CampaignService] Facebook post failed: ${result.error}`);
+      }
+    }
   }
 
+  /**
+   * Post to Twitter
+   */
   private async postToTwitter(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Twitter post: ${campaign.headline}`);
-    // Would integrate with Twitter API
+
+    const supabase = await createClient();
+
+    // Get Twitter accounts configured for campaigns
+    const { data: accounts } = await supabase
+      .from("social_media_accounts")
+      .select("id")
+      .eq("platform", "twitter")
+      .eq("is_active", true)
+      .eq("is_connected", true);
+
+    if (!accounts?.length) {
+      console.log("[CampaignService] No Twitter accounts configured");
+      return;
+    }
+
+    // Twitter has a 280 character limit, so truncate if needed
+    const message = this.formatTwitterMessage(campaign);
+    const hashtags = this.getCampaignHashtags(campaign).slice(0, 3); // Limit hashtags
+
+    for (const account of accounts) {
+      const result = await socialService.post({
+        accountId: account.id,
+        message,
+        imageUrl: campaign.imageUrls?.[0],
+        hashtags,
+      });
+
+      if (result.success) {
+        console.log(`[CampaignService] Posted to Twitter: ${result.postId}`);
+      } else {
+        console.error(`[CampaignService] Twitter post failed: ${result.error}`);
+      }
+    }
   }
 
+  /**
+   * Post to Instagram
+   */
   private async postToInstagram(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Instagram post: ${campaign.headline}`);
-    // Would integrate with Instagram API
+
+    // Instagram requires an image
+    if (!campaign.imageUrls?.length) {
+      console.log("[CampaignService] Instagram requires an image, skipping");
+      return;
+    }
+
+    const supabase = await createClient();
+
+    // Get Instagram accounts configured for campaigns
+    const { data: accounts } = await supabase
+      .from("social_media_accounts")
+      .select("id")
+      .eq("platform", "instagram")
+      .eq("is_active", true)
+      .eq("is_connected", true);
+
+    if (!accounts?.length) {
+      console.log("[CampaignService] No Instagram accounts configured");
+      return;
+    }
+
+    const message = this.formatCampaignMessage(campaign);
+    const hashtags = this.getCampaignHashtags(campaign);
+
+    for (const account of accounts) {
+      const result = await socialService.post({
+        accountId: account.id,
+        message,
+        imageUrl: campaign.imageUrls[0],
+        hashtags,
+      });
+
+      if (result.success) {
+        console.log(`[CampaignService] Posted to Instagram: ${result.postId}`);
+      } else {
+        console.error(`[CampaignService] Instagram post failed: ${result.error}`);
+      }
+    }
   }
 
+  /**
+   * Post to Nextdoor
+   */
   private async postToNextdoor(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Nextdoor post: ${campaign.headline}`);
-    // Would integrate with Nextdoor API
+
+    // Nextdoor integration would require their Agency API
+    // For now, log the intent
+    console.log("[CampaignService] Nextdoor posting not yet implemented");
+    console.log("[CampaignService] Would post:", {
+      headline: campaign.headline,
+      description: campaign.description,
+      targetArea: campaign.targetArea,
+    });
   }
 
+  /**
+   * Send email campaign
+   */
   private async sendEmailCampaign(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Sending email campaign: ${campaign.headline}`);
-    // Would integrate with email service
+
+    const supabase = await createClient();
+
+    // Get subscribers based on target area
+    let query = supabase
+      .from("campaign_email_subscribers")
+      .select("email")
+      .eq("is_active", true)
+      .eq("email_verified", true);
+
+    // Filter by target area if specified
+    if (campaign.targetArea.type === "region" && campaign.targetArea.states?.length) {
+      query = query.in("province", campaign.targetArea.states);
+    }
+
+    const { data: subscribers, error } = await query;
+
+    if (error || !subscribers?.length) {
+      console.log("[CampaignService] No email subscribers found");
+      return;
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca";
+    const campaignUrl = `${appUrl}/campaigns/${campaign.id}`;
+
+    const html = this.generateCampaignEmailHtml(campaign, campaignUrl);
+    const text = this.generateCampaignEmailText(campaign, campaignUrl);
+
+    const result = await emailService.sendBulk({
+      recipients: subscribers.map((s) => ({ email: s.email })),
+      subject: `🚨 ${campaign.headline}`,
+      html,
+      text,
+      tags: ["campaign", campaign.type, campaign.id],
+    });
+
+    console.log(
+      `[CampaignService] Email campaign sent: ${result.sent} delivered, ${result.failed} failed`
+    );
   }
 
+  /**
+   * Send SMS campaign
+   */
   private async sendSMSCampaign(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
     console.log(`[CampaignService] Sending SMS campaign: ${campaign.headline}`);
-    // Would integrate with SMS service
+
+    const supabase = await createClient();
+
+    // Get SMS subscribers based on target area
+    let query = supabase
+      .from("campaign_sms_subscribers")
+      .select("phone_number")
+      .eq("is_active", true)
+      .eq("phone_verified", true);
+
+    // Filter by target area if specified
+    if (campaign.targetArea.type === "region" && campaign.targetArea.states?.length) {
+      query = query.in("province", campaign.targetArea.states);
+    }
+
+    const { data: subscribers, error } = await query;
+
+    if (error || !subscribers?.length) {
+      console.log("[CampaignService] No SMS subscribers found");
+      return;
+    }
+
+    // SMS is limited to 160 characters
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca";
+    const shortUrl = `${appUrl}/c/${campaign.id.slice(0, 8)}`;
+    const message = `🚨 ${campaign.headline}\n${campaign.description.slice(0, 80)}...\nDetails: ${shortUrl}`;
+
+    const result = await smsService.sendBulk({
+      recipients: subscribers.map((s) => s.phone_number),
+      message,
+    });
+
+    console.log(
+      `[CampaignService] SMS campaign sent: ${result.sent} delivered, ${result.failed} failed`
+    );
   }
 
+  /**
+   * Post to digital billboard
+   */
   private async postToDigitalBillboard(
     campaign: AwarenessCampaign,
     channel: CampaignChannel
@@ -414,7 +621,135 @@ class CampaignService {
     console.log(
       `[CampaignService] Digital billboard campaign: ${campaign.headline}`
     );
-    // Would integrate with billboard network API
+
+    // Digital billboard integration would require partnership with billboard networks
+    // (e.g., Clear Channel, Lamar, Outfront Media)
+    console.log("[CampaignService] Digital billboard posting not yet implemented");
+    console.log("[CampaignService] Would submit:", {
+      headline: campaign.headline,
+      imageUrl: campaign.imageUrls?.[0],
+      targetArea: campaign.targetArea,
+      startDate: campaign.startDate,
+      endDate: campaign.endDate,
+    });
+  }
+
+  /**
+   * Format campaign message for social media
+   */
+  private formatCampaignMessage(campaign: AwarenessCampaign): string {
+    const lines = [
+      `🚨 ${campaign.headline}`,
+      "",
+      campaign.description,
+      "",
+      "If you have any information, please contact local authorities.",
+      "",
+      `#${campaign.type.replace(/_/g, "")}`,
+    ];
+
+    return lines.join("\n");
+  }
+
+  /**
+   * Format Twitter message (280 char limit)
+   */
+  private formatTwitterMessage(campaign: AwarenessCampaign): string {
+    const prefix = `🚨 ${campaign.headline}\n\n`;
+    const maxDesc = 280 - prefix.length - 50; // Leave room for hashtags
+    const description =
+      campaign.description.length > maxDesc
+        ? campaign.description.slice(0, maxDesc - 3) + "..."
+        : campaign.description;
+
+    return `${prefix}${description}`;
+  }
+
+  /**
+   * Get campaign hashtags
+   */
+  private getCampaignHashtags(campaign: AwarenessCampaign): string[] {
+    const hashtags = ["MissingPerson", "HelpFind"];
+
+    switch (campaign.type) {
+      case "amber_alert":
+        hashtags.push("AMBERAlert", "MissingChild");
+        break;
+      case "endangered":
+        hashtags.push("Endangered", "PleaseShare");
+        break;
+      default:
+        hashtags.push("CommunityAlert");
+    }
+
+    return hashtags;
+  }
+
+  /**
+   * Generate campaign email HTML
+   */
+  private generateCampaignEmailHtml(
+    campaign: AwarenessCampaign,
+    campaignUrl: string
+  ): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${campaign.headline}</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #dc2626; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">🚨 ${campaign.headline}</h1>
+        </div>
+
+        <div style="padding: 20px; border: 1px solid #e5e5e5; border-top: none;">
+          ${campaign.imageUrls?.[0] ? `<img src="${campaign.imageUrls[0]}" alt="Campaign Image" style="width: 100%; max-width: 400px; display: block; margin: 0 auto 20px;">` : ""}
+
+          <p style="font-size: 16px; line-height: 1.6;">${campaign.description}</p>
+
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${campaignUrl}" style="display: inline-block; background-color: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+              View Full Details
+            </a>
+          </div>
+
+          <p style="color: #666; font-size: 14px;">
+            If you have any information, please contact local authorities immediately.
+          </p>
+
+          <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 20px 0;">
+
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            This alert was sent by LocateConnect.
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca"}/unsubscribe">Unsubscribe</a>
+          </p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Generate campaign email text
+   */
+  private generateCampaignEmailText(
+    campaign: AwarenessCampaign,
+    campaignUrl: string
+  ): string {
+    return `
+🚨 ${campaign.headline}
+
+${campaign.description}
+
+View full details: ${campaignUrl}
+
+If you have any information, please contact local authorities immediately.
+
+---
+This alert was sent by LocateConnect.
+    `.trim();
   }
 
   /**

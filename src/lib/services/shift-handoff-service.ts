@@ -3,6 +3,8 @@
  * Manages law enforcement shift transitions and case continuity
  */
 
+import { createClient } from "@/lib/supabase/server";
+import { emailService } from "@/lib/services/email-service";
 import type {
   ShiftHandoff,
   CaseHandoffSummary,
@@ -359,7 +361,116 @@ class ShiftHandoffService {
     console.log(
       `[ShiftHandoffService] Notifying ${handoff.toOfficerName} of pending handoff`
     );
-    // Would send email/push notification
+
+    const supabase = await createClient();
+
+    // Get incoming officer's profile for email
+    const { data: officer, error: officerError } = await supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .eq("id", handoff.toOfficerId)
+      .single();
+
+    if (officerError || !officer) {
+      console.error("[ShiftHandoffService] Failed to get officer profile:", officerError);
+      return;
+    }
+
+    const shiftLabels: Record<string, string> = {
+      day: "Day Shift",
+      evening: "Evening Shift",
+      night: "Night Shift",
+    };
+
+    const shiftLabel = shiftLabels[handoff.shiftType] || handoff.shiftType;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://locateconnect.ca";
+    const handoffUrl = `${appUrl}/law-enforcement/shift-handoff/${handoff.id}`;
+
+    // Count urgent items
+    const urgentCases = handoff.caseSummaries.filter((c) => c.priority <= 2).length;
+    const totalActionItems = handoff.actionItems.filter((i) => !i.completed).length;
+
+    // Send email notification
+    await emailService.send({
+      to: officer.email,
+      subject: `📋 Shift Handoff: ${shiftLabel} on ${new Date(handoff.shiftDate).toLocaleDateString()}`,
+      html: `
+        <h2>Shift Handoff Report</h2>
+
+        <p>Hello ${officer.full_name || handoff.toOfficerName},</p>
+
+        <p>${handoff.fromOfficerName} has prepared a shift handoff report for your upcoming ${shiftLabel.toLowerCase()}.</p>
+
+        <div style="background-color: #f3f4f6; padding: 16px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0;">Summary</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            <li>📅 Shift Date: <strong>${new Date(handoff.shiftDate).toLocaleDateString()}</strong></li>
+            <li>🕐 Shift Type: <strong>${shiftLabel}</strong></li>
+            <li>📁 Active Cases: <strong>${handoff.caseSummaries.length}</strong></li>
+            ${urgentCases > 0 ? `<li style="color: #dc2626;">🚨 Urgent Cases: <strong>${urgentCases}</strong></li>` : ""}
+            <li>✅ Pending Action Items: <strong>${totalActionItems}</strong></li>
+          </ul>
+        </div>
+
+        ${handoff.urgentNotes ? `
+        <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #991b1b;">⚠️ Urgent Notes</h3>
+          <p style="margin-bottom: 0;">${handoff.urgentNotes}</p>
+        </div>
+        ` : ""}
+
+        <p style="margin-top: 20px;">
+          <a href="${handoffUrl}" style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">
+            View Full Handoff Report
+          </a>
+        </p>
+
+        <p style="color: #666; margin-top: 20px; font-size: 14px;">
+          Please review this handoff report and mark it as acknowledged when you begin your shift.
+        </p>
+      `,
+      text: `
+Shift Handoff Report
+
+Hello ${officer.full_name || handoff.toOfficerName},
+
+${handoff.fromOfficerName} has prepared a shift handoff report for your upcoming ${shiftLabel.toLowerCase()}.
+
+Summary:
+- Shift Date: ${new Date(handoff.shiftDate).toLocaleDateString()}
+- Shift Type: ${shiftLabel}
+- Active Cases: ${handoff.caseSummaries.length}
+${urgentCases > 0 ? `- Urgent Cases: ${urgentCases}` : ""}
+- Pending Action Items: ${totalActionItems}
+
+${handoff.urgentNotes ? `URGENT NOTES:\n${handoff.urgentNotes}` : ""}
+
+View full report at: ${handoffUrl}
+
+Please review this handoff report and mark it as acknowledged when you begin your shift.
+      `.trim(),
+      priority: urgentCases > 0 ? "high" : "normal",
+    });
+
+    // Create in-app notification
+    await supabase.from("notifications").insert({
+      user_id: handoff.toOfficerId,
+      type: "shift_handoff",
+      title: `Shift Handoff from ${handoff.fromOfficerName}`,
+      message: `You have a pending shift handoff for ${shiftLabel} on ${new Date(handoff.shiftDate).toLocaleDateString()}. ${urgentCases > 0 ? `${urgentCases} urgent case(s) require immediate attention.` : ""}`,
+      priority: urgentCases > 0 ? "high" : "medium",
+      data: {
+        handoff_id: handoff.id,
+        from_officer_id: handoff.fromOfficerId,
+        from_officer_name: handoff.fromOfficerName,
+        shift_date: handoff.shiftDate,
+        shift_type: handoff.shiftType,
+        case_count: handoff.caseSummaries.length,
+        urgent_case_count: urgentCases,
+      },
+    });
+
+    console.log(`[ShiftHandoffService] Notified officer ${officer.email} of handoff ${handoff.id}`);
   }
 
   /**
@@ -369,18 +480,77 @@ class ShiftHandoffService {
     officerId: string,
     caseIds: string[]
   ): Promise<CaseHandoffSummary[]> {
-    // Would fetch case data from database
-    const summaries: CaseHandoffSummary[] = caseIds.map((caseId, index) => ({
-      caseId,
-      caseNumber: `LC-${caseId.slice(0, 8).toUpperCase()}`,
-      missingPersonName: "Person Name", // Would be fetched
-      priority: Math.min(index + 1, 5),
-      status: "active",
-      recentActivity: "Recent updates would be fetched from case timeline",
-      pendingTasks: [],
-      notes: "",
-    }));
+    if (caseIds.length === 0) {
+      return [];
+    }
 
+    const supabase = await createClient();
+
+    // Fetch case details from database
+    const { data: cases, error: casesError } = await supabase
+      .from("case_reports")
+      .select(`
+        id,
+        case_number,
+        missing_person_name,
+        priority,
+        status,
+        updated_at
+      `)
+      .in("id", caseIds);
+
+    if (casesError) {
+      console.error("[ShiftHandoffService] Failed to fetch cases:", casesError);
+      return [];
+    }
+
+    // Fetch recent activity for each case
+    const summaries: CaseHandoffSummary[] = [];
+
+    for (const caseData of cases || []) {
+      // Get recent activity from case_activity table
+      const { data: activities } = await supabase
+        .from("case_activity")
+        .select("description, created_at")
+        .eq("case_id", caseData.id)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      // Get pending tasks/action items
+      const { data: tasks } = await supabase
+        .from("case_tasks")
+        .select("title, priority, due_date")
+        .eq("case_id", caseData.id)
+        .eq("status", "pending")
+        .order("due_date", { ascending: true })
+        .limit(5);
+
+      const recentActivity = activities?.length
+        ? activities.map((a) => `${new Date(a.created_at).toLocaleDateString()}: ${a.description}`).join("\n")
+        : "No recent activity recorded.";
+
+      const pendingTasks: string[] = (tasks || []).map((t) => {
+        const dueDate = t.due_date ? ` (Due: ${new Date(t.due_date).toLocaleDateString()})` : "";
+        const priorityLabel = t.priority ? `[${t.priority.toUpperCase()}]` : "";
+        return `${priorityLabel} ${t.title}${dueDate}`.trim();
+      });
+
+      summaries.push({
+        caseId: caseData.id,
+        caseNumber: caseData.case_number,
+        missingPersonName: caseData.missing_person_name || "Unknown",
+        priority: caseData.priority || 3,
+        status: caseData.status || "active",
+        recentActivity,
+        pendingTasks,
+        notes: "",
+      });
+    }
+
+    // Sort by priority (lower number = higher priority)
+    summaries.sort((a, b) => a.priority - b.priority);
+
+    console.log(`[ShiftHandoffService] Generated summaries for ${summaries.length} cases`);
     return summaries;
   }
 }

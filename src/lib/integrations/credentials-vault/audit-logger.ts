@@ -3,6 +3,7 @@
  * Comprehensive audit logging for all credential operations
  */
 
+import { createClient } from '@/lib/supabase/server';
 import type { CredentialAccessLog } from '@/types';
 import type { AccessControlContext } from './access-control';
 
@@ -76,7 +77,7 @@ export class AuditLoggerService {
       },
     };
 
-    // Store in memory for now (would be persisted to database in production)
+    // Store in memory for quick access
     this.logs.push(entry);
 
     // Trim if exceeds max
@@ -89,8 +90,70 @@ export class AuditLoggerService {
       this.consoleLog(entry);
     }
 
-    // In production, this would be persisted to database
-    // await this.persistToDatabase(entry);
+    // Persist to database
+    await this.persistToDatabase(entry);
+  }
+
+  /**
+   * Persist audit log entry to database
+   */
+  private async persistToDatabase(entry: AuditLogEntry): Promise<void> {
+    try {
+      const supabase = await createClient();
+
+      const { error } = await supabase.from('credential_access_logs').insert({
+        credential_id: entry.credentialId,
+        user_id: entry.userId,
+        action: entry.action,
+        success: entry.success,
+        ip_address: entry.ipAddress,
+        user_agent: entry.userAgent,
+        reason: entry.reason,
+        timestamp: entry.timestamp,
+        credential_name: entry.credentialName,
+        integration_id: entry.integrationId,
+        metadata: entry.metadata,
+      });
+
+      if (error) {
+        // Log error but don't fail - audit logging shouldn't break operations
+        console.error('[AuditLogger] Failed to persist to database:', error.message);
+
+        // For critical security events, try a fallback
+        if (!entry.success || entry.action === 'access_denied') {
+          await this.persistSecurityEvent(entry);
+        }
+      }
+    } catch (error) {
+      console.error('[AuditLogger] Database persistence error:', error);
+    }
+  }
+
+  /**
+   * Fallback persistence for critical security events
+   */
+  private async persistSecurityEvent(entry: AuditLogEntry): Promise<void> {
+    try {
+      const supabase = await createClient();
+
+      // Store in a simpler security_events table as fallback
+      await supabase.from('security_events').insert({
+        event_type: `credential_${entry.action}`,
+        severity: entry.action === 'access_denied' ? 'warning' : 'info',
+        user_id: entry.userId,
+        ip_address: entry.ipAddress,
+        details: {
+          credential_id: entry.credentialId,
+          credential_name: entry.credentialName,
+          reason: entry.reason,
+          success: entry.success,
+        },
+        created_at: entry.timestamp,
+      });
+    } catch {
+      // Last resort - ensure it's at least logged
+      console.error('[AuditLogger] CRITICAL: Failed to log security event', entry);
+    }
   }
 
   /**
@@ -199,9 +262,79 @@ export class AuditLoggerService {
   }
 
   /**
-   * Get audit logs with filtering
+   * Get audit logs with filtering - fetches from database
    */
   async getLogs(filter: AuditLogFilter): Promise<AuditLogEntry[]> {
+    try {
+      const supabase = await createClient();
+
+      let query = supabase
+        .from('credential_access_logs')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (filter.credentialId) {
+        query = query.eq('credential_id', filter.credentialId);
+      }
+
+      if (filter.userId) {
+        query = query.eq('user_id', filter.userId);
+      }
+
+      if (filter.action) {
+        query = query.eq('action', filter.action);
+      }
+
+      if (filter.success !== undefined) {
+        query = query.eq('success', filter.success);
+      }
+
+      if (filter.startDate) {
+        query = query.gte('timestamp', filter.startDate.toISOString());
+      }
+
+      if (filter.endDate) {
+        query = query.lte('timestamp', filter.endDate.toISOString());
+      }
+
+      // Apply pagination
+      const offset = filter.offset || 0;
+      const limit = filter.limit || 50;
+      query = query.range(offset, offset + limit - 1);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('[AuditLogger] Database query error:', error.message);
+        // Fall back to in-memory logs
+        return this.getLogsFromMemory(filter);
+      }
+
+      // Map database format to AuditLogEntry format
+      return (data || []).map((row) => ({
+        credentialId: row.credential_id,
+        userId: row.user_id,
+        action: row.action as AuditAction,
+        success: row.success,
+        ipAddress: row.ip_address,
+        userAgent: row.user_agent,
+        reason: row.reason,
+        timestamp: row.timestamp,
+        credentialName: row.credential_name,
+        integrationId: row.integration_id,
+        metadata: row.metadata as Record<string, unknown>,
+      }));
+    } catch (error) {
+      console.error('[AuditLogger] Error fetching logs:', error);
+      // Fall back to in-memory logs
+      return this.getLogsFromMemory(filter);
+    }
+  }
+
+  /**
+   * Fallback: Get logs from in-memory storage
+   */
+  private getLogsFromMemory(filter: AuditLogFilter): AuditLogEntry[] {
     let filtered = [...this.logs];
 
     if (filter.credentialId) {

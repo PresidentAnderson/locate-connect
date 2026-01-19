@@ -207,3 +207,172 @@ export const HIGH_PRIORITY_ACTIVITIES: SocialActivityType[] = [
   'location_tag',
   'live_video',
 ];
+
+// =============================================================================
+// AGENT MONITORING TYPES
+// =============================================================================
+
+export interface CaseWithMonitoredAccounts {
+  caseId: string;
+  caseNumber: string;
+  accounts: MonitoredAccountInfo[];
+}
+
+export interface MonitoredAccountInfo {
+  id: string;
+  platform: SocialMediaPlatform;
+  username: string;
+  profileUrl?: string;
+  lastActivityAt?: string;
+}
+
+export interface ActivityResult {
+  accountId: string;
+  caseId: string;
+  platform: SocialMediaPlatform;
+  activities: SocialMediaActivityEvent[];
+  checkedAt: string;
+  error?: string;
+}
+
+// =============================================================================
+// ALERT CONFIGURATION TYPES
+// =============================================================================
+
+export type SocialAlertPriority = 'low' | 'normal' | 'high' | 'critical';
+
+export interface AlertConfig {
+  activityType: SocialActivityType;
+  priority: SocialAlertPriority;
+  generateLead: boolean;
+  notifyImmediately: boolean;
+}
+
+export const ACTIVITY_ALERT_CONFIG: Record<SocialActivityType, AlertConfig> = {
+  post: {
+    activityType: 'post',
+    priority: 'normal',
+    generateLead: true,
+    notifyImmediately: false,
+  },
+  story: {
+    activityType: 'story',
+    priority: 'normal',
+    generateLead: true,
+    notifyImmediately: false,
+  },
+  comment: {
+    activityType: 'comment',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+  like: {
+    activityType: 'like',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+  share: {
+    activityType: 'share',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+  login: {
+    activityType: 'login',
+    priority: 'high',
+    generateLead: true,
+    notifyImmediately: true,
+  },
+  location_tag: {
+    activityType: 'location_tag',
+    priority: 'critical',
+    generateLead: true,
+    notifyImmediately: true,
+  },
+  profile_update: {
+    activityType: 'profile_update',
+    priority: 'normal',
+    generateLead: true,
+    notifyImmediately: false,
+  },
+  friend_added: {
+    activityType: 'friend_added',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+  group_joined: {
+    activityType: 'group_joined',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+  event_rsvp: {
+    activityType: 'event_rsvp',
+    priority: 'normal',
+    generateLead: true,
+    notifyImmediately: false,
+  },
+  live_video: {
+    activityType: 'live_video',
+    priority: 'critical',
+    generateLead: true,
+    notifyImmediately: true,
+  },
+  reel: {
+    activityType: 'reel',
+    priority: 'normal',
+    generateLead: true,
+    notifyImmediately: false,
+  },
+  other: {
+    activityType: 'other',
+    priority: 'low',
+    generateLead: false,
+    notifyImmediately: false,
+  },
+};
+
+// =============================================================================
+// LEAD GENERATION TYPES
+// =============================================================================
+
+export interface SocialMediaLeadData {
+  caseId: string;
+  accountId: string;
+  activityEventId: string;
+  platform: SocialMediaPlatform;
+  activityType: SocialActivityType;
+  contentPreview?: string;
+  contentUrl?: string;
+  location?: {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  priority: SocialAlertPriority;
+}
+
+// =============================================================================
+// NOTIFICATION TYPES
+// =============================================================================
+
+export interface SocialMediaAlertPayload {
+  caseId: string;
+  caseNumber: string;
+  accountId: string;
+  username: string;
+  platform: SocialMediaPlatform;
+  activityType: SocialActivityType;
+  activityTimestamp: string;
+  contentPreview?: string;
+  contentUrl?: string;
+  location?: {
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  priority: SocialAlertPriority;
+}
