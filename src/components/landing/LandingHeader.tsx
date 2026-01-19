@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { LanguageSwitcherButton } from "@/components/i18n/LocaleSwitcher";
+import { useTranslations } from "@/hooks/useTranslations";
 
 export function LandingHeader() {
+  const t = useTranslations("common");
+
   return (
     <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -18,10 +21,10 @@ export function LandingHeader() {
         <nav className="flex items-center gap-4">
           <LanguageSwitcherButton />
           <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
-            Sign In
+            {t("landing.signIn")}
           </Link>
           <Link href="/cases/new" className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700">
-            Report Missing Person
+            {t("landing.reportMissing")}
           </Link>
         </nav>
       </div>
