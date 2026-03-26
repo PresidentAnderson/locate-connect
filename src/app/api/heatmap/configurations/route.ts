@@ -6,6 +6,7 @@ import type {
   MapSettings,
   LayerVisibility,
 } from "@/types/heatmap.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
       .order("updated_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching configurations:", error);
+      logger.error("Error fetching configurations:", { error: error });
       return NextResponse.json(
         { error: "Failed to fetch configurations" },
         { status: 500 }
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ configurations });
   } catch (error) {
-    console.error("Error in configurations API:", error);
+    logger.error("Error in configurations API:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         );
       }
-      console.error("Error creating configuration:", error);
+      logger.error("Error creating configuration:", { error: error });
       return NextResponse.json(
         { error: "Failed to create configuration" },
         { status: 500 }
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ configuration }, { status: 201 });
   } catch (error) {
-    console.error("Error in configurations POST:", error);
+    logger.error("Error in configurations POST:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -197,7 +198,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error updating configuration:", error);
+      logger.error("Error updating configuration:", { error: error });
       return NextResponse.json(
         { error: "Failed to update configuration" },
         { status: 500 }
@@ -218,7 +219,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ configuration });
   } catch (error) {
-    console.error("Error in configurations PUT:", error);
+    logger.error("Error in configurations PUT:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -255,7 +256,7 @@ export async function DELETE(request: NextRequest) {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Error deleting configuration:", error);
+      logger.error("Error deleting configuration:", { error: error });
       return NextResponse.json(
         { error: "Failed to delete configuration" },
         { status: 500 }
@@ -264,7 +265,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in configurations DELETE:", error);
+    logger.error("Error in configurations DELETE:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -4,6 +4,8 @@ import { authenticateRequest, hasScope, meetsAccessLevel } from '@/lib/api/auth'
 import { checkRateLimit, updateRateLimitCounters } from '@/lib/api/rate-limiter';
 import { apiPaginated, apiUnauthorized, apiForbidden, apiRateLimited, apiServerError, withRateLimitHeaders, withCorsHeaders } from '@/lib/api/response';
 import type { PublicCase } from '@/types';
+import { logger } from "../../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 /**
  * GET /api/v1/cases
@@ -89,7 +91,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,case_number.ilike.%${search}%`);
+      const s = sanitizeSearchInput(search);
+      query = query.or(`first_name.ilike.%${s}%,last_name.ilike.%${s}%,case_number.ilike.%${s}%`);
     }
 
     // Pagination
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Cases API error:', error);
+      logger.error('Cases API error:', { error: error });
       return withCorsHeaders(apiServerError('Failed to fetch cases'));
     }
 
@@ -132,7 +135,7 @@ export async function GET(request: NextRequest) {
     const response = apiPaginated(cases, count || 0, page, pageSize, rateLimit.headers);
     return withCorsHeaders(response);
   } catch (error) {
-    console.error('Cases API error:', error);
+    logger.error('Cases API error:', { error: error });
     return withCorsHeaders(apiServerError('Internal server error'));
   }
 }

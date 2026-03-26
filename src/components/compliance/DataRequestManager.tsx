@@ -14,6 +14,7 @@ import {
   DATA_REQUEST_TYPE_LABELS,
   VIOLATION_SEVERITY_CONFIG,
 } from '@/types/audit.types';
+import { logger } from "../../lib/logger";
 
 const STATUS_CONFIG: Record<
   DataRequestStatus,
@@ -54,7 +55,7 @@ export function DataRequestManager() {
         setRequests(data.data || []);
       }
     } catch (error) {
-      console.error('Error loading data requests:', error);
+      logger.error('Error loading data requests:', { error: error });
     } finally {
       setLoading(false);
     }
@@ -347,7 +348,7 @@ function RequestDetailModal({
         onClose();
       }
     } catch (error) {
-      console.error('Error updating request:', error);
+      logger.error('Error updating request:', { error: error });
     } finally {
       setUpdating(false);
     }
@@ -526,7 +527,7 @@ function CreateRequestModal({
         onClose();
       }
     } catch (error) {
-      console.error('Error creating request:', error);
+      logger.error('Error creating request:', { error: error });
     } finally {
       setCreating(false);
     }

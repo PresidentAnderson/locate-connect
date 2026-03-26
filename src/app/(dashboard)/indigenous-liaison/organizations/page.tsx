@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 interface Organization {
   id: string;
@@ -74,7 +75,7 @@ export default function OrganizationsPage() {
           setOrganizations(data.data || []);
         }
       } catch (error) {
-        console.error("Error fetching organizations:", error);
+        logger.error("Error fetching organizations:", { error: error });
       } finally {
         setLoading(false);
       }

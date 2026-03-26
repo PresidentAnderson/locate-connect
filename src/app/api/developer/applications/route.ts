@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiServerError, apiCreated } from '@/lib/api/response';
 import type { CreateApiApplicationInput, ApiApplication } from '@/types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/developer/applications
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Applications fetch error:', error);
+      logger.error('Applications fetch error:', { error: error });
       return apiServerError('Failed to fetch applications');
     }
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Applications API error:', error);
+    logger.error('Applications API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -89,13 +90,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Application creation error:', error);
+      logger.error('Application creation error:', { error: error });
       return apiServerError('Failed to create application');
     }
 
     return apiCreated(data);
   } catch (error) {
-    console.error('Applications API error:', error);
+    logger.error('Applications API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

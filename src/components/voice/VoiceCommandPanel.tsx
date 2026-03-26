@@ -7,6 +7,7 @@ import {
   type VoiceCommandResult,
   type VoiceCommandLanguage,
 } from "@/lib/services/voice-commands";
+import { logger } from "../../lib/logger";
 
 interface VoiceCommandPanelProps {
   defaultLanguage?: VoiceCommandLanguage;
@@ -89,7 +90,7 @@ export function VoiceCommandPanel({
           const dictatedText = voiceService.stopDictation();
           setIsDictating(false);
           voiceService.speak("Dictation stopped");
-          console.log("Dictated text:", dictatedText);
+          logger.debug("Dictated text:", { data: dictatedText });
           break;
 
         case "SEARCH_CASE":

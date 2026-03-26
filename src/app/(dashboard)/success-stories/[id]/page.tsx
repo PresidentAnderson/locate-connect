@@ -14,6 +14,7 @@ import type {
   CreateApprovalInput,
   SubmitApprovalInput,
 } from "@/types/success-story.types";
+import { logger } from "../../../../lib/logger";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -70,7 +71,7 @@ export default function StoryDetailPage({ params }: PageProps) {
       // Also fetch consent and approval states
       await Promise.all([fetchConsentState(), fetchApprovalState()]);
     } catch (error) {
-      console.error("Error fetching story:", error);
+      logger.error("Error fetching story:", { error: error });
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +85,7 @@ export default function StoryDetailPage({ params }: PageProps) {
         setConsentState(data.workflowState);
       }
     } catch (error) {
-      console.error("Error fetching consent state:", error);
+      logger.error("Error fetching consent state:", { error: error });
     }
   };
 
@@ -96,7 +97,7 @@ export default function StoryDetailPage({ params }: PageProps) {
         setApprovalState(data.workflowState);
       }
     } catch (error) {
-      console.error("Error fetching approval state:", error);
+      logger.error("Error fetching approval state:", { error: error });
     }
   };
 
@@ -188,7 +189,7 @@ export default function StoryDetailPage({ params }: PageProps) {
 
       await fetchStory();
     } catch (error) {
-      console.error("Error publishing:", error);
+      logger.error("Error publishing:", { error: error });
       alert(error instanceof Error ? error.message : "Failed to publish");
     } finally {
       setIsPublishing(false);

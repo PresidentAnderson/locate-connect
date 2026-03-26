@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 type ConsentType = 'data_processing' | 'marketing' | 'analytics' | 'third_party_sharing';
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query;
 
   if (error) {
-    console.error('Error fetching consent records:', error);
+    logger.error('Error fetching consent records:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error recording consent:', error);
+    logger.error('Error recording consent:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -190,7 +191,7 @@ export async function PUT(request: NextRequest) {
     .select();
 
   if (error) {
-    console.error('Error recording bulk consent:', error);
+    logger.error('Error recording bulk consent:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

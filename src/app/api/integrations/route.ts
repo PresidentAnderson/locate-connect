@@ -9,6 +9,7 @@ import {
   apiForbidden,
 } from '@/lib/api/response';
 import type { Integration, IntegrationCategory, AuthenticationType } from '@/types';
+import { logger } from "../../../lib/logger";
 
 interface CreateIntegrationInput {
   name: string;
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Integrations fetch error:', error);
+      logger.error('Integrations fetch error:', { error: error });
       return apiServerError('Failed to fetch integrations');
     }
 
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Integrations API error:', error);
+    logger.error('Integrations API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Integration creation error:', error);
+      logger.error('Integration creation error:', { error: error });
       return apiServerError('Failed to create integration');
     }
 
@@ -166,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(data);
   } catch (error) {
-    console.error('Integrations API error:', error);
+    logger.error('Integrations API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

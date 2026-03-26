@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ quizId: string }>;
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .order("attempt_number", { ascending: false });
 
     if (attemptsError) {
-      console.error("Error checking attempts:", attemptsError);
+      logger.error("Error checking attempts:", { error: attemptsError });
       return NextResponse.json(
         { error: attemptsError.message },
         { status: 500 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (attemptError) {
-      console.error("Error creating attempt:", attemptError);
+      logger.error("Error creating attempt:", { error: attemptError });
       return NextResponse.json(
         { error: attemptError.message },
         { status: 500 }
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .insert(gradedAnswers);
 
     if (answersError) {
-      console.error("Error saving answers:", answersError);
+      logger.error("Error saving answers:", { error: answersError });
       return NextResponse.json(
         { error: answersError.message },
         { status: 500 }
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .eq("id", attempt.id);
 
     if (updateError) {
-      console.error("Error updating attempt:", updateError);
+      logger.error("Error updating attempt:", { error: updateError });
     }
 
     // If passed, mark the module's quiz requirement as met
@@ -252,7 +253,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

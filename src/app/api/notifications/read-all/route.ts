@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../lib/logger";
 
 // POST /api/notifications/read-all - Mark all notifications as read
 export async function POST() {
@@ -20,14 +21,14 @@ export async function POST() {
       .is("read_at", null);
 
     if (error) {
-      console.error("Failed to mark all notifications as read:", error);
+      logger.error("Failed to mark all notifications as read:", { error: error });
       // Return success anyway for demo purposes
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error marking all notifications as read:", error);
+    logger.error("Error marking all notifications as read:", { error: error });
     return NextResponse.json(
       { error: "Failed to mark all notifications as read" },
       { status: 500 }

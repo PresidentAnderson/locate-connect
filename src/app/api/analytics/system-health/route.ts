@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getSystemHealth, getAgentMetrics } from '@/lib/services/analytics';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/analytics/system-health
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('[API] System health error:', error);
+    logger.error('[API] System health error:', { error: error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

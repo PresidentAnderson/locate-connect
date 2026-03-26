@@ -1,5 +1,61 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+import { applyInternalRateLimit } from "@/lib/api/internal-rate-limiter";
+
+const caseCreateSchema = z.object({
+  reporterFirstName: z.string().max(100).optional(),
+  reporterLastName: z.string().max(100).optional(),
+  reporterEmail: z.string().email().max(254).optional(),
+  reporterPhone: z.string().max(30).optional(),
+  reporterAddress: z.string().max(500).optional(),
+  reporterRelationship: z.string().max(100).optional(),
+  firstName: z.string().min(1, "First name is required").max(100),
+  lastName: z.string().min(1, "Last name is required").max(100),
+  dateOfBirth: z.string().nullable().optional(),
+  gender: z.string().max(50).nullable().optional(),
+  heightCm: z.number().min(0).max(300).nullable().optional(),
+  weightKg: z.number().min(0).max(500).nullable().optional(),
+  hairColor: z.string().max(50).optional(),
+  eyeColor: z.string().max(50).optional(),
+  distinguishingFeatures: z.string().max(2000).optional(),
+  lastSeenDate: z.string().min(1, "Last seen date is required"),
+  lastSeenLocation: z.string().max(500).optional(),
+  lastSeenLocationConfidence: z.enum(["unknown", "low", "medium", "high"]).optional(),
+  lastSeenWitnessType: z.enum(["unknown", "self_reported", "family", "friend", "public", "law_enforcement", "camera", "other"]).optional(),
+  locationDetails: z.string().max(2000).optional(),
+  outOfCharacter: z.boolean().optional(),
+  circumstances: z.string().max(5000).optional(),
+  unverifiedNotes: z.string().max(5000).optional(),
+  medicalConditions: z.array(z.string().max(200)).max(50).optional(),
+  medications: z.array(z.string().max(200)).max(50).optional(),
+  mentalHealthConditions: z.array(z.string().max(200)).max(50).optional(),
+  isSuicidalRisk: z.boolean().optional(),
+  contactEmails: z.array(z.string().email().max(254)).max(20).optional(),
+  contactPhones: z.array(z.string().max(30)).max(20).optional(),
+  contactFriends: z.array(z.object({
+    name: z.string().max(200),
+    relationship: z.string().max(100).optional(),
+    contact: z.string().max(200).optional(),
+  })).max(20).optional(),
+  socialMediaAccounts: z.array(z.object({
+    platform: z.string().max(100),
+    handle: z.string().max(200),
+  })).max(20).optional(),
+  threats: z.array(z.object({
+    name: z.string().max(200).optional(),
+    relationship: z.string().max(100).optional(),
+    description: z.string().max(2000).optional(),
+  })).max(20).optional(),
+  reporterLanguages: z.array(z.string().max(50)).max(10).optional(),
+  reporterPreferredLanguage: z.string().max(50).optional(),
+  reporterNeedsInterpreter: z.boolean().optional(),
+  reporterOtherLanguage: z.string().max(100).optional(),
+  subjectPrimaryLanguages: z.array(z.string().max(50)).max(10).optional(),
+  subjectRespondsToLanguages: z.array(z.string().max(50)).max(10).optional(),
+  subjectCanCommunicateOfficial: z.boolean().optional(),
+  subjectOtherLanguage: z.string().max(100).optional(),
+});
 
 interface CasePayload {
   reporterFirstName?: string;
@@ -85,14 +141,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as CasePayload;
+  // Rate limit: 10 case creations per minute per user
+  const rateLimited = applyInternalRateLimit(`cases:create:${user.id}`, { limit: 10, windowSeconds: 60 });
+  if (rateLimited) return rateLimited;
 
-  if (!body.firstName || !body.lastName || !body.lastSeenDate) {
+  const rawBody = await request.json();
+  const parsed = caseCreateSchema.safeParse(rawBody);
+
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
       { status: 400 }
     );
   }
+
+  const body = parsed.data as CasePayload;
 
   const lastSeenLocationConfidence = parseLastSeenConfidence(
     body.lastSeenLocationConfidence

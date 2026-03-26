@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { logger } from "../../../../lib/logger";
 
 interface Resource {
   id: string;
@@ -123,7 +124,7 @@ function ResourcesPageContent() {
           setResources(data.data || []);
         }
       } catch (error) {
-        console.error("Error fetching resources:", error);
+        logger.error("Error fetching resources:", { error: error });
       } finally {
         setLoading(false);
       }

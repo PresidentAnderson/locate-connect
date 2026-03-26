@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/training/certifications
@@ -43,13 +44,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching certifications:", error);
+      logger.error("Error fetching certifications:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (certError) {
-      console.error("Error creating certification:", certError);
+      logger.error("Error creating certification:", { error: certError });
       return NextResponse.json({ error: certError.message }, { status: 500 });
     }
 
@@ -233,7 +234,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: certification }, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

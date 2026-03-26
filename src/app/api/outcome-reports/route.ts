@@ -6,7 +6,21 @@ import type {
   CaseOutcomeReport,
   CaseOutcomeReportWithRelations,
   OutcomeReportFilters,
+  OutcomeReportDbRow,
+  RecommendationDbRow,
+  SimilarCaseDbRow,
+  LeadEffectivenessDbRow,
+  TimelineMilestoneDbRow,
+  SimilarCaseRpcResult,
+  OutcomeReportStatus,
+  DiscoveryMethod,
+  FoundByType,
+  RecommendationCategory,
+  RecommendationPriority,
+  LeadEffectivenessRating,
+  MilestoneType,
 } from "@/types/outcome-report.types";
+import { logger } from "../../../lib/logger";
 
 /**
  * GET /api/outcome-reports
@@ -128,7 +142,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error("Error fetching outcome reports:", error);
+    logger.error("Error fetching outcome reports:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch outcome reports" },
       { status: 500 }
@@ -341,7 +355,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (similarCases && similarCases.length > 0) {
-      const similarCaseRecords = similarCases.map((sc: any) => ({
+      const similarCaseRecords = similarCases.map((sc: SimilarCaseRpcResult) => ({
         outcome_report_id: report.id,
         similar_case_id: sc.similar_case_id,
         similarity_score: sc.similarity_score,
@@ -386,7 +400,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(formatOutcomeReport(completeReport), { status: 201 });
   } catch (error) {
-    console.error("Error creating outcome report:", error);
+    logger.error("Error creating outcome report:", { error: error });
     return NextResponse.json(
       { error: "Failed to create outcome report" },
       { status: 500 }
@@ -395,18 +409,18 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper functions
-function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
+function formatOutcomeReport(data: OutcomeReportDbRow): CaseOutcomeReportWithRelations {
   return {
     id: data.id,
     caseId: data.case_id,
     reportNumber: data.report_number,
-    status: data.status,
+    status: data.status as OutcomeReportStatus,
     version: data.version,
     totalDurationHours: parseFloat(data.total_duration_hours) || 0,
     initialPriorityLevel: data.initial_priority_level,
     finalPriorityLevel: data.final_priority_level,
     priorityChanges: data.priority_changes || 0,
-    discoveryMethod: data.discovery_method,
+    discoveryMethod: data.discovery_method as DiscoveryMethod | undefined,
     discoveryMethodOther: data.discovery_method_other,
     locationFound: data.location_found,
     locationFoundCity: data.location_found_city,
@@ -418,7 +432,7 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       : undefined,
     conditionAtResolution: data.condition_at_resolution,
     conditionNotes: data.condition_notes,
-    foundByType: data.found_by_type,
+    foundByType: data.found_by_type as FoundByType | undefined,
     foundByOrganizationId: data.found_by_organization_id,
     foundByUserId: data.found_by_user_id,
     foundByName: data.found_by_name,
@@ -493,11 +507,11 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
           resolutionDate: data.case.resolution_date,
         }
       : undefined,
-    recommendations: (data.recommendations || []).map((rec: any) => ({
+    recommendations: (data.recommendations || []).map((rec: RecommendationDbRow) => ({
       id: rec.id,
       outcomeReportId: rec.outcome_report_id,
-      category: rec.category,
-      priority: rec.priority,
+      category: rec.category as RecommendationCategory,
+      priority: rec.priority as RecommendationPriority,
       title: rec.title,
       description: rec.description,
       isActionable: rec.is_actionable,
@@ -512,7 +526,7 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       createdAt: rec.created_at,
       updatedAt: rec.updated_at,
     })),
-    similarCases: (data.similar_cases || []).map((sc: any) => ({
+    similarCases: (data.similar_cases || []).map((sc: SimilarCaseDbRow) => ({
       id: sc.id,
       outcomeReportId: sc.outcome_report_id,
       similarCaseId: sc.similar_case_id,
@@ -525,11 +539,11 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       leadEffectivenessComparison: sc.lead_effectiveness_comparison,
       createdAt: sc.created_at,
     })),
-    leadEffectivenessScores: (data.lead_effectiveness_scores || []).map((le: any) => ({
+    leadEffectivenessScores: (data.lead_effectiveness_scores || []).map((le: LeadEffectivenessDbRow) => ({
       id: le.id,
       outcomeReportId: le.outcome_report_id,
       leadId: le.lead_id,
-      effectivenessRating: le.effectiveness_rating,
+      effectivenessRating: le.effectiveness_rating as LeadEffectivenessRating,
       score: le.score,
       responseTimeHours: le.response_time_hours
         ? parseFloat(le.response_time_hours)
@@ -539,10 +553,10 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       notes: le.notes,
       createdAt: le.created_at,
     })),
-    timeline: (data.timeline || []).map((tm: any) => ({
+    timeline: (data.timeline || []).map((tm: TimelineMilestoneDbRow) => ({
       id: tm.id,
       outcomeReportId: tm.outcome_report_id,
-      milestoneType: tm.milestone_type,
+      milestoneType: tm.milestone_type as MilestoneType,
       timestamp: tm.timestamp,
       title: tm.title,
       description: tm.description,
@@ -570,23 +584,23 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
   };
 }
 
-function formatOutcomeReportForEngine(data: any): CaseOutcomeReport {
+function formatOutcomeReportForEngine(data: OutcomeReportDbRow): CaseOutcomeReport {
   return {
     id: data.id,
     caseId: data.case_id,
     reportNumber: data.report_number,
-    status: data.status,
+    status: data.status as OutcomeReportStatus,
     version: data.version || 1,
     totalDurationHours: parseFloat(data.total_duration_hours) || 0,
     initialPriorityLevel: data.initial_priority_level,
     finalPriorityLevel: data.final_priority_level,
     priorityChanges: data.priority_changes || 0,
-    discoveryMethod: data.discovery_method,
+    discoveryMethod: data.discovery_method as DiscoveryMethod | undefined,
     locationFound: data.location_found,
     locationFoundCity: data.location_found_city,
     locationFoundProvince: data.location_found_province,
     conditionAtResolution: data.condition_at_resolution,
-    foundByType: data.found_by_type,
+    foundByType: data.found_by_type as FoundByType | undefined,
     foundByName: data.found_by_name,
     totalLeadsGenerated: data.total_leads_generated || 0,
     leadsVerified: data.leads_verified || 0,

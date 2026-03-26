@@ -11,6 +11,7 @@ import type {
   IngestionRecord,
 } from "./data-ingestion-engine";
 import { ingestionEngine } from "./data-ingestion-engine";
+import { logger } from "../logger";
 
 // Lead source types
 export type LeadSourceType =
@@ -179,7 +180,7 @@ const resolveCaseStep: PipelineStep<Record<string, unknown>, Record<string, unkn
     const lead = data as unknown as IncomingLead;
 
     if (!lead.caseId && lead.caseNumber) {
-      console.log(`[LeadPipeline] Resolving case number: ${lead.caseNumber}`);
+      logger.debug(`[LeadPipeline] Resolving case number: ${lead.caseNumber}`);
 
       const supabase = await createClient();
 
@@ -191,12 +192,12 @@ const resolveCaseStep: PipelineStep<Record<string, unknown>, Record<string, unkn
         .single();
 
       if (error || !caseData) {
-        console.error(`[LeadPipeline] Case not found: ${lead.caseNumber}`);
+        logger.error(`[LeadPipeline] Case not found: ${lead.caseNumber}`);
         throw new Error(`Case not found: ${lead.caseNumber}`);
       }
 
       lead.caseId = caseData.id;
-      console.log(`[LeadPipeline] Resolved case ${lead.caseNumber} to ID ${lead.caseId}`);
+      logger.debug(`[LeadPipeline] Resolved case ${lead.caseNumber} to ID ${lead.caseId}`);
     }
 
     return data;
@@ -224,7 +225,7 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
         .join(", ");
 
       if (addressStr) {
-        console.log(`[LeadPipeline] Geocoding address: ${addressStr}`);
+        logger.debug(`[LeadPipeline] Geocoding address: ${addressStr}`);
 
         try {
           // Use Nominatim (OpenStreetMap) geocoding API
@@ -244,13 +245,11 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
             if (results.length > 0) {
               lead.latitude = parseFloat(results[0].lat);
               lead.longitude = parseFloat(results[0].lon);
-              console.log(
-                `[LeadPipeline] Geocoded to: ${lead.latitude}, ${lead.longitude}`
-              );
+              logger.debug(`[LeadPipeline] Geocoded to: ${lead.latitude}, ${lead.longitude}`);
             }
           }
         } catch (error) {
-          console.warn(`[LeadPipeline] Geocoding failed:`, error);
+          logger.warn(`[LeadPipeline] Geocoding failed:`, { data: error });
           // Continue without coordinates - not a fatal error
         }
       }
@@ -258,9 +257,7 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
 
     // If we have coordinates but no address, reverse geocode
     if (lead.latitude && lead.longitude && !lead.address) {
-      console.log(
-        `[LeadPipeline] Reverse geocoding: ${lead.latitude}, ${lead.longitude}`
-      );
+      logger.debug(`[LeadPipeline] Reverse geocoding: ${lead.latitude}, ${lead.longitude}`);
 
       try {
         // Use Nominatim reverse geocoding
@@ -302,13 +299,11 @@ const enrichLocationStep: PipelineStep<Record<string, unknown>, Record<string, u
               zip: result.address.postcode,
               country: result.address.country,
             };
-            console.log(
-              `[LeadPipeline] Reverse geocoded to: ${lead.address.city}, ${lead.address.state}`
-            );
+            logger.debug(`[LeadPipeline] Reverse geocoded to: ${lead.address.city}, ${lead.address.state}`);
           }
         }
       } catch (error) {
-        console.warn(`[LeadPipeline] Reverse geocoding failed:`, error);
+        logger.warn(`[LeadPipeline] Reverse geocoding failed:`, { data: error });
         // Continue without address - not a fatal error
       }
     }
@@ -329,7 +324,7 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
       return data as Record<string, unknown> & { _duplicateOf?: string };
     }
 
-    console.log(`[LeadPipeline] Checking for duplicates in case ${lead.caseId}`);
+    logger.debug(`[LeadPipeline] Checking for duplicates in case ${lead.caseId}`);
 
     const supabase = await createClient();
 
@@ -354,7 +349,7 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
         .limit(1);
 
       if (exactMatches && exactMatches.length > 0) {
-        console.log(`[LeadPipeline] Found duplicate by email: ${exactMatches[0].id}`);
+        logger.debug(`[LeadPipeline] Found duplicate by email: ${exactMatches[0].id}`);
         (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = exactMatches[0].id;
         return data as Record<string, unknown> & { _duplicateOf?: string };
       }
@@ -379,7 +374,7 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
 
         // If similarity > 70%, consider it a potential duplicate
         if (similarity > 0.7) {
-          console.log(`[LeadPipeline] Found similar lead (${(similarity * 100).toFixed(0)}% match): ${existing.id}`);
+          logger.debug(`[LeadPipeline] Found similar lead (${(similarity * 100).toFixed(0)}% match): ${existing.id}`);
           (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = existing.id;
           break;
         }
@@ -397,9 +392,7 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
 
             // If within 100 meters and similar time frame, likely duplicate
             if (distance < 0.1 && similarity > 0.3) {
-              console.log(
-                `[LeadPipeline] Found nearby lead (${distance.toFixed(2)}km, ${(similarity * 100).toFixed(0)}% text match): ${existing.id}`
-              );
+              logger.debug(`[LeadPipeline] Found nearby lead (${distance.toFixed(2)}km, ${(similarity * 100).toFixed(0)}% text match): ${existing.id}`);
               (data as Record<string, unknown> & { _duplicateOf?: string })._duplicateOf = existing.id;
               break;
             }
@@ -482,9 +475,7 @@ const processAttachmentsStep: PipelineStep<Record<string, unknown>, Record<strin
 
     if (lead.attachments && lead.attachments.length > 0) {
       for (const attachment of lead.attachments) {
-        console.log(
-          `[LeadPipeline] Processing ${attachment.type} attachment: ${attachment.filename || "unnamed"}`
-        );
+        logger.debug(`[LeadPipeline] Processing ${attachment.type} attachment: ${attachment.filename || "unnamed"}`);
 
         // In production, upload to storage and get ID
         // const id = await uploadAttachment(attachment);
@@ -566,13 +557,13 @@ const normalizeAndStoreStep: PipelineStep<Record<string, unknown>, NormalizedLea
     };
 
     // In production, store to database
-    console.log(`[LeadPipeline] Storing lead ${normalizedLead.id}`);
+    logger.debug(`[LeadPipeline] Storing lead ${normalizedLead.id}`);
 
     return normalizedLead;
   },
   async rollback(data) {
     // Remove stored lead on failure
-    console.log(`[LeadPipeline] Rolling back lead storage`);
+    logger.debug(`[LeadPipeline] Rolling back lead storage`);
   },
 };
 
@@ -697,7 +688,7 @@ export function registerLeadSources(): void {
     normalizeAndStoreStep,
   ]);
 
-  console.log("[LeadPipeline] Lead ingestion sources and pipeline registered");
+  logger.debug("[LeadPipeline] Lead ingestion sources and pipeline registered");
 }
 
 // Convenience function to ingest a single lead

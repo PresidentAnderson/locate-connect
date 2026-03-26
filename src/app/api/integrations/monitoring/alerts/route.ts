@@ -7,6 +7,7 @@ import {
   apiServerError,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/monitoring/alerts
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Alerts fetch error:', error);
+      logger.error('Alerts fetch error:', { error: error });
       return apiServerError('Failed to fetch alerts');
     }
 
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Alerts API error:', error);
+    logger.error('Alerts API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -132,13 +133,13 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Alert update error:', error);
+      logger.error('Alert update error:', { error: error });
       return apiServerError('Failed to update alert');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Alerts API error:', error);
+    logger.error('Alerts API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

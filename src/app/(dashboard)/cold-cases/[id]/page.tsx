@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { logger } from "../../../../lib/logger";
 
 // Local type for cold case data from API
 interface ColdCaseData {
@@ -91,7 +92,7 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
         setColdCase(data.data);
       }
     } catch (error) {
-      console.error("Error fetching cold case:", error);
+      logger.error("Error fetching cold case:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -284,7 +285,7 @@ export default function ColdCaseDetailPage({ params }: ColdCaseDetailProps) {
         alert(error.error?.message || "Failed to start review");
       }
     } catch (error) {
-      console.error("Error starting review:", error);
+      logger.error("Error starting review:", { error: error });
     }
   }
 }

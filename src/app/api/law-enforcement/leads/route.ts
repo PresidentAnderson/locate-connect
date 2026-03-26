@@ -4,10 +4,28 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { leadManagementService, type CreateLeadInput, type LeadFilters } from "@/lib/services/lead-management-service";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["law_enforcement", "admin", "developer"].includes(profile.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
 
     const filters: LeadFilters = {
@@ -26,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error("[API] Error listing leads:", error);
+    logger.error("[API] Error listing leads:", { error: error });
     return NextResponse.json(
       { error: "Failed to list leads" },
       { status: 500 }
@@ -36,8 +54,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["law_enforcement", "admin", "developer"].includes(profile.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
-    const userId = request.headers.get("x-user-id") || "system";
+    const userId = user.id;
 
     const input: CreateLeadInput = {
       caseId: body.caseId,
@@ -55,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(lead, { status: 201 });
   } catch (error) {
-    console.error("[API] Error creating lead:", error);
+    logger.error("[API] Error creating lead:", { error: error });
     return NextResponse.json(
       { error: "Failed to create lead" },
       { status: 500 }

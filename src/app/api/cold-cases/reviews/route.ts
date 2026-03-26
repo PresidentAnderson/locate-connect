@@ -15,6 +15,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { CreateReviewRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -104,7 +105,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching reviews:', error);
+    logger.error('Error fetching reviews:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
     });
 
   if (assignError) {
-    console.error('Error assigning reviewer:', assignError);
+    logger.error('Error assigning reviewer:', { error: assignError });
     // If no reviewers available, create review without rotation
     if (assignError.message.includes('No available reviewers')) {
       return apiBadRequest('No available reviewers. Please try again later or manually assign a reviewer.', 'no_reviewers');
@@ -180,7 +181,7 @@ export async function POST(request: Request) {
     });
 
   if (checklistError) {
-    console.error('Error creating checklist:', checklistError);
+    logger.error('Error creating checklist:', { error: checklistError });
     // Don't fail the request, just log the error
   }
 
@@ -200,7 +201,7 @@ export async function POST(request: Request) {
     .single();
 
   if (fetchError) {
-    console.error('Error fetching created review:', fetchError);
+    logger.error('Error fetching created review:', { error: fetchError });
     return apiServerError(fetchError.message);
   }
 

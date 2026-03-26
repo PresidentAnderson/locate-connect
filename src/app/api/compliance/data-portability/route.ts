@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 interface ExportRequestInput {
   format: 'json' | 'csv' | 'xml';
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching data exports:', error);
+    logger.error('Error fetching data exports:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating data export request:', error);
+    logger.error('Error creating data export request:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -298,7 +299,7 @@ async function generateDataExport(
       });
 
     if (uploadError) {
-      console.error('Error uploading export file:', uploadError);
+      logger.error('Error uploading export file:', { error: uploadError });
       throw new Error('Failed to store export file');
     }
 
@@ -308,7 +309,7 @@ async function generateDataExport(
       .createSignedUrl(storagePath, 7 * 24 * 60 * 60); // 7 days in seconds
 
     if (signedUrlError) {
-      console.error('Error generating signed URL:', signedUrlError);
+      logger.error('Error generating signed URL:', { error: signedUrlError });
       // Fall back to API download route
     }
 
@@ -340,7 +341,7 @@ async function generateDataExport(
       },
     });
   } catch (error) {
-    console.error('Error generating data export:', error);
+    logger.error('Error generating data export:', { error: error });
     await supabase
       .from('data_portability_exports')
       .update({

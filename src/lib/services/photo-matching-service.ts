@@ -5,6 +5,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { PhotoMatchRequest, PhotoMatchResult } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 interface FacialFeatures {
   embedding: number[];
@@ -61,7 +62,7 @@ class PhotoMatchingService {
     } else if (this.azureFaceEndpoint && this.azureFaceKey) {
       this.faceApiProvider = "azure";
     }
-    console.log(`[PhotoMatching] Initialized with provider: ${this.faceApiProvider}`);
+    logger.debug(`[PhotoMatching] Initialized with provider: ${this.faceApiProvider}`);
   }
 
   /**
@@ -95,11 +96,11 @@ class PhotoMatchingService {
       created_at: now,
     });
 
-    console.log(`[PhotoMatching] Request submitted for case ${caseId}`);
+    logger.debug(`[PhotoMatching] Request submitted for case ${caseId}`);
 
     // Process asynchronously
     this.processMatchRequest(id).catch(async (error) => {
-      console.error(`[PhotoMatching] Error processing request ${id}:`, error);
+      logger.error(`[PhotoMatching] Error processing request ${id}:`, { error: error });
       request.status = "failed";
       this.requests.set(id, request);
 
@@ -263,9 +264,7 @@ class PhotoMatchingService {
         })
         .eq("id", requestId);
 
-      console.log(
-        `[PhotoMatching] Request ${requestId} completed with ${results.length} matches`
-      );
+      logger.debug(`[PhotoMatching] Request ${requestId} completed with ${results.length} matches`);
 
       // Create leads for high-confidence matches
       if (results.some((r) => r.confidence >= 80)) {
@@ -290,7 +289,7 @@ class PhotoMatchingService {
   private async extractFacialFeatures(
     imageUrl: string
   ): Promise<FacialFeatures | null> {
-    console.log(`[PhotoMatching] Extracting features from ${imageUrl}`);
+    logger.debug(`[PhotoMatching] Extracting features from ${imageUrl}`);
 
     switch (this.faceApiProvider) {
       case "aws":
@@ -310,7 +309,7 @@ class PhotoMatchingService {
       // Download image and convert to bytes
       const imageResponse = await fetch(imageUrl);
       if (!imageResponse.ok) {
-        console.error(`[PhotoMatching] Failed to fetch image: ${imageResponse.status}`);
+        logger.error(`[PhotoMatching] Failed to fetch image: ${imageResponse.status}`);
         return null;
       }
 
@@ -335,7 +334,7 @@ class PhotoMatchingService {
       );
 
       if (!rekognitionResponse.ok) {
-        console.error(`[PhotoMatching] AWS Rekognition error: ${rekognitionResponse.status}`);
+        logger.error(`[PhotoMatching] AWS Rekognition error: ${rekognitionResponse.status}`);
         return this.extractFeaturesLocal(imageUrl);
       }
 
@@ -350,7 +349,7 @@ class PhotoMatchingService {
       };
 
       if (!data.FaceDetails?.length) {
-        console.log("[PhotoMatching] No faces detected in image");
+        logger.debug("[PhotoMatching] No faces detected in image");
         return null;
       }
 
@@ -380,7 +379,7 @@ class PhotoMatchingService {
         genderEstimate: face.Gender?.Value?.toLowerCase(),
       };
     } catch (error) {
-      console.error("[PhotoMatching] AWS extraction error:", error);
+      logger.error("[PhotoMatching] AWS extraction error:", { error: error });
       return this.extractFeaturesLocal(imageUrl);
     }
   }
@@ -403,7 +402,7 @@ class PhotoMatchingService {
       );
 
       if (!response.ok) {
-        console.error(`[PhotoMatching] Azure Face API error: ${response.status}`);
+        logger.error(`[PhotoMatching] Azure Face API error: ${response.status}`);
         return this.extractFeaturesLocal(imageUrl);
       }
 
@@ -418,7 +417,7 @@ class PhotoMatchingService {
       }>;
 
       if (!data.length) {
-        console.log("[PhotoMatching] No faces detected in image");
+        logger.debug("[PhotoMatching] No faces detected in image");
         return null;
       }
 
@@ -448,7 +447,7 @@ class PhotoMatchingService {
         genderEstimate: face.faceAttributes?.gender?.toLowerCase(),
       };
     } catch (error) {
-      console.error("[PhotoMatching] Azure extraction error:", error);
+      logger.error("[PhotoMatching] Azure extraction error:", { error: error });
       return this.extractFeaturesLocal(imageUrl);
     }
   }
@@ -457,7 +456,7 @@ class PhotoMatchingService {
    * Local feature extraction (fallback)
    */
   private async extractFeaturesLocal(imageUrl: string): Promise<FacialFeatures | null> {
-    console.log("[PhotoMatching] Using local feature extraction (demo mode)");
+    logger.debug("[PhotoMatching] Using local feature extraction (demo mode)");
 
     // In production, this would use a local face-api.js or similar library
     // For now, generate deterministic features based on image URL hash
@@ -657,11 +656,11 @@ class PhotoMatchingService {
 
     for (const db of EXTERNAL_DATABASES.filter((d) => d.enabled)) {
       try {
-        console.log(`[PhotoMatching] Searching ${db.name}`);
+        logger.debug(`[PhotoMatching] Searching ${db.name}`);
         const dbResults = await this.searchExternalDatabase(db, sourceFeatures);
         results.push(...dbResults);
       } catch (error) {
-        console.error(`[PhotoMatching] Error searching ${db.name}:`, error);
+        logger.error(`[PhotoMatching] Error searching ${db.name}:`, { error: error });
       }
 
       // Rate limiting
@@ -698,7 +697,7 @@ class PhotoMatchingService {
       });
 
       if (!response.ok) {
-        console.error(`[PhotoMatching] ${db.name} API error: ${response.status}`);
+        logger.error(`[PhotoMatching] ${db.name} API error: ${response.status}`);
         return [];
       }
 
@@ -733,7 +732,7 @@ class PhotoMatchingService {
         },
       }));
     } catch (error) {
-      console.error(`[PhotoMatching] ${db.name} search error:`, error);
+      logger.error(`[PhotoMatching] ${db.name} search error:`, { error: error });
       return [];
     }
   }
@@ -824,9 +823,7 @@ class PhotoMatchingService {
     result.isMatch = isMatch;
     this.requests.set(requestId, request);
 
-    console.log(
-      `[PhotoMatching] Match ${resultId} verified as ${isMatch ? "MATCH" : "NOT MATCH"}`
-    );
+    logger.debug(`[PhotoMatching] Match ${resultId} verified as ${isMatch ? "MATCH" : "NOT MATCH"}`);
 
     // If verified as match, create notification
     if (isMatch) {
@@ -903,16 +900,14 @@ class PhotoMatchingService {
     imageUrl: string,
     targetAge: number
   ): Promise<{ progressedImageUrl: string; confidence: number }> {
-    console.log(
-      `[PhotoMatching] Generating age progression to age ${targetAge}`
-    );
+    logger.debug(`[PhotoMatching] Generating age progression to age ${targetAge}`);
 
     // Check if age progression service is configured
     const ageProgressionApiUrl = process.env.AGE_PROGRESSION_API_URL;
     const ageProgressionApiKey = process.env.AGE_PROGRESSION_API_KEY;
 
     if (!ageProgressionApiUrl || !ageProgressionApiKey) {
-      console.log("[PhotoMatching] Age progression service not configured");
+      logger.debug("[PhotoMatching] Age progression service not configured");
       return {
         progressedImageUrl: imageUrl,
         confidence: 0,
@@ -935,7 +930,7 @@ class PhotoMatchingService {
       });
 
       if (!response.ok) {
-        console.error(`[PhotoMatching] Age progression API error: ${response.status}`);
+        logger.error(`[PhotoMatching] Age progression API error: ${response.status}`);
         return {
           progressedImageUrl: imageUrl,
           confidence: 0,
@@ -952,7 +947,7 @@ class PhotoMatchingService {
         confidence: data.confidence,
       };
     } catch (error) {
-      console.error("[PhotoMatching] Age progression error:", error);
+      logger.error("[PhotoMatching] Age progression error:", { error: error });
       return {
         progressedImageUrl: imageUrl,
         confidence: 0,

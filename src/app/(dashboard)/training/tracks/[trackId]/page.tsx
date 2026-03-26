@@ -10,6 +10,7 @@ import type {
   TrainingModuleProgress,
   TrainingLessonProgress,
 } from "@/types/training.types";
+import { logger } from "../../../../../lib/logger";
 
 interface ModuleWithProgress extends TrainingModule {
   progress?: TrainingModuleProgress;
@@ -55,7 +56,7 @@ export default function TrackDetailPage({
         }
       }
     } catch (error) {
-      console.error("Failed to fetch track:", error);
+      logger.error("Failed to fetch track:", { error: error });
     } finally {
       setLoading(false);
     }

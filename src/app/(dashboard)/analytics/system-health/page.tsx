@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { SystemHealth, AgentMetrics } from "@/types/analytics.types";
+import { logger } from "../../../../lib/logger";
 
 interface SystemHealthData {
   systemHealth: SystemHealth;
@@ -29,7 +30,7 @@ export default function SystemHealthPage() {
       setData(result);
       setError(null);
     } catch (err) {
-      console.error("Error fetching system health:", err);
+      logger.error("Error fetching system health:", { error: err });
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiServerError, apiCreated } from '@/lib/api/response';
 import type { CreateSupportTicketInput } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/developer/support/tickets
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Tickets fetch error:', error);
+      logger.error('Tickets fetch error:', { error: error });
       return apiServerError('Failed to fetch tickets');
     }
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Tickets API error:', error);
+    logger.error('Tickets API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -106,13 +107,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Ticket creation error:', error);
+      logger.error('Ticket creation error:', { error: error });
       return apiServerError('Failed to create ticket');
     }
 
     return apiCreated(data);
   } catch (error) {
-    console.error('Tickets API error:', error);
+    logger.error('Tickets API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

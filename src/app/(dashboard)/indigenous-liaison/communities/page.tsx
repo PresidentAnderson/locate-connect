@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 interface Community {
   id: string;
@@ -109,7 +110,7 @@ export default function CommunitiesPage() {
           setTerritories(data.data || []);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        logger.error("Error fetching data:", { error: error });
       } finally {
         setLoading(false);
       }

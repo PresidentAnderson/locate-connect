@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { StoryGalleryItem, SuccessMetrics } from '@/types/success-story.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/success-stories/gallery
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
   const { data: stories, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching gallery stories:', error);
+    logger.error('Error fetching gallery stories:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

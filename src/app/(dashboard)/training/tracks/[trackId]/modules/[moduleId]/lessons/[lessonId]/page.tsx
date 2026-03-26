@@ -8,6 +8,7 @@ import type {
   LessonSection,
   InteractiveStep,
 } from "@/types/training.types";
+import { logger } from "../../../../../../../../../lib/logger";
 
 interface LessonWithDetails extends TrainingLesson {
   progress?: { status: string; time_spent_seconds: number };
@@ -55,7 +56,7 @@ export default function LessonPage({
         }
       }
     } catch (error) {
-      console.error("Failed to fetch lesson:", error);
+      logger.error("Failed to fetch lesson:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ export default function LessonPage({
         }),
       });
     } catch (error) {
-      console.error("Failed to update progress:", error);
+      logger.error("Failed to update progress:", { error: error });
     }
   };
 
@@ -88,7 +89,7 @@ export default function LessonPage({
         }),
       });
     } catch (error) {
-      console.error("Failed to save time spent:", error);
+      logger.error("Failed to save time spent:", { error: error });
     }
   };
 

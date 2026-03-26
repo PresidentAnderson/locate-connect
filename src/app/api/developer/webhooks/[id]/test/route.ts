@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiUnauthorized, apiNotFound, apiServerError, apiForbidden } from '@/lib/api/response';
 import { generateWebhookSignature } from '@/lib/api/crypto';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       if (webhookError.code === 'PGRST116') {
         return apiNotFound('Webhook not found');
       }
-      console.error('Webhook fetch error:', webhookError);
+      logger.error('Webhook fetch error:', { error: webhookError });
       return apiServerError('Failed to fetch webhook');
     }
 
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       payload: testPayload,
     });
   } catch (error) {
-    console.error('Webhook test API error:', error);
+    logger.error('Webhook test API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

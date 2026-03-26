@@ -11,6 +11,7 @@ import {
   apiServerError,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 interface IntegrationLogRow {
   id: string;
@@ -121,7 +122,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('[IntegrationLogs] Database error:', error);
+      logger.error('[IntegrationLogs] Database error:', { error: error });
       return apiServerError('Failed to fetch logs');
     }
 
@@ -170,7 +171,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[IntegrationLogs] Error:', error);
+    logger.error('[IntegrationLogs] Error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

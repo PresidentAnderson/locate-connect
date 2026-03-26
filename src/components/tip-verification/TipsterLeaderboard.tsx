@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import type { TipsterProfile, TipsterReliabilityTier } from '@/types/tip-verification.types';
+import { logger } from "../../lib/logger";
 
 interface TipsterLeaderboardProps {
   initialLimit?: number;
@@ -39,7 +40,7 @@ export function TipsterLeaderboard({ initialLimit = 20 }: TipsterLeaderboardProp
         setTipsters(data.tipsters);
       }
     } catch (error) {
-      console.error('Failed to fetch tipsters:', error);
+      logger.error('Failed to fetch tipsters:', { error: error });
     } finally {
       setIsLoading(false);
     }
@@ -68,7 +69,7 @@ export function TipsterLeaderboard({ initialLimit = 20 }: TipsterLeaderboardProp
         setSelectedTipster(data.tipsterProfile);
       }
     } catch (error) {
-      console.error('Failed to perform action:', error);
+      logger.error('Failed to perform action:', { error: error });
     } finally {
       setActionLoading(false);
     }

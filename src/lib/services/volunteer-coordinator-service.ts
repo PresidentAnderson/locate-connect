@@ -9,6 +9,7 @@ import type {
   SearchVolunteer,
   SearchFinding,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateSearchPartyInput {
   caseId: string;
@@ -100,7 +101,7 @@ class VolunteerCoordinatorService {
     };
 
     this.searchParties.set(id, searchParty);
-    console.log(`[VolunteerService] Created search party ${id} for case ${input.caseId}`);
+    logger.debug(`[VolunteerService] Created search party ${id} for case ${input.caseId}`);
     return searchParty;
   }
 
@@ -185,7 +186,7 @@ class VolunteerCoordinatorService {
     party.updatedAt = new Date().toISOString();
     this.searchParties.set(partyId, party);
 
-    console.log(`[VolunteerService] Registered volunteer ${volunteer.name} for party ${partyId}`);
+    logger.debug(`[VolunteerService] Registered volunteer ${volunteer.name} for party ${partyId}`);
     return volunteer;
   }
 
@@ -307,7 +308,7 @@ class VolunteerCoordinatorService {
       await this.alertOnCriticalFinding(party, finding);
     }
 
-    console.log(`[VolunteerService] Finding reported: ${input.type}`);
+    logger.debug(`[VolunteerService] Finding reported: ${input.type}`);
     return finding;
   }
 
@@ -443,9 +444,7 @@ class VolunteerCoordinatorService {
     party: SearchParty,
     finding: SearchFinding
   ): Promise<void> {
-    console.log(
-      `[VolunteerService] CRITICAL FINDING in party ${party.name}: ${finding.type}`
-    );
+    logger.debug(`[VolunteerService] CRITICAL FINDING in party ${party.name}: ${finding.type}`);
     // Would send notifications to coordinator, law enforcement, etc.
   }
 

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiServerError, apiCreated, apiForbidden } from '@/lib/api/response';
 import { generateWebhookSecret, hashApiKey } from '@/lib/api/crypto';
 import type { CreateWebhookInput, WebhookWithSecret, WebhookEventType } from '@/types';
+import { logger } from "../../../../lib/logger";
 
 const VALID_EVENTS: WebhookEventType[] = [
   'case.created',
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Webhooks fetch error:', error);
+      logger.error('Webhooks fetch error:', { error: error });
       return apiServerError('Failed to fetch webhooks');
     }
 
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     return apiSuccess(sanitizedData, { total: count || 0 });
   } catch (error) {
-    console.error('Webhooks API error:', error);
+    logger.error('Webhooks API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Webhook creation error:', error);
+      logger.error('Webhook creation error:', { error: error });
       return apiServerError('Failed to create webhook');
     }
 
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(response);
   } catch (error) {
-    console.error('Webhooks API error:', error);
+    logger.error('Webhooks API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

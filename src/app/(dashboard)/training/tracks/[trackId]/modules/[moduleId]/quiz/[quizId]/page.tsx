@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TrainingQuiz, QuizQuestion, QuizResult } from "@/types/training.types";
+import { logger } from "../../../../../../../../../lib/logger";
 
 interface QuizWithQuestions extends TrainingQuiz {
   questions: QuizQuestion[];
@@ -48,7 +49,7 @@ export default function QuizPage({
         }
       }
     } catch (error) {
-      console.error("Failed to fetch quiz:", error);
+      logger.error("Failed to fetch quiz:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,7 @@ export default function QuizPage({
         setShowResults(true);
       }
     } catch (error) {
-      console.error("Failed to submit quiz:", error);
+      logger.error("Failed to submit quiz:", { error: error });
     } finally {
       setSubmitting(false);
     }

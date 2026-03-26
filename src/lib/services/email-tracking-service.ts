@@ -6,6 +6,7 @@
  */
 
 import type { GeoLocation } from '@/types/email-tracking.types';
+import { logger } from "../logger";
 
 // 1x1 transparent GIF pixel (43 bytes)
 // Base64: R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
@@ -50,14 +51,14 @@ export async function lookupGeoLocation(ip: string): Promise<GeoLocation | null>
     );
 
     if (!response.ok) {
-      console.error('Geolocation API error:', response.status);
+      logger.error('Geolocation API error:', { error: response.status });
       return null;
     }
 
     const data = await response.json();
 
     if (data.status !== 'success') {
-      console.error('Geolocation lookup failed:', data.message);
+      logger.error('Geolocation lookup failed:', { error: data.message });
       return null;
     }
 
@@ -72,7 +73,7 @@ export async function lookupGeoLocation(ip: string): Promise<GeoLocation | null>
       isp: data.isp || undefined,
     };
   } catch (error) {
-    console.error('Geolocation lookup error:', error);
+    logger.error('Geolocation lookup error:', { error: error });
     return null;
   }
 }

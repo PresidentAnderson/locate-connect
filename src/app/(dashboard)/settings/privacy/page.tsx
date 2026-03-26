@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib';
+import { logger } from "../../../../lib/logger";
 
 type ConsentType = 'data_processing' | 'marketing' | 'analytics' | 'third_party_sharing';
 
@@ -77,7 +78,7 @@ export default function PrivacySettingsPage() {
         setConsents(statusMap);
       }
     } catch (error) {
-      console.error('Error loading consents:', error);
+      logger.error('Error loading consents:', { error: error });
       // Set defaults
       setConsents([
         { consentType: 'data_processing', isGranted: true },
@@ -118,7 +119,7 @@ export default function PrivacySettingsPage() {
         );
       }
     } catch (error) {
-      console.error('Error updating consent:', error);
+      logger.error('Error updating consent:', { error: error });
     } finally {
       setSaving(null);
     }
@@ -139,7 +140,7 @@ export default function PrivacySettingsPage() {
         );
       }
     } catch (error) {
-      console.error('Error requesting data export:', error);
+      logger.error('Error requesting data export:', { error: error });
     }
   }
 
@@ -162,7 +163,7 @@ export default function PrivacySettingsPage() {
         );
       }
     } catch (error) {
-      console.error('Error requesting data erasure:', error);
+      logger.error('Error requesting data erasure:', { error: error });
     }
   }
 

@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 /**
  * Multi-language Voice Commands Service
  * Provides hands-free voice interface for the application.
@@ -237,7 +238,7 @@ export class VoiceCommandService {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognitionAPI) {
-      console.warn("[VoiceCommands] Speech recognition not supported");
+      logger.warn("[VoiceCommands] Speech recognition not supported");
       return false;
     }
 
@@ -252,7 +253,7 @@ export class VoiceCommandService {
 
     this.synthesis = window.speechSynthesis;
 
-    console.log("[VoiceCommands] Initialized");
+    logger.debug("[VoiceCommands] Initialized");
     return true;
   }
 
@@ -283,7 +284,7 @@ export class VoiceCommandService {
     try {
       this.recognition.start();
       this.isListening = true;
-      console.log("[VoiceCommands] Listening started");
+      logger.debug("[VoiceCommands] Listening started");
     } catch (error) {
       this.onErrorCallback?.("Failed to start voice recognition");
     }
@@ -294,20 +295,20 @@ export class VoiceCommandService {
 
     this.recognition.stop();
     this.isListening = false;
-    console.log("[VoiceCommands] Listening stopped");
+    logger.debug("[VoiceCommands] Listening stopped");
   }
 
   startDictation() {
     this.isDictating = true;
     this.dictationText = "";
-    console.log("[VoiceCommands] Dictation started");
+    logger.debug("[VoiceCommands] Dictation started");
   }
 
   stopDictation(): string {
     this.isDictating = false;
     const text = this.dictationText;
     this.dictationText = "";
-    console.log("[VoiceCommands] Dictation stopped");
+    logger.debug("[VoiceCommands] Dictation stopped");
     return text;
   }
 
@@ -353,7 +354,7 @@ export class VoiceCommandService {
     const transcript = lastResult[0].transcript.trim().toLowerCase();
     const confidence = lastResult[0].confidence;
 
-    console.log(`[VoiceCommands] Heard: "${transcript}" (${confidence})`);
+    logger.debug(`[VoiceCommands] Heard: "${transcript}" (${confidence})`);
 
     if (this.isDictating) {
       this.dictationText += " " + transcript;
@@ -410,7 +411,7 @@ export class VoiceCommandService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleError(event: any) {
-    console.error("[VoiceCommands] Error:", event.error);
+    logger.error("[VoiceCommands] Error:", { error: event.error });
     this.onErrorCallback?.(event.error);
 
     if (event.error === "not-allowed") {

@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { i18nService } from "@/lib/services/i18n-service";
 import type { SupportedLanguage, TranslationNamespace } from "@/types/compliance.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] I18n error:", error);
+    logger.error("[API] I18n error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] I18n error:", error);
+    logger.error("[API] I18n error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

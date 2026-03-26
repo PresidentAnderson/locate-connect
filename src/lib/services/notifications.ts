@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { Notification, NotificationPreferences, NotificationType } from '@/types/notification.types';
+import { logger } from "../logger";
 
 // =============================================================================
 // Types
@@ -99,7 +100,7 @@ export async function createNotification({
       .single();
 
     if (error) {
-      console.error('[NotificationService] Create failed:', error);
+      logger.error('[NotificationService] Create failed:', { error: error });
       return { success: false, error: error.message };
     }
 
@@ -113,7 +114,7 @@ export async function createNotification({
 
     return { success: true, notificationId: data?.id };
   } catch (error) {
-    console.error('[NotificationService] Error:', error);
+    logger.error('[NotificationService] Error:', { error: error });
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -407,13 +408,13 @@ async function triggerPushNotification(
     // Send push notification via web-push
     // This would typically call a separate push notification service
     // For now, we'll just log that we would send it
-    console.log('[NotificationService] Would send push notification:', {
+    logger.debug('[NotificationService] Would send push notification:', {
       userId,
       endpoint: subscription.endpoint,
       ...options,
     });
   } catch (error) {
-    console.error('[NotificationService] Push notification error:', error);
+    logger.error('[NotificationService] Push notification error:', { error: error });
   }
 }
 

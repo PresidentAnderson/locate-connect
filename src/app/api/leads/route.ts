@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { LeadCreatePayload, LeadFilters } from "@/types/lead.types";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
+import { applyInternalRateLimit } from "@/lib/api/internal-rate-limiter";
 
 const LEAD_STATUSES = ["new", "investigating", "verified", "dismissed", "archived"] as const;
 const LEAD_PRIORITIES = ["low", "medium", "high", "critical"] as const;
@@ -79,7 +81,8 @@ export async function GET(request: Request) {
     query = query.eq("assigned_to_id", filters.assignedToId);
   }
   if (filters.search) {
-    query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+    const s = sanitizeSearchInput(filters.search);
+    query = query.or(`title.ilike.%${s}%,description.ilike.%${s}%`);
   }
 
   const { data, error, count } = await query
@@ -139,6 +142,10 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Rate limit: 30 lead creations per minute per user
+  const rateLimited = applyInternalRateLimit(`leads:create:${user.id}`, { limit: 30, windowSeconds: 60 });
+  if (rateLimited) return rateLimited;
 
   const body = (await request.json()) as LeadCreatePayload;
 

@@ -581,3 +581,189 @@ export interface OutcomeReportPDFData {
   includeBranding: boolean;
   includeConfidentialData: boolean;
 }
+
+// =============================================================================
+// RAW DATABASE ROW TYPES (snake_case from Supabase)
+// =============================================================================
+
+/** Raw database row shape for case_outcome_reports with joined relations */
+export interface OutcomeReportDbRow {
+  id: string;
+  case_id: string;
+  report_number: string;
+  status: string;
+  version: number;
+  total_duration_hours: string;
+  initial_priority_level?: string;
+  final_priority_level?: string;
+  priority_changes?: number;
+  discovery_method?: string;
+  discovery_method_other?: string;
+  location_found?: string;
+  location_found_city?: string;
+  location_found_province?: string;
+  location_found_latitude?: number;
+  location_found_longitude?: number;
+  distance_from_last_seen_km?: string;
+  condition_at_resolution?: string;
+  condition_notes?: string;
+  found_by_type?: string;
+  found_by_organization_id?: string;
+  found_by_user_id?: string;
+  found_by_name?: string;
+  total_leads_generated: number;
+  leads_verified: number;
+  leads_dismissed: number;
+  leads_acted_upon: number;
+  solving_lead_id?: string;
+  solving_lead_source?: string;
+  false_positive_rate?: string;
+  avg_lead_response_hours?: string;
+  total_tips_received: number;
+  tips_verified: number;
+  tips_hoax: number;
+  tips_duplicate: number;
+  tips_converted_to_leads: number;
+  tip_conversion_rate?: string;
+  total_assigned_officers: number;
+  total_volunteer_hours?: string;
+  media_outlets_engaged: number;
+  social_media_reach: number;
+  estimated_cost?: string;
+  partner_organizations_involved?: string[];
+  time_to_first_response?: string;
+  time_to_first_lead?: string;
+  time_to_verified_lead?: string;
+  time_to_resolution?: string;
+  case_reported_at?: string;
+  first_response_at?: string;
+  first_lead_at?: string;
+  first_verified_lead_at?: string;
+  public_alert_issued_at?: string;
+  media_coverage_started_at?: string;
+  case_resolved_at?: string;
+  what_worked?: string[];
+  what_didnt_work?: string[];
+  delays_identified?: string[];
+  lessons_learned?: string;
+  key_decision_points?: DecisionPoint[];
+  created_by: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
+  approved_by?: string;
+  approved_at?: string;
+  created_at: string;
+  updated_at: string;
+  case?: {
+    id: string;
+    case_number: string;
+    first_name: string;
+    last_name: string;
+    age_at_disappearance?: number;
+    disposition?: string;
+    last_seen_date: string;
+    resolution_date?: string;
+  } | null;
+  recommendations?: RecommendationDbRow[];
+  similar_cases?: SimilarCaseDbRow[];
+  lead_effectiveness_scores?: LeadEffectivenessDbRow[];
+  timeline?: TimelineMilestoneDbRow[];
+  created_by_user?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
+  reviewed_by_user?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+  } | null;
+  approved_by_user?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+  } | null;
+  [key: string]: unknown;
+}
+
+export interface RecommendationDbRow {
+  id: string;
+  outcome_report_id: string;
+  category: string;
+  priority: string;
+  title: string;
+  description: string;
+  is_actionable: boolean;
+  assigned_to?: string;
+  target_completion_date?: string;
+  is_implemented: boolean;
+  implemented_at?: string;
+  implemented_by?: string;
+  implementation_notes?: string;
+  source_analysis?: string;
+  similar_cases_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SimilarCaseDbRow {
+  id: string;
+  outcome_report_id: string;
+  similar_case_id: string;
+  similarity_score: string;
+  similarity_factors?: SimilarityFactor[];
+  resolution_comparison?: string;
+  duration_difference_hours?: string;
+  lead_effectiveness_comparison?: string;
+  created_at: string;
+  similar_case?: {
+    id: string;
+    case_number: string;
+    first_name: string;
+    last_name: string;
+    disposition?: string;
+    resolution_date?: string;
+  } | null;
+}
+
+export interface LeadEffectivenessDbRow {
+  id: string;
+  outcome_report_id: string;
+  lead_id: string;
+  effectiveness_rating: string;
+  score: number;
+  response_time_hours?: string;
+  contributed_to_resolution: boolean;
+  was_false_positive: boolean;
+  notes?: string;
+  created_at: string;
+}
+
+export interface TimelineMilestoneDbRow {
+  id: string;
+  outcome_report_id: string;
+  milestone_type: string;
+  timestamp: string;
+  title: string;
+  description?: string;
+  related_lead_id?: string;
+  related_tip_id?: string;
+  actor_id?: string;
+  actor_name?: string;
+  is_decision_point: boolean;
+  decision_outcome?: string;
+  decision_rationale?: string;
+  was_delay: boolean;
+  delay_hours?: string;
+  delay_reason?: string;
+  display_order: number;
+  created_at: string;
+}
+
+/** Shape of a similar case result from the find_similar_cases RPC */
+export interface SimilarCaseRpcResult {
+  similar_case_id: string;
+  similarity_score: number;
+  similarity_factors: SimilarityFactor[];
+}

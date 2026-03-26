@@ -6,6 +6,7 @@
 import { BaseAgent } from "./base-agent";
 import { createClient } from "@/lib/supabase/server";
 import type { AgentConfig, EmailOpenEvent, EmailTrackingPixel } from "@/types/agent.types";
+import { logger } from "../logger";
 
 interface EmailTrackingAgentSettings {
   processBatchSize: number;
@@ -54,7 +55,7 @@ export class EmailTrackingAgent extends BaseAgent {
         // Get pixel info and case
         const pixel = await this.getPixelInfo(event.pixelId);
         if (!pixel) {
-          console.log(`[EmailTrackingAgent] No pixel found for ID ${event.pixelId}`);
+          logger.debug(`[EmailTrackingAgent] No pixel found for ID ${event.pixelId}`);
           await this.markEventProcessed(event.id, false);
           continue;
         }
@@ -75,7 +76,7 @@ export class EmailTrackingAgent extends BaseAgent {
         // Mark as processed
         await this.markEventProcessed(event.id, true);
       } catch (error) {
-        console.error(`[EmailTrackingAgent] Error processing event ${event.id}:`, error);
+        logger.error(`[EmailTrackingAgent] Error processing event ${event.id}:`, { error: error });
         this.errors.push(this.createError(error));
       }
     }
@@ -95,7 +96,7 @@ export class EmailTrackingAgent extends BaseAgent {
       .limit(this.settings.processBatchSize * 2); // Get extra in case of duplicates
 
     if (error) {
-      console.error("[EmailTrackingAgent] Error fetching events:", error);
+      logger.error("[EmailTrackingAgent] Error fetching events:", { error: error });
       return [];
     }
 
@@ -123,7 +124,7 @@ export class EmailTrackingAgent extends BaseAgent {
       })
       .eq("id", eventId);
 
-    console.log(`[EmailTrackingAgent] Processing event ${eventId}`);
+    logger.debug(`[EmailTrackingAgent] Processing event ${eventId}`);
   }
 
   private async markEventProcessed(eventId: string, success: boolean): Promise<void> {
@@ -139,7 +140,7 @@ export class EmailTrackingAgent extends BaseAgent {
       })
       .eq("id", eventId);
 
-    console.log(`[EmailTrackingAgent] Event ${eventId} processed: ${success}`);
+    logger.debug(`[EmailTrackingAgent] Event ${eventId} processed: ${success}`);
   }
 
   private async enrichEvent(event: EmailOpenEvent): Promise<EmailOpenEvent> {
@@ -222,7 +223,7 @@ export class EmailTrackingAgent extends BaseAgent {
           };
         }
       } catch (error) {
-        console.error("[EmailTrackingAgent] IPInfo lookup error:", error);
+        logger.error("[EmailTrackingAgent] IPInfo lookup error:", { error: error });
       }
     }
 
@@ -250,7 +251,7 @@ export class EmailTrackingAgent extends BaseAgent {
         };
       }
     } catch (error) {
-      console.error("[EmailTrackingAgent] IP-API lookup error:", error);
+      logger.error("[EmailTrackingAgent] IP-API lookup error:", { error: error });
     }
 
     return {
@@ -312,7 +313,7 @@ export class EmailTrackingAgent extends BaseAgent {
   ): Promise<void> {
     const supabase = await createClient();
 
-    console.log(`[EmailTrackingAgent] Generating lead for case ${caseId}`);
+    logger.debug(`[EmailTrackingAgent] Generating lead for case ${caseId}`);
 
     const locationStr = [
       event.geolocation?.city,
@@ -399,7 +400,7 @@ export class EmailTrackingAgent extends BaseAgent {
   ): Promise<void> {
     const supabase = await createClient();
 
-    console.log(`[EmailTrackingAgent] Triggering alert for case ${caseId}`);
+    logger.debug(`[EmailTrackingAgent] Triggering alert for case ${caseId}`);
 
     // Get case details
     const { data: caseData } = await supabase
@@ -475,7 +476,7 @@ export class EmailTrackingAgent extends BaseAgent {
       })
       .eq("id", pixelId);
 
-    console.log(`[EmailTrackingAgent] Updated stats for pixel ${pixelId}: ${newCount} opens`);
+    logger.debug(`[EmailTrackingAgent] Updated stats for pixel ${pixelId}: ${newCount} opens`);
   }
 
   protected clone(config: AgentConfig): BaseAgent {
@@ -543,7 +544,7 @@ export async function createTrackingPixel(
   });
 
   if (error) {
-    console.error("[EmailTracking] Error creating pixel:", error);
+    logger.error("[EmailTracking] Error creating pixel:", { error: error });
     return null;
   }
 

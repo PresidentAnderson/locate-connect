@@ -14,6 +14,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { UpdateChecklistItemRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -65,7 +66,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     .order('item_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching checklist items:', error);
+    logger.error('Error fetching checklist items:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -172,7 +173,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     .single();
 
   if (error) {
-    console.error('Error updating checklist item:', error);
+    logger.error('Error updating checklist item:', { error: error });
     return apiServerError(error.message);
   }
 

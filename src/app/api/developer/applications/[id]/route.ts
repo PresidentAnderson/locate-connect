@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiNotFound, apiServerError, apiForbidden, apiNoContent } from '@/lib/api/response';
 import type { UpdateApiApplicationInput } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return apiNotFound('Application not found');
       }
-      console.error('Application fetch error:', error);
+      logger.error('Application fetch error:', { error: error });
       return apiServerError('Failed to fetch application');
     }
 
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Application API error:', error);
+    logger.error('Application API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -118,13 +119,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Application update error:', error);
+      logger.error('Application update error:', { error: error });
       return apiServerError('Failed to update application');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Application API error:', error);
+    logger.error('Application API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -169,13 +170,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Application delete error:', error);
+      logger.error('Application delete error:', { error: error });
       return apiServerError('Failed to delete application');
     }
 
     return apiNoContent();
   } catch (error) {
-    console.error('Application API error:', error);
+    logger.error('Application API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

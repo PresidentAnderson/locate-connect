@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { StoryGalleryItem, SuccessMetrics } from "@/types/success-story.types";
+import { logger } from "../../lib/logger";
 
 interface PublicGalleryProps {
   initialStories?: StoryGalleryItem[];
@@ -74,7 +75,7 @@ export function PublicGallery({
       setHasMore(data.hasMore);
       if (reset) setPage(1);
     } catch (error) {
-      console.error("Error fetching stories:", error);
+      logger.error("Error fetching stories:", { error: error });
     } finally {
       setIsLoading(false);
     }

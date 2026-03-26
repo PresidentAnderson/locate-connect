@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import type { TrainingAudience, TrainingStatus } from "@/types/training.types";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/training/tracks
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
         const { data: tracks, error } = await query;
 
         if (error) {
-          console.error("Error fetching tracks:", error);
+          logger.error("Error fetching tracks:", { error: error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -96,13 +97,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching tracks:", error);
+      logger.error("Error fetching tracks:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -163,13 +164,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating track:", error);
+      logger.error("Error creating track:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

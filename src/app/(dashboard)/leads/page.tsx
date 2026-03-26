@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { Lead, LeadStatus, LeadPriority, LeadSource } from "@/types/lead.types";
+import { logger } from "../../../lib/logger";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -35,7 +36,7 @@ export default function LeadsPage() {
         setTotalPages(data.pagination?.totalPages || 1);
       }
     } catch (error) {
-      console.error("Error fetching leads:", error);
+      logger.error("Error fetching leads:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -52,7 +53,7 @@ export default function LeadsPage() {
         fetchLeads();
       }
     } catch (error) {
-      console.error("Error updating lead:", error);
+      logger.error("Error updating lead:", { error: error });
     }
   };
 
@@ -78,8 +79,9 @@ export default function LeadsPage() {
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex-1 min-w-[200px]">
           <input
-            type="text"
+            type="search"
             placeholder="Search leads..."
+            aria-label="Search leads"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
@@ -88,7 +90,8 @@ export default function LeadsPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as LeadStatus | "all")}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+          aria-label="Filter by status"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         >
           <option value="all">All Statuses</option>
           <option value="new">New</option>
@@ -100,7 +103,8 @@ export default function LeadsPage() {
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value as LeadPriority | "all")}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+          aria-label="Filter by priority"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
         >
           <option value="all">All Priorities</option>
           <option value="critical">Critical</option>
@@ -121,8 +125,26 @@ export default function LeadsPage() {
 
       {/* Leads Table */}
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600" />
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden animate-pulse" role="status" aria-label="Loading leads">
+          <div className="bg-gray-50 px-6 py-3 flex gap-8">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="h-3 w-14 rounded bg-gray-200" />
+            ))}
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="border-t border-gray-200 px-6 py-4 flex items-center gap-6">
+              <div className="flex-1">
+                <div className="h-4 w-36 rounded bg-gray-200" />
+                <div className="mt-1 h-3 w-52 rounded bg-gray-200" />
+              </div>
+              <div className="h-4 w-20 rounded bg-gray-200" />
+              <div className="h-5 w-16 rounded bg-gray-200" />
+              <div className="h-5 w-16 rounded-full bg-gray-200" />
+              <div className="h-5 w-18 rounded-full bg-gray-200" />
+              <div className="h-4 w-20 rounded bg-gray-200" />
+            </div>
+          ))}
+          <span className="sr-only">Loading leads...</span>
         </div>
       ) : leads.length === 0 ? (
         <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">

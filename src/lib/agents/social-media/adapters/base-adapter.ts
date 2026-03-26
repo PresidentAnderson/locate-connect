@@ -8,6 +8,7 @@ import type {
   SocialActivityType,
   SocialMediaActivityEvent,
 } from '@/types/social-monitoring.types';
+import { logger } from "../../../logger";
 
 // =============================================================================
 // TYPES
@@ -232,9 +233,7 @@ export abstract class SocialMediaAdapter {
           maxDelayMs
         );
 
-        console.log(
-          `[${this.platform}Adapter] ${operationName} failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms`
-        );
+        logger.debug(`[${this.platform}Adapter] ${operationName} failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms`);
 
         await this.sleep(delay);
       }

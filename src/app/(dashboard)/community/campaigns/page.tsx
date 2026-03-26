@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +67,7 @@ export default function CampaignsPage() {
         setStats(data.stats || null);
       }
     } catch (error) {
-      console.error("Error loading campaigns:", error);
+      logger.error("Error loading campaigns:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -289,7 +290,7 @@ function CreateCampaignModal({ onClose, onCreated }: { onClose: () => void; onCr
         onClose();
       }
     } catch (error) {
-      console.error("Error creating campaign:", error);
+      logger.error("Error creating campaign:", { error: error });
     } finally {
       setCreating(false);
     }

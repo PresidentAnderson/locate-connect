@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { voiceMemoService, type CreateVoiceMemoInput, type VoiceMemoFilters } from "@/lib/services/voice-memo-service";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ memos });
   } catch (error) {
-    console.error("[API] Error listing voice memos:", error);
+    logger.error("[API] Error listing voice memos:", { error: error });
     return NextResponse.json(
       { error: "Failed to list voice memos" },
       { status: 500 }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(memo, { status: 201 });
   } catch (error) {
-    console.error("[API] Error creating voice memo:", error);
+    logger.error("[API] Error creating voice memo:", { error: error });
     return NextResponse.json(
       { error: "Failed to create voice memo" },
       { status: 500 }

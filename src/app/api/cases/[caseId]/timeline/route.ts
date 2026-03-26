@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 interface TimelineEvent {
   id: string;
@@ -217,7 +218,7 @@ export async function GET(
       total: events.length,
     });
   } catch (error) {
-    console.error("Error fetching case timeline:", error);
+    logger.error("Error fetching case timeline:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch timeline" },
       { status: 500 }

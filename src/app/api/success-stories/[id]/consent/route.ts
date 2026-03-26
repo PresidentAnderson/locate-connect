@@ -6,7 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { emailService } from '@/lib/services/email-service';
 import type { CreateConsentInput } from '@/types/success-story.types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -64,7 +66,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching consents:', error);
+    logger.error('Error fetching consents:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -192,7 +194,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (createError) {
-    console.error('Error creating consent:', createError);
+    logger.error('Error creating consent:', { error: createError });
     return NextResponse.json({ error: createError.message }, { status: 500 });
   }
 
@@ -211,10 +213,59 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     user_agent: userAgent,
   });
 
-  // If email confirmation, send verification email (placeholder for now)
+  // If email confirmation, send verification email
   if (body.consentMethod === 'email_confirmation' && body.consenterEmail) {
-    // TODO: Implement email sending
-    console.log(`Would send verification email to ${body.consenterEmail} with code ${verificationCode}`);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://locateconnect.ca';
+    const verifyUrl = `${appUrl}/success-stories/${id}/verify-consent?code=${verificationCode}&consentId=${consent.id}`;
+
+    const emailResult = await emailService.send({
+      to: body.consenterEmail,
+      subject: 'LocateConnect - Please Confirm Your Consent',
+      priority: 'high',
+      tags: ['consent-verification', 'success-story'],
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Consent Verification</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+          <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 22px;">Consent Verification</h1>
+          </div>
+          <div style="background-color: white; padding: 20px; border-radius: 0 0 8px 8px;">
+            <p>Hello ${body.consenterName},</p>
+            <p>You have been asked to provide consent for a success story on LocateConnect. Please verify your consent by using the code below or clicking the link.</p>
+            <div style="background-color: #f0f4ff; border: 2px dashed #2563eb; padding: 15px; text-align: center; margin: 20px 0; border-radius: 6px;">
+              <p style="margin: 0 0 5px; color: #666; font-size: 14px;">Your verification code:</p>
+              <p style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 4px; color: #2563eb;">${verificationCode}</p>
+            </div>
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="${verifyUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                Verify Consent
+              </a>
+            </div>
+            <p style="color: #666; font-size: 13px;">
+              <strong>Consent type:</strong> ${body.consentType}<br>
+              <strong>Relationship:</strong> ${body.consenterRelationship}
+            </p>
+            <p style="color: #999; font-size: 12px;">If you did not expect this email, please disregard it. No action will be taken without your explicit confirmation.</p>
+            <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Sent by <a href="${appUrl}" style="color: #2563eb;">LocateConnect</a>
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `Hello ${body.consenterName},\n\nYou have been asked to provide consent for a success story on LocateConnect.\n\nYour verification code: ${verificationCode}\n\nOr verify at: ${verifyUrl}\n\nConsent type: ${body.consentType}\nRelationship: ${body.consenterRelationship}\n\nIf you did not expect this email, please disregard it.`,
+    });
+
+    if (!emailResult.success) {
+      logger.error(`Failed to send consent verification email to ${body.consenterEmail}:`, { error: emailResult.error });
+    }
   }
 
   return NextResponse.json(transformConsentFromDB(consent), { status: 201 });

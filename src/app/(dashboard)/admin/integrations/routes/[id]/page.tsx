@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../../lib/logger";
 
 interface Integration {
   id: string;
@@ -97,7 +98,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       const data = await response.json();
       setAvailableIntegrations(data.data?.integrations || []);
     } catch (err) {
-      console.error('Failed to fetch integrations:', err);
+      logger.error('Failed to fetch integrations:', { error: err });
     }
   };
 
@@ -130,7 +131,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
         fetchRoute();
       }
     } catch (err) {
-      console.error('Failed to add mapping:', err);
+      logger.error('Failed to add mapping:', { error: err });
     } finally {
       setAddingMapping(false);
     }
@@ -145,7 +146,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       });
       fetchRoute();
     } catch (err) {
-      console.error('Failed to toggle mapping:', err);
+      logger.error('Failed to toggle mapping:', { error: err });
     }
   };
 
@@ -158,7 +159,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       });
       fetchRoute();
     } catch (err) {
-      console.error('Failed to delete mapping:', err);
+      logger.error('Failed to delete mapping:', { error: err });
     }
   };
 
@@ -174,7 +175,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
         router.push('/admin/integrations/routes');
       }
     } catch (err) {
-      console.error('Failed to delete route:', err);
+      logger.error('Failed to delete route:', { error: err });
     }
   };
 
@@ -207,7 +208,7 @@ export default function RouteDetailPage({ params }: { params: Promise<{ id: stri
       });
       fetchRoute();
     } catch (err) {
-      console.error('Failed to reorder mappings:', err);
+      logger.error('Failed to reorder mappings:', { error: err });
     }
   };
 

@@ -15,6 +15,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { CreateCampaignRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -100,7 +101,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching campaigns:', error);
+    logger.error('Error fetching campaigns:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -186,7 +187,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    console.error('Error creating campaign:', error);
+    logger.error('Error creating campaign:', { error: error });
     return apiServerError(error.message);
   }
 

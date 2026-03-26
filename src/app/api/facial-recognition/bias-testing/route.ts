@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { BiasTestCategory, BiasTestResult } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/bias-testing
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching bias test results:', error);
+    logger.error('Error fetching bias test results:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Error creating bias test result:', dbError);
+      logger.error('Error creating bias test result:', { error: dbError });
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
@@ -259,7 +260,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Bias test creation error:', error);
+    logger.error('Bias test creation error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -331,7 +332,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating bias test:', updateError);
+      logger.error('Error updating bias test:', { error: updateError });
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -340,7 +341,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Bias test update error:', error);
+    logger.error('Bias test update error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

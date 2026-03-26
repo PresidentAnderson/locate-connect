@@ -8,6 +8,7 @@ import type {
   PublicAPIScope,
   PublicAPIRequest,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 class PublicAPIService {
   private apiKeys: Map<string, PublicAPIKey> = new Map();
@@ -67,7 +68,7 @@ class PublicAPIService {
     };
 
     this.apiRequests.set(id, request);
-    console.log(`[PublicAPI] Request submitted by ${input.organizationName}`);
+    logger.debug(`[PublicAPI] Request submitted by ${input.organizationName}`);
 
     return request;
   }
@@ -134,7 +135,7 @@ class PublicAPIService {
     request.apiKeyId = apiKey.id;
     this.apiRequests.set(requestId, request);
 
-    console.log(`[PublicAPI] Request approved, key issued: ${prefix}`);
+    logger.debug(`[PublicAPI] Request approved, key issued: ${prefix}`);
 
     return { apiKey, rawKey: key };
   }
@@ -151,7 +152,7 @@ class PublicAPIService {
     request.reviewedBy = reviewerId;
     this.apiRequests.set(requestId, request);
 
-    console.log(`[PublicAPI] Request denied: ${requestId}`);
+    logger.debug(`[PublicAPI] Request denied: ${requestId}`);
     return true;
   }
 
@@ -226,7 +227,7 @@ class PublicAPIService {
     apiKey.status = "suspended";
     this.apiKeys.set(keyId, apiKey);
 
-    console.log(`[PublicAPI] Key suspended: ${apiKey.keyPrefix}`);
+    logger.debug(`[PublicAPI] Key suspended: ${apiKey.keyPrefix}`);
     return true;
   }
 
@@ -240,7 +241,7 @@ class PublicAPIService {
     apiKey.status = "revoked";
     this.apiKeys.set(keyId, apiKey);
 
-    console.log(`[PublicAPI] Key revoked: ${apiKey.keyPrefix}`);
+    logger.debug(`[PublicAPI] Key revoked: ${apiKey.keyPrefix}`);
     return true;
   }
 
@@ -254,7 +255,7 @@ class PublicAPIService {
     apiKey.status = "active";
     this.apiKeys.set(keyId, apiKey);
 
-    console.log(`[PublicAPI] Key reactivated: ${apiKey.keyPrefix}`);
+    logger.debug(`[PublicAPI] Key reactivated: ${apiKey.keyPrefix}`);
     return true;
   }
 

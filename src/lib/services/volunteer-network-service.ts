@@ -9,6 +9,7 @@ import type {
   VolunteerOpportunity,
   SupportedLanguage,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 class VolunteerNetworkService {
   private volunteers: Map<string, VolunteerProfile> = new Map();
@@ -51,7 +52,7 @@ class VolunteerNetworkService {
     };
 
     this.volunteers.set(id, profile);
-    console.log(`[VolunteerNetwork] Registered volunteer: ${input.name}`);
+    logger.debug(`[VolunteerNetwork] Registered volunteer: ${input.name}`);
 
     return profile;
   }
@@ -203,7 +204,7 @@ class VolunteerNetworkService {
     };
 
     this.opportunities.set(id, opportunity);
-    console.log(`[VolunteerNetwork] Created opportunity: ${input.title}`);
+    logger.debug(`[VolunteerNetwork] Created opportunity: ${input.title}`);
 
     // Notify matching volunteers
     await this.notifyMatchingVolunteers(opportunity);
@@ -283,9 +284,7 @@ class VolunteerNetworkService {
 
     this.opportunities.set(opportunityId, opportunity);
 
-    console.log(
-      `[VolunteerNetwork] ${volunteer.name} registered for ${opportunity.title}`
-    );
+    logger.debug(`[VolunteerNetwork] ${volunteer.name} registered for ${opportunity.title}`);
     return true;
   }
 
@@ -394,9 +393,7 @@ class VolunteerNetworkService {
       verifiedOnly: true,
     });
 
-    console.log(
-      `[VolunteerNetwork] Notifying ${matching.length} volunteers of opportunity`
-    );
+    logger.debug(`[VolunteerNetwork] Notifying ${matching.length} volunteers of opportunity`);
     // Would send notifications
   }
 }

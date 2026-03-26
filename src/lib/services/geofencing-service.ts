@@ -9,6 +9,7 @@ import type {
   GeofenceAlert,
   GeofenceNotification,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateGeofenceInput {
   caseId: string;
@@ -58,7 +59,7 @@ class GeofencingService {
     };
 
     this.geofences.set(id, geofence);
-    console.log(`[GeofencingService] Created geofence ${id} for case ${input.caseId}`);
+    logger.debug(`[GeofencingService] Created geofence ${id} for case ${input.caseId}`);
     return geofence;
   }
 
@@ -302,9 +303,7 @@ class GeofencingService {
     };
 
     this.alerts.set(alert.id, alert);
-    console.log(
-      `[GeofencingService] Alert triggered: ${alertType} for geofence ${geofence.name}`
-    );
+    logger.debug(`[GeofencingService] Alert triggered: ${alertType} for geofence ${geofence.name}`);
     return alert;
   }
 
@@ -318,9 +317,7 @@ class GeofencingService {
     for (const notification of geofence.notifications) {
       if (!notification.enabled) continue;
 
-      console.log(
-        `[GeofencingService] Sending ${notification.type} notification to ${notification.target}`
-      );
+      logger.debug(`[GeofencingService] Sending ${notification.type} notification to ${notification.target}`);
 
       // Would integrate with notification services
       switch (notification.type) {

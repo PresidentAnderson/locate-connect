@@ -9,6 +9,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { saveUserLocation, getLastLocation } from "@/lib/pwa/indexeddb";
 import { updateLocationInSW } from "@/lib/pwa/service-worker";
+import { logger } from "../../lib/logger";
 
 export interface NearbyCase {
   id: string;
@@ -96,7 +97,7 @@ export function NearbyCaseAlerts({
         setNearbyCases(data.cases || []);
         setLastUpdated(new Date());
       } catch (err) {
-        console.error("Error fetching nearby cases:", err);
+        logger.error("Error fetching nearby cases:", { error: err });
         // Don't set error for fetch failures - just keep existing data
       }
     },

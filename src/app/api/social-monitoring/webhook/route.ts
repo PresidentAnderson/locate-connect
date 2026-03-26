@@ -10,6 +10,7 @@ import type {
   SocialMediaWebhookPayload,
   WebhookVerificationRequest,
 } from '@/types/social-monitoring.types';
+import { logger } from "../../../../lib/logger";
 
 // Use service role client for webhook processing
 function getServiceClient() {
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (WEBHOOK_SECRET) {
       const signature = request.headers.get('x-webhook-signature') || '';
       if (!verifyWebhookSignature(rawBody, signature, WEBHOOK_SECRET)) {
-        console.error('Invalid webhook signature');
+        logger.error('Invalid webhook signature');
         return NextResponse.json(
           { error: 'Invalid signature' },
           { status: 401 }
@@ -160,7 +161,7 @@ export async function POST(request: NextRequest) {
       if (createError.code === '23505') {
         return NextResponse.json({ received: true, processed: false, reason: 'duplicate' });
       }
-      console.error('Failed to create activity event:', createError);
+      logger.error('Failed to create activity event:', { error: createError });
       return NextResponse.json(
         { error: 'Failed to process event' },
         { status: 500 }
@@ -230,7 +231,7 @@ export async function POST(request: NextRequest) {
       alert_triggered: shouldAlert,
     });
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    logger.error('Webhook processing error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

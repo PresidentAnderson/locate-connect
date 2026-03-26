@@ -242,10 +242,10 @@ describe('Priority Engine', () => {
         expect(result.factors.find(f => f.factor === 'missing_72_plus')?.weight).toBe(30);
       });
 
-      it('should handle typo in hourssMissing field', () => {
+      it('should handle hoursMissing field', () => {
         const result = assessPriority({
           age: 30,
-          hourssMissing: 50, // Note: using the typo field
+          hoursMissing: 50,
           hasMedicalCondition: false,
           requiresDailyMedication: false,
           hasMentalHealthCondition: false,

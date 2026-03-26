@@ -1,5 +1,99 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
+import type {
+  OutcomeReportDbRow,
+  RecommendationDbRow,
+  SimilarCaseDbRow,
+  TimelineMilestoneDbRow,
+} from "@/types/outcome-report.types";
+
+/** Shape of formatted export data returned by formatExportData */
+interface FormattedExportData {
+  reportNumber: string;
+  reportStatus: string;
+  reportVersion: number;
+  generatedAt: string;
+  caseNumber: string;
+  subjectName: string;
+  subjectAge?: number;
+  reportedDate?: string;
+  resolvedDate?: string;
+  totalDurationHours: number;
+  totalDurationDays: number;
+  disposition?: string;
+  dispositionLabel: string;
+  resolution: {
+    discoveryMethod?: string;
+    discoveryMethodLabel: string;
+    location?: string;
+    city?: string;
+    province?: string;
+    foundBy?: string;
+    conditionAtResolution?: string;
+    notes?: string;
+  };
+  leadAnalysis: {
+    totalLeads: number;
+    verifiedLeads: number;
+    dismissedLeads: number;
+    actsedUponLeads: number;
+    solvingLeadSource?: string;
+    falsePositiveRate: number;
+    avgResponseHours: number;
+    verificationRate: number;
+  };
+  tipAnalysis: {
+    totalTips: number;
+    verifiedTips: number;
+    hoaxTips: number;
+    duplicateTips: number;
+    convertedToLeads: number;
+    conversionRate: number;
+  };
+  resources: {
+    assignedOfficers: number;
+    volunteerHours: number;
+    mediaOutlets: number;
+    socialMediaReach: number;
+    estimatedCost: number | null;
+    partnerOrganizations: string[];
+  };
+  timeBreakdown: {
+    toFirstResponse: number | null;
+    toFirstLead: number | null;
+    toVerifiedLead: number | null;
+    toResolution: number | null;
+  };
+  whatWorked: string[];
+  whatDidntWork: string[];
+  delaysIdentified: string[];
+  lessonsLearned?: string;
+  recommendations: {
+    category: string;
+    priority: string;
+    title: string;
+    description: string;
+    isImplemented: boolean;
+    implementationNotes?: string;
+  }[];
+  similarCases: {
+    caseNumber?: string;
+    similarityScore: number;
+    disposition?: string;
+    factors: unknown[];
+  }[];
+  timeline: {
+    timestamp: string;
+    type: string;
+    title: string;
+    description?: string;
+    isDecisionPoint: boolean;
+    wasDelay: boolean;
+    delayHours: number | null;
+    delayReason?: string;
+  }[];
+}
 
 /**
  * GET /api/outcome-reports/[id]/export
@@ -125,7 +219,7 @@ export async function GET(
         );
     }
   } catch (error) {
-    console.error("Error exporting outcome report:", error);
+    logger.error("Error exporting outcome report:", { error: error });
     return NextResponse.json(
       { error: "Failed to export outcome report" },
       { status: 500 }
@@ -133,8 +227,9 @@ export async function GET(
   }
 }
 
-function formatExportData(report: any, includeConfidential: boolean) {
-  const caseData = report.case || {};
+function formatExportData(report: OutcomeReportDbRow, includeConfidential: boolean): FormattedExportData {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const caseData = (report.case || {}) as Record<string, any>;
   const subjectName = includeConfidential
     ? `${caseData.first_name || ""} ${caseData.last_name || ""}`.trim()
     : `[Redacted]`;
@@ -160,7 +255,7 @@ function formatExportData(report: any, includeConfidential: boolean) {
     // Resolution details
     resolution: {
       discoveryMethod: report.discovery_method,
-      discoveryMethodLabel: formatDiscoveryMethod(report.discovery_method),
+      discoveryMethodLabel: formatDiscoveryMethod(report.discovery_method ?? ""),
       location: report.location_found,
       city: report.location_found_city,
       province: report.location_found_province,
@@ -239,7 +334,7 @@ function formatExportData(report: any, includeConfidential: boolean) {
     lessonsLearned: report.lessons_learned,
 
     // Recommendations
-    recommendations: (report.recommendations || []).map((rec: any) => ({
+    recommendations: (report.recommendations || []).map((rec: RecommendationDbRow) => ({
       category: rec.category,
       priority: rec.priority,
       title: rec.title,
@@ -249,7 +344,7 @@ function formatExportData(report: any, includeConfidential: boolean) {
     })),
 
     // Similar cases
-    similarCases: (report.similar_cases || []).map((sc: any) => ({
+    similarCases: (report.similar_cases || []).map((sc: SimilarCaseDbRow) => ({
       caseNumber: sc.similar_case?.case_number,
       similarityScore: parseFloat(sc.similarity_score),
       disposition: sc.similar_case?.disposition,
@@ -258,8 +353,8 @@ function formatExportData(report: any, includeConfidential: boolean) {
 
     // Timeline
     timeline: (report.timeline || [])
-      .sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-      .map((tm: any) => ({
+      .sort((a: TimelineMilestoneDbRow, b: TimelineMilestoneDbRow) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .map((tm: TimelineMilestoneDbRow) => ({
         timestamp: tm.timestamp,
         type: tm.milestone_type,
         title: tm.title,
@@ -272,7 +367,7 @@ function formatExportData(report: any, includeConfidential: boolean) {
   };
 }
 
-function generateCSV(data: any): string {
+function generateCSV(data: FormattedExportData): string {
   const lines: string[] = [];
 
   // Header section
@@ -371,7 +466,7 @@ function generateCSV(data: any): string {
   // Recommendations
   lines.push("RECOMMENDATIONS");
   lines.push("Category,Priority,Title,Description,Implemented");
-  data.recommendations.forEach((rec: any) => {
+  data.recommendations.forEach((rec) => {
     lines.push(
       `${rec.category},${rec.priority},"${rec.title}","${rec.description}",${rec.isImplemented}`
     );
@@ -381,7 +476,7 @@ function generateCSV(data: any): string {
   // Similar Cases
   lines.push("SIMILAR CASES");
   lines.push("Case Number,Similarity Score,Disposition");
-  data.similarCases.forEach((sc: any) => {
+  data.similarCases.forEach((sc) => {
     lines.push(`${sc.caseNumber},${sc.similarityScore}%,${sc.disposition || "N/A"}`);
   });
   lines.push("");
@@ -389,7 +484,7 @@ function generateCSV(data: any): string {
   // Timeline
   lines.push("TIMELINE");
   lines.push("Timestamp,Type,Title,Description,Decision Point,Was Delay,Delay Hours");
-  data.timeline.forEach((tm: any) => {
+  data.timeline.forEach((tm) => {
     lines.push(
       `${tm.timestamp},${tm.type},"${tm.title}","${tm.description || ""}",${tm.isDecisionPoint},${tm.wasDelay},${tm.delayHours || ""}`
     );

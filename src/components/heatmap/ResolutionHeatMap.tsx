@@ -8,6 +8,7 @@ import type {
   MapSettings,
   LayerVisibility,
 } from "@/types/heatmap.types";
+import { logger } from "../../lib/logger";
 
 // Leaflet will be loaded dynamically to avoid SSR issues
 interface LeafletMap {
@@ -82,7 +83,7 @@ export function ResolutionHeatMap({
           const heatModule = await import("leaflet.heat");
           HeatLayer = heatModule.default;
         } catch {
-          console.warn("leaflet.heat not available, using fallback visualization");
+          logger.warn("leaflet.heat not available, using fallback visualization");
         }
 
         // Create map
@@ -117,7 +118,7 @@ export function ResolutionHeatMap({
 
         setIsLoading(false);
       } catch (err) {
-        console.error("Error initializing map:", err);
+        logger.error("Error initializing map:", { error: err });
         setError("Failed to initialize map. Please refresh the page.");
         setIsLoading(false);
       }
@@ -189,7 +190,7 @@ export function ResolutionHeatMap({
         addClusterMarkers(L, clusters);
       }
     } catch (err) {
-      console.error("Error updating heat layer:", err);
+      logger.error("Error updating heat layer:", { error: err });
     }
   }, [clusters, visibleLayers, settings]);
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "@/hooks/useTranslations";
+import { logger } from "../../../lib/logger";
 
 interface SupportResource {
   id: string;
@@ -78,7 +79,7 @@ export default function FamilySupportPage() {
         setFaqs(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch family support data:", error);
+      logger.error("Failed to fetch family support data:", { error: error });
     } finally {
       setLoading(false);
     }

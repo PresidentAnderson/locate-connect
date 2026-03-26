@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { authenticateRequest, hasScope } from '@/lib/api/auth';
 import { checkRateLimit, updateRateLimitCounters } from '@/lib/api/rate-limiter';
 import { apiCreated, apiUnauthorized, apiForbidden, apiBadRequest, apiRateLimited, apiServerError, withRateLimitHeaders, withCorsHeaders } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 /**
  * POST /api/v1/tips
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Tip creation error:', error);
+      logger.error('Tip creation error:', { error: error });
       return withCorsHeaders(apiServerError('Failed to submit tip'));
     }
 
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     return withCorsHeaders(response);
   } catch (error) {
-    console.error('Tips API error:', error);
+    logger.error('Tips API error:', { error: error });
     return withCorsHeaders(apiServerError('Internal server error'));
   }
 }

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { accessibilityService } from "@/lib/services/accessibility-service";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Accessibility error:", error);
+    logger.error("[API] Accessibility error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Accessibility error:", error);
+    logger.error("[API] Accessibility error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

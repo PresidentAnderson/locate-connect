@@ -78,10 +78,11 @@ export default function OutcomeReportsPage() {
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex flex-wrap items-center gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="status-filter" className="block text-xs font-medium text-gray-500 mb-1">
               Status
             </label>
             <select
+              id="status-filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as OutcomeReportStatus | "")}
               className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -95,10 +96,11 @@ export default function OutcomeReportsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label htmlFor="discovery-method-filter" className="block text-xs font-medium text-gray-500 mb-1">
               Discovery Method
             </label>
             <select
+              id="discovery-method-filter"
               value={discoveryMethodFilter}
               onChange={(e) =>
                 setDiscoveryMethodFilter(e.target.value as DiscoveryMethod | "")
@@ -139,8 +141,27 @@ export default function OutcomeReportsPage() {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden animate-pulse" role="status" aria-label="Loading reports">
+          <div className="bg-gray-50 px-6 py-3 flex gap-12">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="h-3 w-16 rounded bg-gray-200" />
+            ))}
+          </div>
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="border-t border-gray-200 px-6 py-4 flex items-center gap-6">
+              <div className="flex-1">
+                <div className="h-4 w-24 rounded bg-gray-200" />
+                <div className="mt-1 h-3 w-20 rounded bg-gray-200" />
+              </div>
+              <div className="h-4 w-20 rounded bg-gray-200" />
+              <div className="h-5 w-16 rounded-full bg-gray-200" />
+              <div className="h-4 w-12 rounded bg-gray-200" />
+              <div className="h-4 w-16 rounded bg-gray-200" />
+              <div className="h-5 w-16 rounded-full bg-gray-200" />
+              <div className="h-4 w-12 rounded bg-gray-200" />
+            </div>
+          ))}
+          <span className="sr-only">Loading reports...</span>
         </div>
       )}
 
@@ -177,8 +198,16 @@ export default function OutcomeReportsPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {reports.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                      No outcome reports found
+                    <td colSpan={7} className="px-6 py-16 text-center">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                      </svg>
+                      <h3 className="mt-3 text-sm font-medium text-gray-900">No outcome reports found</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {statusFilter || discoveryMethodFilter
+                          ? "Try adjusting your filters to find reports."
+                          : "Outcome reports will appear here when cases are resolved."}
+                      </p>
                     </td>
                   </tr>
                 ) : (

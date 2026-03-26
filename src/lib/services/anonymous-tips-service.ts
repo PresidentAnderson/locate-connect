@@ -4,6 +4,7 @@
  */
 
 import type { AnonymousTip, SupportedLanguage } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 class AnonymousTipsService {
   private tips: Map<string, AnonymousTip> = new Map();
@@ -65,7 +66,7 @@ class AnonymousTipsService {
     this.tips.set(id, tip);
     this.tipCodeIndex.set(tipCode, id);
 
-    console.log(`[AnonymousTips] Tip submitted: ${tipCode}`);
+    logger.debug(`[AnonymousTips] Tip submitted: ${tipCode}`);
 
     // Auto-escalate critical tips
     if (priority === "critical") {
@@ -160,7 +161,7 @@ class AnonymousTipsService {
     tip.status = status;
     this.tips.set(tipId, tip);
 
-    console.log(`[AnonymousTips] Tip ${tip.tipCode} status updated to ${status}`);
+    logger.debug(`[AnonymousTips] Tip ${tip.tipCode} status updated to ${status}`);
     return tip;
   }
 
@@ -194,7 +195,7 @@ class AnonymousTipsService {
     tip.caseNumber = caseNumber;
     this.tips.set(tipId, tip);
 
-    console.log(`[AnonymousTips] Tip ${tip.tipCode} linked to case ${caseNumber}`);
+    logger.debug(`[AnonymousTips] Tip ${tip.tipCode} linked to case ${caseNumber}`);
     return true;
   }
 
@@ -244,7 +245,7 @@ class AnonymousTipsService {
     const tip = this.tips.get(tipId);
     if (!tip) return;
 
-    console.log(`[AnonymousTips] CRITICAL TIP ESCALATED: ${tip.tipCode}`);
+    logger.debug(`[AnonymousTips] CRITICAL TIP ESCALATED: ${tip.tipCode}`);
     // Would notify on-call staff, law enforcement, etc.
   }
 
@@ -315,7 +316,7 @@ class AnonymousTipsService {
     tip.description += `\n\n[Follow-up ${new Date().toISOString()}]: ${additionalInfo}`;
     this.tips.set(tipId, tip);
 
-    console.log(`[AnonymousTips] Follow-up added to tip ${tipCode}`);
+    logger.debug(`[AnonymousTips] Follow-up added to tip ${tipCode}`);
     return true;
   }
 }

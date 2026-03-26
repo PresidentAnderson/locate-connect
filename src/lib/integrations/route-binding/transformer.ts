@@ -5,6 +5,7 @@
 
 import type { TransformationRule, DataMapping, RouteCondition } from '@/types';
 import { executeInlineTransform } from './transform-executor';
+import { logger } from "../../logger";
 
 export interface TransformContext {
   source: Record<string, unknown>;
@@ -38,10 +39,7 @@ export class DataTransformer {
           this.setNestedValue(result, rule.targetField, value);
         }
       } catch (error) {
-        console.warn(
-          `[DataTransformer] Rule ${rule.id} failed:`,
-          error instanceof Error ? error.message : error
-        );
+        logger.warn(`[DataTransformer] Rule ${rule.id} failed:`, { data: error instanceof Error ? error.message : error });
         // Use default value if available
         if (rule.config?.defaultValue !== undefined) {
           this.setNestedValue(result, rule.targetField, rule.config.defaultValue);

@@ -12,6 +12,7 @@ import type {
   VOLUNTEER_STATUS_LABELS,
   ZONE_STATUS_LABELS,
 } from "@/types/volunteer.types";
+import { logger } from "../../lib/logger";
 
 interface SearchPartyCoordinatorProps {
   eventId: string;
@@ -37,7 +38,7 @@ export function SearchPartyCoordinator({
           setData(dashboardData);
         }
       } catch (error) {
-        console.error("Failed to fetch search event data:", error);
+        logger.error("Failed to fetch search event data:", { error: error });
       } finally {
         setLoading(false);
       }

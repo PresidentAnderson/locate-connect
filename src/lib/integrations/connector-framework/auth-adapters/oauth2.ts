@@ -4,6 +4,7 @@
  */
 
 import type { DecryptedCredential, CredentialData } from '@/types';
+import { logger } from "../../../logger";
 
 export interface OAuth2Config {
   tokenUrl: string;
@@ -106,7 +107,7 @@ export class OAuth2AuthAdapter {
         await this.refreshAccessToken();
         return this.accessToken!;
       } catch (error) {
-        console.warn('[OAuth2Adapter] Token refresh failed:', error);
+        logger.warn('[OAuth2Adapter] Token refresh failed:', { data: error });
         // Fall through to get new token
       }
     }

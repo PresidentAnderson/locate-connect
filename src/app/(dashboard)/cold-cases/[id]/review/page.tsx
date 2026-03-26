@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { ChecklistStatus, CampaignType, RevivalDecision } from "@/types/cold-case.types";
+import { logger } from "../../../../../lib/logger";
 
 interface ReviewPageProps {
   params: Promise<{ id: string }>;
@@ -64,7 +65,7 @@ export default function ColdCaseReviewPage({ params }: ReviewPageProps) {
         }
       }
     } catch (error) {
-      console.error("Error fetching review:", error);
+      logger.error("Error fetching review:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ export default function ColdCaseReviewPage({ params }: ReviewPageProps) {
         fetchReview();
       }
     } catch (error) {
-      console.error("Error starting review:", error);
+      logger.error("Error starting review:", { error: error });
     } finally {
       setSaving(false);
     }
@@ -105,7 +106,7 @@ export default function ColdCaseReviewPage({ params }: ReviewPageProps) {
         fetchReview();
       }
     } catch (error) {
-      console.error("Error updating checklist item:", error);
+      logger.error("Error updating checklist item:", { error: error });
     }
   };
 
@@ -132,7 +133,7 @@ export default function ColdCaseReviewPage({ params }: ReviewPageProps) {
         alert(error.error?.message || "Failed to complete review");
       }
     } catch (error) {
-      console.error("Error completing review:", error);
+      logger.error("Error completing review:", { error: error });
     } finally {
       setSaving(false);
     }

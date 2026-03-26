@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../lib/logger";
 
 interface DashboardSummary {
   totalIntegrations: number;
@@ -130,7 +131,7 @@ export default function IntegrationMonitoringPage() {
         fetchDashboard();
       }
     } catch (err) {
-      console.error('Failed to update alert:', err);
+      logger.error('Failed to update alert:', { error: err });
     } finally {
       setUpdatingAlert(null);
     }

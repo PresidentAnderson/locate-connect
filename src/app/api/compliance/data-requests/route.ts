@@ -12,6 +12,7 @@ import {
   ViolationSeverity,
   mapDataSubjectRequestFromDb,
 } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 interface CreateDataRequestInput {
   requestType: DataRequestType;
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching data requests:', error);
+    logger.error('Error fetching data requests:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating data request:', error);
+    logger.error('Error creating data request:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -271,7 +272,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error updating data request:', error);
+    logger.error('Error updating data request:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

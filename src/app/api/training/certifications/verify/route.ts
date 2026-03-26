@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/training/certifications/verify
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createNewsCrawlerAgent, agentRegistry } from '@/lib/agents';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/cron/news-crawler
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     const result = await agent.run();
 
     // Log run to console for Vercel logs
-    console.log('[Cron] News Crawler Agent completed:', {
+    logger.debug('[Cron] News Crawler Agent completed:', {
       runId: result.runId,
       duration: result.duration,
       itemsProcessed: result.itemsProcessed,
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
       metrics: result.metrics,
     });
   } catch (error) {
-    console.error('[Cron] News Crawler Agent failed:', error);
+    logger.error('[Cron] News Crawler Agent failed:', { error: error });
 
     return NextResponse.json(
       {

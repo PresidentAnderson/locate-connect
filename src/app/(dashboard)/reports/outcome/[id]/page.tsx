@@ -144,7 +144,7 @@ export default function OutcomeReportViewPage({ params }: Props) {
     timeline: report.timeline?.map((tm) => ({
       timestamp: tm.timestamp,
       event: tm.title,
-      type: tm.milestoneType as any,
+      type: tm.milestoneType as "report" | "update" | "lead" | "tip" | "action" | "resolution",
       actor: tm.actorName,
       details: tm.description,
     })) || [],

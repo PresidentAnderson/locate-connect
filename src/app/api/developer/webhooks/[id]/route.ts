@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiNotFound, apiServerError, apiForbidden, apiNoContent } from '@/lib/api/response';
 import type { UpdateWebhookInput, WebhookEventType } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return apiNotFound('Webhook not found');
       }
-      console.error('Webhook fetch error:', error);
+      logger.error('Webhook fetch error:', { error: error });
       return apiServerError('Failed to fetch webhook');
     }
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(webhookData);
   } catch (error) {
-    console.error('Webhook API error:', error);
+    logger.error('Webhook API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -165,7 +166,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Webhook update error:', error);
+      logger.error('Webhook update error:', { error: error });
       return apiServerError('Failed to update webhook');
     }
 
@@ -174,7 +175,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(webhookData);
   } catch (error) {
-    console.error('Webhook API error:', error);
+    logger.error('Webhook API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -223,13 +224,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Webhook delete error:', error);
+      logger.error('Webhook delete error:', { error: error });
       return apiServerError('Failed to delete webhook');
     }
 
     return apiNoContent();
   } catch (error) {
-    console.error('Webhook API error:', error);
+    logger.error('Webhook API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

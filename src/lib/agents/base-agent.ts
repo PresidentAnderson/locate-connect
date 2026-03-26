@@ -9,6 +9,7 @@ import type {
   AgentError,
   AgentType,
 } from "@/types/agent.types";
+import { logger } from "../logger";
 
 export abstract class BaseAgent {
   protected config: AgentConfig;
@@ -57,7 +58,7 @@ export abstract class BaseAgent {
     let alertsTriggered = 0;
 
     try {
-      console.log(`[Agent:${this.name}] Starting run ${this.runId}`);
+      logger.debug(`[Agent:${this.name}] Starting run ${this.runId}`);
 
       // Pre-run hook
       await this.beforeRun();
@@ -75,14 +76,14 @@ export abstract class BaseAgent {
       // Post-run hook
       await this.afterRun(result);
 
-      console.log(`[Agent:${this.name}] Completed run ${this.runId}`);
+      logger.debug(`[Agent:${this.name}] Completed run ${this.runId}`);
 
       return this.buildResult(true, itemsProcessed, leadsGenerated, alertsTriggered);
     } catch (error) {
       const agentError = this.createError(error);
       this.errors.push(agentError);
 
-      console.error(`[Agent:${this.name}] Failed run ${this.runId}:`, error);
+      logger.error(`[Agent:${this.name}] Failed run ${this.runId}:`, { error: error });
 
       // Retry logic
       if (this.config.retryAttempts > 0 && this.shouldRetry(error)) {
@@ -142,7 +143,7 @@ export abstract class BaseAgent {
    * Retry the run with delay
    */
   private async retryRun(): Promise<AgentResult> {
-    console.log(`[Agent:${this.name}] Retrying in ${this.config.retryDelay}ms`);
+    logger.debug(`[Agent:${this.name}] Retrying in ${this.config.retryDelay}ms`);
 
     await this.sleep(this.config.retryDelay);
 
@@ -244,7 +245,7 @@ export class AgentRegistry {
 
   register(agent: BaseAgent): void {
     this.agents.set(agent.id, agent);
-    console.log(`[AgentRegistry] Registered agent: ${agent.name}`);
+    logger.debug(`[AgentRegistry] Registered agent: ${agent.name}`);
   }
 
   unregister(agentId: string): void {

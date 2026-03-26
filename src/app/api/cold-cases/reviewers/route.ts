@@ -14,6 +14,7 @@ import {
   apiBadRequest,
   apiServerError,
 } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 interface CreateReviewerRequest {
   reviewerId: string;
@@ -85,7 +86,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching reviewers:', error);
+    logger.error('Error fetching reviewers:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -180,7 +181,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    console.error('Error creating reviewer:', error);
+    logger.error('Error creating reviewer:', { error: error });
     return apiServerError(error.message);
   }
 

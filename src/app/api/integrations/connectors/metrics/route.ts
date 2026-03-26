@@ -9,6 +9,7 @@ import {
 import { getConnectorFactory } from '@/lib/integrations/connector-framework';
 import { getRateLimiterRegistry } from '@/lib/integrations/connector-framework/rate-limiter';
 import { getCacheRegistry } from '@/lib/integrations/connector-framework/response-cache';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/connectors/metrics
@@ -189,7 +190,7 @@ export async function GET(request: NextRequest) {
       connectors: connectorMetrics,
     });
   } catch (error) {
-    console.error('Connector metrics error:', error);
+    logger.error('Connector metrics error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

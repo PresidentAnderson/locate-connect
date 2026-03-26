@@ -11,6 +11,7 @@ import type {
   CreateApprovalInput,
   SubmitApprovalInput,
 } from "@/types/success-story.types";
+import { logger } from "../../lib/logger";
 
 interface ApprovalWorkflowProps {
   storyId: string;
@@ -114,7 +115,7 @@ export function ApprovalWorkflow({
       });
       onRefresh();
     } catch (error) {
-      console.error("Error requesting approval:", error);
+      logger.error("Error requesting approval:", { error: error });
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +143,7 @@ export function ApprovalWorkflow({
       });
       onRefresh();
     } catch (error) {
-      console.error("Error submitting decision:", error);
+      logger.error("Error submitting decision:", { error: error });
     } finally {
       setIsSubmitting(false);
     }

@@ -12,6 +12,7 @@ import {
   CONSENT_TYPE_LABELS,
   CONSENT_STATUS_LABELS,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../lib/logger";
 
 interface ConsentManagerProps {
   caseId?: string;
@@ -40,7 +41,7 @@ export function ConsentManager({ caseId, subjectId, onConsentChange }: ConsentMa
       const data = await response.json();
       setConsents(data.data);
     } catch (error) {
-      console.error('Error fetching consents:', error);
+      logger.error('Error fetching consents:', { error: error });
     } finally {
       setLoading(false);
     }
@@ -76,7 +77,7 @@ export function ConsentManager({ caseId, subjectId, onConsentChange }: ConsentMa
       );
       onConsentChange?.(data.data);
     } catch (error) {
-      console.error('Error withdrawing consent:', error);
+      logger.error('Error withdrawing consent:', { error: error });
     }
   };
 

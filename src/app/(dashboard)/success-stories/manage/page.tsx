@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { SuccessStoryWithRelations, StoryStatus } from "@/types/success-story.types";
+import { logger } from "../../../../lib/logger";
 
 const STATUS_COLORS: Record<StoryStatus, { bg: string; text: string }> = {
   draft: { bg: "bg-gray-100", text: "text-gray-700" },
@@ -47,7 +48,7 @@ export default function ManageStoriesPage() {
       const data = await response.json();
       setStories(data.stories || []);
     } catch (error) {
-      console.error("Error fetching stories:", error);
+      logger.error("Error fetching stories:", { error: error });
     } finally {
       setIsLoading(false);
     }

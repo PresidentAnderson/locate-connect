@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
+import { applyInternalRateLimit } from "@/lib/api/internal-rate-limiter";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -24,6 +26,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    // Rate limit: 20 uploads per minute per user
+    const rateLimited = applyInternalRateLimit(`upload:photo:${user.id}`, { limit: 20, windowSeconds: 60 });
+    if (rateLimited) return rateLimited;
 
     // Parse form data
     const formData = await request.formData();
@@ -72,7 +78,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('[Upload] Storage error:', uploadError);
+      logger.error('[Upload] Storage error:', { error: uploadError });
       return NextResponse.json(
         { error: 'Failed to upload file' },
         { status: 500 }
@@ -96,7 +102,7 @@ export async function POST(request: NextRequest) {
       type: file.type,
     });
   } catch (error) {
-    console.error('[Upload] Error:', error);
+    logger.error('[Upload] Error:', { error: error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

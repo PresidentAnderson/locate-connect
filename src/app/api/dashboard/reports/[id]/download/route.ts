@@ -1,5 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "../../../../../../lib/logger";
+
+interface CaseRow {
+  id: string;
+  status: string;
+  priority_level: string;
+  disposition: string | null;
+  created_at: string;
+  resolution_date: string | null;
+}
+
+interface GeoRow {
+  city?: string;
+  province?: string;
+  total_cases?: number;
+  active_cases?: number;
+  resolved_cases?: number;
+}
+
+interface SlaRow {
+  compliance_score?: number;
+  sla_definitions?: { priority_level?: string } | null;
+}
+
+interface SlaGroupStats {
+  compliant: number;
+  total: number;
+}
+
+interface UserStatsEntry {
+  name: string;
+  casesResolved: number;
+  leadsVerified: number;
+  totalActions: number;
+}
+
+interface OrgStatsEntry {
+  organization: string;
+  casesReferred: number;
+  collaborationScoreSum: number;
+  count: number;
+}
+
+interface ReportData {
+  kpis: { label: string; value: string | number; description: string }[];
+  caseMetrics?: {
+    total: number;
+    active: number;
+    resolved: number;
+    avgResolutionHours: number;
+  };
+  resolutionRates?: {
+    overall: number;
+    byPriority: { priority: string; rate: number }[];
+  };
+  staffProductivity?: {
+    name: string;
+    casesResolved: number;
+    leadsVerified: number;
+    performanceScore: number;
+  }[];
+  geographicData?: {
+    region: string;
+    totalCases: number;
+    activeCases: number;
+    resolvedCases: number;
+  }[];
+  partnerEngagement?: {
+    organization: string;
+    casesReferred: number;
+    collaborationScore: number;
+  }[];
+  slaCompliance?: {
+    totalCases: number;
+    compliantCases: number;
+    averageScore: number;
+    byPriority: { priority: string; compliant: number; total: number }[];
+  };
+}
 
 export async function GET(
   request: NextRequest,
@@ -55,7 +135,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error generating report download:", error);
+    logger.error("Error generating report download:", { error: error });
     return NextResponse.json(
       { error: "Failed to generate report" },
       { status: 500 }
@@ -64,12 +144,12 @@ export async function GET(
 }
 
 async function fetchReportData(
-  supabase: any,
+  supabase: SupabaseClient,
   reportType: string,
   dateFrom: string,
   dateTo: string
-) {
-  const data: any = {
+): Promise<ReportData> {
+  const data: ReportData = {
     kpis: [],
   };
 
@@ -82,20 +162,20 @@ async function fetchReportData(
 
   const allCases = cases || [];
   const totalCases = allCases.length;
-  const activeCases = allCases.filter((c: any) => c.status === "active").length;
+  const activeCases = allCases.filter((c: CaseRow) => c.status === "active").length;
   const resolvedCases = allCases.filter(
-    (c: any) => c.status === "resolved" || c.status === "closed"
+    (c: CaseRow) => c.status === "resolved" || c.status === "closed"
   ).length;
 
   // Calculate average resolution time
   const resolvedWithTime = allCases.filter(
-    (c: any) => c.resolution_date && c.created_at
+    (c: CaseRow) => c.resolution_date && c.created_at
   );
   let avgResolutionHours = 0;
   if (resolvedWithTime.length > 0) {
-    const totalHours = resolvedWithTime.reduce((sum: number, c: any) => {
+    const totalHours = resolvedWithTime.reduce((sum: number, c: CaseRow) => {
       const created = new Date(c.created_at);
-      const resolved = new Date(c.resolution_date);
+      const resolved = new Date(c.resolution_date!);
       return sum + (resolved.getTime() - created.getTime()) / (1000 * 60 * 60);
     }, 0);
     avgResolutionHours = totalHours / resolvedWithTime.length;
@@ -127,11 +207,11 @@ async function fetchReportData(
     case "comprehensive":
       // Resolution rates by priority
       const priorityDistribution = {
-        p0: allCases.filter((c: any) => c.priority_level === "p0_critical").length,
-        p1: allCases.filter((c: any) => c.priority_level === "p1_high").length,
-        p2: allCases.filter((c: any) => c.priority_level === "p2_medium").length,
-        p3: allCases.filter((c: any) => c.priority_level === "p3_low").length,
-        p4: allCases.filter((c: any) => c.priority_level === "p4_routine").length,
+        p0: allCases.filter((c: CaseRow) => c.priority_level === "p0_critical").length,
+        p1: allCases.filter((c: CaseRow) => c.priority_level === "p1_high").length,
+        p2: allCases.filter((c: CaseRow) => c.priority_level === "p2_medium").length,
+        p3: allCases.filter((c: CaseRow) => c.priority_level === "p3_low").length,
+        p4: allCases.filter((c: CaseRow) => c.priority_level === "p4_routine").length,
       };
 
       data.resolutionRates = {
@@ -158,7 +238,7 @@ async function fetchReportData(
 
       if (productivity && productivity.length > 0) {
         // Aggregate by user
-        const userStats = new Map<string, any>();
+        const userStats = new Map<string, UserStatsEntry>();
         for (const p of productivity) {
           const userId = p.user_id;
           const name = p.profiles
@@ -174,7 +254,7 @@ async function fetchReportData(
             });
           }
 
-          const stats = userStats.get(userId);
+          const stats = userStats.get(userId)!;
           stats.casesResolved += p.cases_resolved || 0;
           stats.leadsVerified += p.leads_verified || 0;
           stats.totalActions += p.total_actions || 0;
@@ -202,7 +282,7 @@ async function fetchReportData(
         .lte("metric_date", dateTo);
 
       if (geographic && geographic.length > 0) {
-        data.geographicData = geographic.map((g: any) => ({
+        data.geographicData = geographic.map((g: GeoRow) => ({
           region: g.city || g.province || "Unknown",
           totalCases: g.total_cases || 0,
           activeCases: g.active_cases || 0,
@@ -223,7 +303,7 @@ async function fetchReportData(
 
       if (partners && partners.length > 0) {
         // Aggregate by organization
-        const orgStats = new Map<string, any>();
+        const orgStats = new Map<string, OrgStatsEntry>();
         for (const p of partners) {
           const orgId = p.organization_id;
           const name = p.organizations?.name || "Unknown";
@@ -237,7 +317,7 @@ async function fetchReportData(
             });
           }
 
-          const stats = orgStats.get(orgId);
+          const stats = orgStats.get(orgId)!;
           stats.casesReferred += p.cases_referred || 0;
           stats.collaborationScoreSum += p.collaboration_score || 0;
           stats.count++;
@@ -261,13 +341,13 @@ async function fetchReportData(
 
       if (sla && sla.length > 0) {
         const totalSLACases = sla.length;
-        const compliantCases = sla.filter((s: any) => (s.compliance_score || 0) >= 80).length;
+        const compliantCases = sla.filter((s: SlaRow) => (s.compliance_score || 0) >= 80).length;
         const avgScore =
-          sla.reduce((sum: number, s: any) => sum + (s.compliance_score || 0), 0) /
+          sla.reduce((sum: number, s: SlaRow) => sum + (s.compliance_score || 0), 0) /
           totalSLACases;
 
         // Group by priority
-        const slaPriorityGroups = sla.reduce((acc: any, s: any) => {
+        const slaPriorityGroups = sla.reduce((acc: Record<string, SlaGroupStats>, s: SlaRow) => {
           const priority = s.sla_definitions?.priority_level || "unknown";
           if (!acc[priority]) {
             acc[priority] = { compliant: 0, total: 0 };
@@ -281,7 +361,7 @@ async function fetchReportData(
           totalCases: totalSLACases,
           compliantCases,
           averageScore: avgScore,
-          byPriority: Object.entries(slaPriorityGroups).map(([priority, stats]: [string, any]) => ({
+          byPriority: (Object.entries(slaPriorityGroups) as [string, SlaGroupStats][]).map(([priority, stats]) => ({
             priority: priority.toUpperCase(),
             compliant: stats.compliant,
             total: stats.total,
@@ -315,7 +395,7 @@ async function fetchReportData(
 
     // Process and add to data object (similar to above)
     if (productivityResult.data) {
-      const userStats = new Map<string, any>();
+      const userStats = new Map<string, UserStatsEntry>();
       for (const p of productivityResult.data) {
         const userId = p.user_id;
         const name = p.profiles
@@ -324,7 +404,7 @@ async function fetchReportData(
         if (!userStats.has(userId)) {
           userStats.set(userId, { name, casesResolved: 0, leadsVerified: 0, totalActions: 0 });
         }
-        const stats = userStats.get(userId);
+        const stats = userStats.get(userId)!;
         stats.casesResolved += p.cases_resolved || 0;
         stats.leadsVerified += p.leads_verified || 0;
         stats.totalActions += p.total_actions || 0;
@@ -341,7 +421,7 @@ async function fetchReportData(
     }
 
     if (geoResult.data) {
-      data.geographicData = geoResult.data.map((g: any) => ({
+      data.geographicData = geoResult.data.map((g: GeoRow) => ({
         region: g.city || g.province || "Unknown",
         totalCases: g.total_cases || 0,
         activeCases: g.active_cases || 0,
@@ -350,14 +430,14 @@ async function fetchReportData(
     }
 
     if (partnerResult.data) {
-      const orgStats = new Map<string, any>();
+      const orgStats = new Map<string, OrgStatsEntry>();
       for (const p of partnerResult.data) {
         const orgId = p.organization_id;
         const name = p.organizations?.name || "Unknown";
         if (!orgStats.has(orgId)) {
           orgStats.set(orgId, { organization: name, casesReferred: 0, collaborationScoreSum: 0, count: 0 });
         }
-        const stats = orgStats.get(orgId);
+        const stats = orgStats.get(orgId)!;
         stats.casesReferred += p.cases_referred || 0;
         stats.collaborationScoreSum += p.collaboration_score || 0;
         stats.count++;
@@ -372,10 +452,10 @@ async function fetchReportData(
     if (slaResult.data && slaResult.data.length > 0) {
       const sla = slaResult.data;
       const totalSLACases = sla.length;
-      const compliantCases = sla.filter((s: any) => (s.compliance_score || 0) >= 80).length;
+      const compliantCases = sla.filter((s: SlaRow) => (s.compliance_score || 0) >= 80).length;
       const avgScore =
-        sla.reduce((sum: number, s: any) => sum + (s.compliance_score || 0), 0) / totalSLACases;
-      const slaPriorityGroups = sla.reduce((acc: any, s: any) => {
+        sla.reduce((sum: number, s: SlaRow) => sum + (s.compliance_score || 0), 0) / totalSLACases;
+      const slaPriorityGroups = sla.reduce((acc: Record<string, SlaGroupStats>, s: SlaRow) => {
         const priority = s.sla_definitions?.priority_level || "unknown";
         if (!acc[priority]) acc[priority] = { compliant: 0, total: 0 };
         acc[priority].total++;
@@ -386,7 +466,7 @@ async function fetchReportData(
         totalCases: totalSLACases,
         compliantCases,
         averageScore: avgScore,
-        byPriority: Object.entries(slaPriorityGroups).map(([priority, stats]: [string, any]) => ({
+        byPriority: (Object.entries(slaPriorityGroups) as [string, SlaGroupStats][]).map(([priority, stats]) => ({
           priority: priority.toUpperCase(),
           compliant: stats.compliant,
           total: stats.total,

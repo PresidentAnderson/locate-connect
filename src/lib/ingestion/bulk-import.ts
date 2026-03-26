@@ -4,6 +4,7 @@
  */
 
 import { ingestionEngine, type DataSource, type DataSchema, type IngestionJob } from "./data-ingestion-engine";
+import { logger } from "../logger";
 
 // Supported file formats
 export type ImportFormat = "csv" | "json" | "xlsx" | "xml";
@@ -439,14 +440,14 @@ export class BulkImportService {
       // Get the first worksheet (xl/worksheets/sheet1.xml)
       const sheetXml = files["xl/worksheets/sheet1.xml"];
       if (!sheetXml) {
-        console.warn("[BulkImport] No worksheet found in XLSX file");
+        logger.warn("[BulkImport] No worksheet found in XLSX file");
         return [];
       }
 
       // Parse the worksheet
       return this.parseWorksheet(sheetXml, sharedStrings);
     } catch (error) {
-      console.error("[BulkImport] XLSX parsing error:", error);
+      logger.error("[BulkImport] XLSX parsing error:", { error: error });
       return [];
     }
   }
@@ -499,7 +500,7 @@ export class BulkImportService {
           files[filename] = new TextDecoder().decode(decompressed);
         } catch {
           // Skip files we can't decompress
-          console.warn(`[BulkImport] Could not decompress ${filename}`);
+          logger.warn(`[BulkImport] Could not decompress ${filename}`);
         }
       }
 
@@ -550,7 +551,7 @@ export class BulkImportService {
       } else {
         // For compressed blocks, we need a full inflate implementation
         // For now, return what we have or throw
-        console.warn("[BulkImport] Compressed XLSX block - limited support");
+        logger.warn("[BulkImport] Compressed XLSX block - limited support");
         break;
       }
 
@@ -662,7 +663,7 @@ export class BulkImportService {
     // Find the root element and its children
     const rootMatch = cleanedContent.match(/<(\w+)[^>]*>([\s\S]*)<\/\1>/);
     if (!rootMatch) {
-      console.warn("[BulkImport] Could not find root XML element");
+      logger.warn("[BulkImport] Could not find root XML element");
       return [];
     }
 

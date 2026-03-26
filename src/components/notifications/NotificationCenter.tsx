@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRealtime } from "@/hooks/useRealtime";
+import { logger } from "../../lib/logger";
 
 // Notification types based on issue requirements
 type NotificationPriority = "low" | "normal" | "high" | "critical";
@@ -190,7 +191,7 @@ export function NotificationCenter({ userId, enableRealtime = true }: Notificati
         setGroups(data.groups || []);
       }
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      logger.error("Failed to fetch notifications:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -256,7 +257,7 @@ export function NotificationCenter({ userId, enableRealtime = true }: Notificati
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       );
     } catch (error) {
-      console.error("Failed to mark as read:", error);
+      logger.error("Failed to mark as read:", { error: error });
     }
   };
 
@@ -266,7 +267,7 @@ export function NotificationCenter({ userId, enableRealtime = true }: Notificati
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setGroups((prev) => prev.map((g) => ({ ...g, read: true })));
     } catch (error) {
-      console.error("Failed to mark all as read:", error);
+      logger.error("Failed to mark all as read:", { error: error });
     }
   };
 
@@ -277,7 +278,7 @@ export function NotificationCenter({ userId, enableRealtime = true }: Notificati
         prev.map((n) => (n.id === notificationId ? { ...n, dismissed: true } : n))
       );
     } catch (error) {
-      console.error("Failed to dismiss:", error);
+      logger.error("Failed to dismiss:", { error: error });
     }
   };
 

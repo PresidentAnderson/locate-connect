@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       .eq("endpoint", endpoint);
 
     if (updateError) {
-      console.error("Error deactivating subscription:", updateError);
+      logger.error("Error deactivating subscription:", { error: updateError });
       return NextResponse.json(
         { error: "Failed to unsubscribe" },
         { status: 500 }
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       message: "Unsubscribed successfully",
     });
   } catch (error) {
-    console.error("Push unsubscribe error:", error);
+    logger.error("Push unsubscribe error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

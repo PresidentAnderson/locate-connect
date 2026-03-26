@@ -4,6 +4,7 @@ import {
   mapTipsterProfileFromDb,
   type TipsterReliabilityTier,
 } from '@/types/tip-verification.types';
+import { sanitizeSearchInput } from '@/lib/api/sanitize';
 
 /**
  * GET /api/tips/verification/tipsters
@@ -61,7 +62,8 @@ export async function GET(request: NextRequest) {
     query = query.lte('reliability_score', parseInt(maxScore, 10));
   }
   if (search) {
-    query = query.or(`email.ilike.%${search}%,phone.ilike.%${search}%`);
+    const s = sanitizeSearchInput(search);
+    query = query.or(`email.ilike.%${s}%,phone.ilike.%${s}%`);
   }
 
   // Apply sorting

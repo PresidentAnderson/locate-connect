@@ -13,6 +13,7 @@ import type {
   REWARD_STATUS_COLORS,
   CLAIM_STATUS_COLORS,
 } from "@/types/reward.types";
+import { logger } from "../../lib/logger";
 
 interface RewardManagementProps {
   caseId?: string;
@@ -40,7 +41,7 @@ export function RewardManagement({ caseId, initialData }: RewardManagementProps)
         setData(dashboardData);
       }
     } catch (error) {
-      console.error("Failed to fetch reward data:", error);
+      logger.error("Failed to fetch reward data:", { error: error });
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { PartnerOrganizationUpdate } from '@/types';
+import { logger } from "../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return NextResponse.json({ error: 'Partner not found' }, { status: 404 });
     }
-    console.error('Partner fetch error:', error);
+    logger.error('Partner fetch error:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -141,7 +142,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (updateError) {
-    console.error('Partner update error:', updateError);
+    logger.error('Partner update error:', { error: updateError });
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
@@ -183,7 +184,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     .eq('id', id);
 
   if (deleteError) {
-    console.error('Partner delete error:', deleteError);
+    logger.error('Partner delete error:', { error: deleteError });
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 

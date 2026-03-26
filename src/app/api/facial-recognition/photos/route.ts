@@ -10,6 +10,7 @@ import {
   PhotoQualityGrade,
   PhotoQualityFactors,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/photos
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching photo submissions:', error);
+    logger.error('Error fetching photo submissions:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      logger.error('Upload error:', { error: uploadError });
       return NextResponse.json(
         { error: 'Failed to upload file' },
         { status: 500 }
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', { error: dbError });
       // Clean up uploaded file
       await supabase.storage.from('facial-recognition-photos').remove([uploadData.path]);
       return NextResponse.json({ error: dbError.message }, { status: 500 });
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Photo upload error:', error);
+    logger.error('Photo upload error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -465,7 +466,7 @@ async function analyzeWithAzureFace(
     );
 
     if (!response.ok) {
-      console.error('[PhotoQuality] Azure Face API error:', await response.text());
+      logger.error('[PhotoQuality] Azure Face API error:', { error: await response.text() });
       return null;
     }
 
@@ -515,7 +516,7 @@ async function analyzeWithAzureFace(
       angle: Math.max(0, Math.min(100, angleScore)),
     };
   } catch (error) {
-    console.error('[PhotoQuality] Azure Face API error:', error);
+    logger.error('[PhotoQuality] Azure Face API error:', { error: error });
     return null;
   }
 }
@@ -585,7 +586,7 @@ async function analyzeWithRekognition(
     });
 
     if (!response.ok) {
-      console.error('[PhotoQuality] Rekognition error:', await response.text());
+      logger.error('[PhotoQuality] Rekognition error:', { error: await response.text() });
       return null;
     }
 
@@ -629,7 +630,7 @@ async function analyzeWithRekognition(
       angle,
     };
   } catch (error) {
-    console.error('[PhotoQuality] Rekognition error:', error);
+    logger.error('[PhotoQuality] Rekognition error:', { error: error });
     return null;
   }
 }

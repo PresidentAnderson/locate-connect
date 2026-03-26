@@ -8,6 +8,7 @@ import type {
   KPI,
   TrendDirection,
 } from "@/types/analytics.types";
+import { logger } from "../../../lib/logger";
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
   { value: "24h", label: "Last 24 Hours" },
@@ -38,7 +39,7 @@ export default function AnalyticsDashboardPage() {
       const result: AnalyticsExecutiveDashboardData = await response.json();
       setData(result);
     } catch (err) {
-      console.error("Error fetching analytics:", err);
+      logger.error("Error fetching analytics:", { error: err });
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
@@ -75,6 +76,7 @@ export default function AnalyticsDashboardPage() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+            aria-label="Select time range"
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-cyan-500 focus:border-cyan-500"
           >
             {TIME_RANGE_OPTIONS.map((option) => (

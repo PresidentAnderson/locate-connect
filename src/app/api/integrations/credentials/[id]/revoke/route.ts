@@ -11,7 +11,9 @@ import {
 import {
   getCredentialsVault,
   type AccessControlContext,
+  type Role,
 } from '@/lib/integrations/credentials-vault';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const context: AccessControlContext = {
       userId: user.id,
-      userRole: profile.role as any,
+      userRole: profile.role as Role,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
       userAgent: request.headers.get('user-agent') || undefined,
     };
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       throw error;
     }
   } catch (error) {
-    console.error('Credential revoke error:', error);
+    logger.error('Credential revoke error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

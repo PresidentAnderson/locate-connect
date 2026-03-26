@@ -16,6 +16,7 @@ import {
   apiNoContent,
 } from '@/lib/api/response';
 import type { UpdateCampaignRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -82,7 +83,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return apiNotFound('Campaign not found');
     }
-    console.error('Error fetching campaign:', error);
+    logger.error('Error fetching campaign:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -146,7 +147,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error approving campaign:', error);
+      logger.error('Error approving campaign:', { error: error });
       return apiServerError(error.message);
     }
 
@@ -169,7 +170,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error launching campaign:', error);
+      logger.error('Error launching campaign:', { error: error });
       return apiServerError(error.message);
     }
 
@@ -202,7 +203,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error completing campaign:', error);
+      logger.error('Error completing campaign:', { error: error });
       return apiServerError(error.message);
     }
 
@@ -224,7 +225,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error cancelling campaign:', error);
+      logger.error('Error cancelling campaign:', { error: error });
       return apiServerError(error.message);
     }
 
@@ -283,7 +284,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     .single();
 
   if (error) {
-    console.error('Error updating campaign:', error);
+    logger.error('Error updating campaign:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -332,7 +333,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting campaign:', error);
+    logger.error('Error deleting campaign:', { error: error });
     return apiServerError(error.message);
   }
 

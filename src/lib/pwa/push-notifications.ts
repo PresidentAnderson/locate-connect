@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 /**
  * Push Notification utilities
  * LC-FEAT-031: Mobile App Companion
@@ -56,13 +57,13 @@ export async function subscribeToPush(
   vapidPublicKey: string
 ): Promise<PushSubscriptionData | null> {
   if (!isPushSupported()) {
-    console.warn('Push notifications are not supported');
+    logger.warn('Push notifications are not supported');
     return null;
   }
 
   const permission = await requestNotificationPermission();
   if (permission !== 'granted') {
-    console.warn('Notification permission denied');
+    logger.warn('Notification permission denied');
     return null;
   }
 
@@ -80,7 +81,7 @@ export async function subscribeToPush(
     const subscriptionData = formatSubscriptionData(subscription);
     return subscriptionData;
   } catch (error) {
-    console.error('Failed to subscribe to push:', error);
+    logger.error('Failed to subscribe to push:', { error: error });
     return null;
   }
 }
@@ -103,7 +104,7 @@ export async function getCurrentSubscription(): Promise<PushSubscriptionData | n
 
     return formatSubscriptionData(subscription);
   } catch (error) {
-    console.error('Failed to get subscription:', error);
+    logger.error('Failed to get subscription:', { error: error });
     return null;
   }
 }
@@ -125,7 +126,7 @@ export async function unsubscribeFromPush(): Promise<boolean> {
     }
     return true;
   } catch (error) {
-    console.error('Failed to unsubscribe:', error);
+    logger.error('Failed to unsubscribe:', { error: error });
     return false;
   }
 }
@@ -178,7 +179,7 @@ export async function saveSubscriptionToServer(
 
     return response.ok;
   } catch (error) {
-    console.error('Failed to save subscription to server:', error);
+    logger.error('Failed to save subscription to server:', { error: error });
     return false;
   }
 }
@@ -200,7 +201,7 @@ export async function removeSubscriptionFromServer(
 
     return response.ok;
   } catch (error) {
-    console.error('Failed to remove subscription from server:', error);
+    logger.error('Failed to remove subscription from server:', { error: error });
     return false;
   }
 }

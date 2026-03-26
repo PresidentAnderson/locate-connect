@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { mapUserSessionFromDb } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/audit/sessions
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching sessions:', error);
+    logger.error('Error fetching sessions:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating session:', error);
+    logger.error('Error creating session:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

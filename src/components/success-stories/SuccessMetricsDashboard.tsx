@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import type { SuccessMetrics, StoryDashboardStats } from "@/types/success-story.types";
+import { logger } from "../../lib/logger";
 
 interface SuccessMetricsDashboardProps {
   initialMetrics?: SuccessMetrics[];
@@ -34,7 +35,7 @@ export function SuccessMetricsDashboard({
       const data = await response.json();
       setMetrics(data.metrics || []);
     } catch (error) {
-      console.error("Error fetching metrics:", error);
+      logger.error("Error fetching metrics:", { error: error });
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +54,7 @@ export function SuccessMetricsDashboard({
         fetchMetrics();
       }
     } catch (error) {
-      console.error("Error calculating metrics:", error);
+      logger.error("Error calculating metrics:", { error: error });
     } finally {
       setIsCalculating(false);
     }

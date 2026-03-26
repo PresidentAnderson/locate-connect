@@ -12,6 +12,7 @@ import type {
   StoryStatus,
   StoryVisibility,
 } from '@/types/success-story.types';
+import { logger } from "../../../lib/logger";
 
 /**
  * GET /api/success-stories
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching success stories:', error);
+    logger.error('Error fetching success stories:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (createError) {
-    console.error('Error creating success story:', createError);
+    logger.error('Error creating success story:', { error: createError });
     return NextResponse.json({ error: createError.message }, { status: 500 });
   }
 

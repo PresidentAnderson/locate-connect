@@ -13,6 +13,7 @@ import type {
   FAMILY_SUPPORT_CATEGORY_LABELS,
   CHECK_IN_FREQUENCY_LABELS,
 } from "@/types/family-liaison.types";
+import { logger } from "../../lib/logger";
 
 interface FamilyLiaisonDashboardProps {
   caseId: string;
@@ -41,7 +42,7 @@ export function FamilyLiaisonDashboard({
         setData(dashboardData);
       }
     } catch (error) {
-      console.error("Failed to fetch family support data:", error);
+      logger.error("Failed to fetch family support data:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -492,7 +493,7 @@ function MessagesTab({
       const normalized = normalizeMessages(payload.data || []);
       setMessageList(normalized);
     } catch (err) {
-      console.error("Failed to fetch messages:", err);
+      logger.error("Failed to fetch messages:", { error: err });
       setError("Failed to load messages.");
     } finally {
       setLoading(false);
@@ -552,7 +553,7 @@ function MessagesTab({
         prev.map((item) => (item.id === message.id ? { ...item, isRead: true } : item))
       );
     } catch (err) {
-      console.error("Failed to mark message as read:", err);
+      logger.error("Failed to mark message as read:", { error: err });
     }
   };
 
@@ -596,7 +597,7 @@ function MessagesTab({
       setSelectedMessage(newMessage);
       return true;
     } catch (err) {
-      console.error("Failed to send message:", err);
+      logger.error("Failed to send message:", { error: err });
       setError("Failed to send message.");
       return false;
     }

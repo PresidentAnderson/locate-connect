@@ -12,6 +12,7 @@ import type {
   ResolvedRouteMapping,
   IntegrationCallResult,
 } from '@/types';
+import { logger } from "../../logger";
 
 export interface RouteExecutionRequest {
   method: string;
@@ -560,7 +561,7 @@ async function updateMappingMetrics(
       p_error: result.error || null,
     });
   } catch (error) {
-    console.error('Failed to update mapping metrics:', error);
+    logger.error('Failed to update mapping metrics:', { error: error });
   }
 }
 
@@ -592,6 +593,6 @@ async function logExecution(
       error_message: result.errors?.join('; ') || null,
     });
   } catch (error) {
-    console.error('Failed to log route execution:', error);
+    logger.error('Failed to log route execution:', { error: error });
   }
 }

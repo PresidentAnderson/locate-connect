@@ -11,6 +11,7 @@ import {
   RemediationStatus,
   mapComplianceViolationFromDb,
 } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 interface CreateViolationInput {
   violationCode?: string;
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching compliance violations:', error);
+    logger.error('Error fetching compliance violations:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating compliance violation:', error);
+    logger.error('Error creating compliance violation:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -237,7 +238,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error updating compliance violation:', error);
+    logger.error('Error updating compliance violation:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

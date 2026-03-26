@@ -12,6 +12,7 @@ import {
   AuditActionType,
   AUDIT_ACTION_LABELS,
 } from '@/types/audit.types';
+import { logger } from "../../lib/logger";
 
 interface AuditLogFilters {
   userId?: string;
@@ -53,7 +54,7 @@ export function AuditLogViewer() {
         setTotal(data.meta?.total || 0);
       }
     } catch (error) {
-      console.error('Error loading audit logs:', error);
+      logger.error('Error loading audit logs:', { error: error });
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,7 @@ export function AuditLogViewer() {
         window.URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Error exporting logs:', error);
+      logger.error('Error exporting logs:', { error: error });
     }
   };
 

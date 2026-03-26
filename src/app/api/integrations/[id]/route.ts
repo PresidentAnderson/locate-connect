@@ -9,6 +9,7 @@ import {
   apiNotFound,
   apiNoContent,
 } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 interface UpdateIntegrationInput {
   name?: string;
@@ -72,7 +73,7 @@ export async function GET(
 
     return apiSuccess(integration);
   } catch (error) {
-    console.error('Integration API error:', error);
+    logger.error('Integration API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -171,13 +172,13 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Integration update error:', error);
+      logger.error('Integration update error:', { error: error });
       return apiServerError('Failed to update integration');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Integration API error:', error);
+    logger.error('Integration API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -235,13 +236,13 @@ export async function DELETE(
       .eq('id', id);
 
     if (error) {
-      console.error('Integration deletion error:', error);
+      logger.error('Integration deletion error:', { error: error });
       return apiServerError('Failed to delete integration');
     }
 
     return apiNoContent();
   } catch (error) {
-    console.error('Integration API error:', error);
+    logger.error('Integration API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

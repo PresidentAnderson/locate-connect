@@ -8,6 +8,7 @@ import {
   apiForbidden,
   apiBadRequest,
 } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/integrations/routes
@@ -79,7 +80,7 @@ export async function GET(request: NextRequest) {
     const { data: routes, error } = await query;
 
     if (error) {
-      console.error('Error fetching routes:', error);
+      logger.error('Error fetching routes:', { error: error });
       return apiServerError('Failed to fetch routes');
     }
 
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
       total: routes?.length || 0,
     });
   } catch (error) {
-    console.error('Route listing error:', error);
+    logger.error('Route listing error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -210,7 +211,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error creating route:', error);
+      logger.error('Error creating route:', { error: error });
       return apiServerError('Failed to create route');
     }
 
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Route creation error:', error);
+    logger.error('Route creation error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

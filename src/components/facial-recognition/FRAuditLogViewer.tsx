@@ -7,6 +7,7 @@ import type {
   FRAuditAction,
   FRAuditCategory,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../lib/logger";
 
 interface FRAuditLogViewerProps {
   caseId?: string;
@@ -96,7 +97,7 @@ export function FRAuditLogViewer({
       setLogs(data.data);
       setTotal(data.meta.total);
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
+      logger.error('Error fetching audit logs:', { error: error });
     } finally {
       setLoading(false);
     }

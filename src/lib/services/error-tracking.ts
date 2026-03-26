@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 /**
  * Error Tracking Service
  * Provides centralized error reporting and tracking functionality.
@@ -64,7 +65,7 @@ class ErrorTrackingService {
       );
     });
 
-    console.log("[ErrorTracking] Initialized");
+    logger.debug("[ErrorTracking] Initialized");
   }
 
   addBreadcrumb(type: string, message: string) {
@@ -168,8 +169,8 @@ class ErrorTrackingService {
       // In development, just log
       errors.forEach((error) => {
         console.group(`[ErrorTracking] ${error.severity.toUpperCase()}`);
-        console.error(error.message);
-        if (error.stack) console.error(error.stack);
+        logger.error("log", { data: error.message });
+        if (error.stack) logger.error("log", { data: error.stack });
         console.groupEnd();
       });
     }

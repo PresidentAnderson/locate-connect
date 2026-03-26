@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/training/badges
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
     const { data: badges, error: badgesError } = await badgesQuery;
 
     if (badgesError) {
-      console.error("Error fetching badges:", badgesError);
+      logger.error("Error fetching badges:", { error: badgesError });
       return NextResponse.json({ error: badgesError.message }, { status: 500 });
     }
 
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id);
 
     if (userBadgesError) {
-      console.error("Error fetching user badges:", userBadgesError);
+      logger.error("Error fetching user badges:", { error: userBadgesError });
       return NextResponse.json(
         { error: userBadgesError.message },
         { status: 500 }
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: badgesWithEarned });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -145,13 +146,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating badge:", error);
+      logger.error("Error creating badge:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

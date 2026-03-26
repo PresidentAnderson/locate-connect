@@ -17,6 +17,7 @@ import type {
   DistributeAmberAlertRequest,
   DistributeAmberAlertResponse,
 } from '@/types';
+import { logger } from "../../logger";
 
 // =============================================================================
 // Distribution Service
@@ -180,7 +181,7 @@ export class AmberDistributionService {
         .select();
 
       if (error) {
-        console.error(`Error creating ${channel} distributions:`, error);
+        logger.error(`Error creating ${channel} distributions:`, { error: error });
         return [];
       }
 
@@ -351,7 +352,7 @@ export class AmberDistributionService {
         await this.processDistribution(distribution as AmberDistribution & { amber_alert: AmberAlert });
         processed++;
       } catch (err) {
-        console.error(`Error processing distribution ${distribution.id}:`, err);
+        logger.error(`Error processing distribution ${distribution.id}:`, { error: err });
       }
     }
 
@@ -478,7 +479,7 @@ export class AmberDistributionService {
     const alert = distribution.amber_alert;
     const provinces = (distribution.channel_config as { provinces?: string[] })?.provinces || [];
 
-    console.log(`[EMAIL] Sending AMBER Alert ${alert.alert_number} to email subscribers`);
+    logger.debug(`[EMAIL] Sending AMBER Alert ${alert.alert_number} to email subscribers`);
 
     // Get email subscribers for the target provinces
     let query = supabase
@@ -494,7 +495,7 @@ export class AmberDistributionService {
     const { data: subscribers, error } = await query;
 
     if (error || !subscribers?.length) {
-      console.log(`[EMAIL] No email subscribers found for AMBER Alert ${alert.alert_number}`);
+      logger.debug(`[EMAIL] No email subscribers found for AMBER Alert ${alert.alert_number}`);
       return;
     }
 
@@ -525,7 +526,7 @@ export class AmberDistributionService {
       throw new Error(`Email distribution failed: ${result.errors?.join(', ')}`);
     }
 
-    console.log(`[EMAIL] Sent AMBER Alert to ${result.sent} subscribers`);
+    logger.debug(`[EMAIL] Sent AMBER Alert to ${result.sent} subscribers`);
   }
 
   /**
@@ -537,7 +538,7 @@ export class AmberDistributionService {
     const alert = distribution.amber_alert;
     const provinces = (distribution.channel_config as { provinces?: string[] })?.provinces || [];
 
-    console.log(`[PUSH] Sending AMBER Alert ${alert.alert_number} via push notification`);
+    logger.debug(`[PUSH] Sending AMBER Alert ${alert.alert_number} via push notification`);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://locateconnect.ca';
     const alertUrl = `${appUrl}/amber-alerts/${alert.id}`;
@@ -553,7 +554,7 @@ export class AmberDistributionService {
       alertUrl,
     });
 
-    console.log(`[PUSH] Sent AMBER Alert to ${result.sent} devices, ${result.failed} failed, ${result.expired} expired`);
+    logger.debug(`[PUSH] Sent AMBER Alert to ${result.sent} devices, ${result.failed} failed, ${result.expired} expired`);
 
     if (result.sent === 0 && result.failed > 0) {
       throw new Error(`Push notification distribution failed: ${result.errors?.join(', ')}`);
@@ -572,7 +573,7 @@ export class AmberDistributionService {
       throw new Error('Social media account ID not specified');
     }
 
-    console.log(`[SOCIAL] Posting AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
+    logger.debug(`[SOCIAL] Posting AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://locateconnect.ca';
     const alertUrl = `${appUrl}/amber-alerts/${alert.id}`;
@@ -612,7 +613,7 @@ export class AmberDistributionService {
       throw new Error(`Social media post failed: ${result.error}`);
     }
 
-    console.log(`[SOCIAL] Posted AMBER Alert to ${distribution.target_name}, post ID: ${result.postId}`);
+    logger.debug(`[SOCIAL] Posted AMBER Alert to ${distribution.target_name}, post ID: ${result.postId}`);
   }
 
   /**
@@ -627,7 +628,7 @@ export class AmberDistributionService {
       throw new Error('Media contact email not specified');
     }
 
-    console.log(`[MEDIA] Sending AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
+    logger.debug(`[MEDIA] Sending AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://locateconnect.ca';
     const alertUrl = `${appUrl}/amber-alerts/${alert.id}`;
@@ -746,7 +747,7 @@ This AMBER Alert was distributed via LocateConnect.
       throw new Error(`Media alert failed: ${result.error}`);
     }
 
-    console.log(`[MEDIA] Sent AMBER Alert to ${distribution.target_name}`);
+    logger.debug(`[MEDIA] Sent AMBER Alert to ${distribution.target_name}`);
   }
 
   /**
@@ -759,7 +760,7 @@ This AMBER Alert was distributed via LocateConnect.
     const alert = distribution.amber_alert;
     const provinces = (distribution.channel_config as { provinces?: string[] })?.provinces || [];
 
-    console.log(`[SMS] Sending AMBER Alert ${alert.alert_number} via SMS`);
+    logger.debug(`[SMS] Sending AMBER Alert ${alert.alert_number} via SMS`);
 
     // Get SMS subscribers for the target provinces
     let query = supabase
@@ -775,7 +776,7 @@ This AMBER Alert was distributed via LocateConnect.
     const { data: subscribers, error } = await query;
 
     if (error || !subscribers?.length) {
-      console.log(`[SMS] No SMS subscribers found for AMBER Alert ${alert.alert_number}`);
+      logger.debug(`[SMS] No SMS subscribers found for AMBER Alert ${alert.alert_number}`);
       return;
     }
 
@@ -792,7 +793,7 @@ This AMBER Alert was distributed via LocateConnect.
       alertUrl,
     });
 
-    console.log(`[SMS] Sent AMBER Alert to ${result.sent} recipients, ${result.failed} failed`);
+    logger.debug(`[SMS] Sent AMBER Alert to ${result.sent} recipients, ${result.failed} failed`);
 
     if (result.sent === 0 && result.failed > 0) {
       throw new Error(`SMS distribution failed: ${result.errors?.join(', ')}`);
@@ -838,7 +839,7 @@ This AMBER Alert was distributed via LocateConnect.
       .limit(1)
       .single();
 
-    console.log(`[WEBHOOK] Sending AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
+    logger.debug(`[WEBHOOK] Sending AMBER Alert ${alert.alert_number} to ${distribution.target_name}`);
 
     // Build the webhook payload
     const payload = {
@@ -927,7 +928,7 @@ This AMBER Alert was distributed via LocateConnect.
         throw new Error(`Webhook returned ${response.status}: ${errorText.substring(0, 200)}`);
       }
 
-      console.log(`[WEBHOOK] Successfully sent AMBER Alert to ${distribution.target_name}`);
+      logger.debug(`[WEBHOOK] Successfully sent AMBER Alert to ${distribution.target_name}`);
 
       // Log the webhook delivery
       await supabase.from('webhook_deliveries').insert({

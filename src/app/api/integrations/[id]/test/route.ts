@@ -7,6 +7,7 @@ import {
   apiNotFound,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * POST /api/integrations/[id]/test
@@ -203,7 +204,7 @@ export async function POST(
       testedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Test connection API error:', error);
+    logger.error('Test connection API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

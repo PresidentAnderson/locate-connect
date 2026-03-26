@@ -7,6 +7,7 @@ import {
   apiForbidden,
   apiNotFound,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Template fetch error:', error);
+    logger.error('Template fetch error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -147,7 +148,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error updating template:', error);
+      logger.error('Error updating template:', { error: error });
       return apiServerError('Failed to update template');
     }
 
@@ -166,7 +167,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Template update error:', error);
+    logger.error('Template update error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -221,13 +222,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting template:', error);
+      logger.error('Error deleting template:', { error: error });
       return apiServerError('Failed to delete template');
     }
 
     return apiSuccess({ message: `Template "${existing.name}" deleted successfully` });
   } catch (error) {
-    console.error('Template deletion error:', error);
+    logger.error('Template deletion error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

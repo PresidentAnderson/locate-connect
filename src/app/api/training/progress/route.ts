@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/training/progress
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     const { data: trackProgress, error: trackError } = await trackProgressQuery;
 
     if (trackError) {
-      console.error("Error fetching track progress:", trackError);
+      logger.error("Error fetching track progress:", { error: trackError });
       return NextResponse.json({ error: trackError.message }, { status: 500 });
     }
 
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
       .order("last_activity_at", { ascending: false });
 
     if (moduleError) {
-      console.error("Error fetching module progress:", moduleError);
+      logger.error("Error fetching module progress:", { error: moduleError });
       return NextResponse.json({ error: moduleError.message }, { status: 500 });
     }
 
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
       .order("completed_at", { ascending: false });
 
     if (lessonError) {
-      console.error("Error fetching lesson progress:", lessonError);
+      logger.error("Error fetching lesson progress:", { error: lessonError });
       return NextResponse.json({ error: lessonError.message }, { status: 500 });
     }
 
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error updating lesson progress:", error);
+      logger.error("Error updating lesson progress:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -204,7 +205,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

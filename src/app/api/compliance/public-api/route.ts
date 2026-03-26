@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publicAPIService } from "@/lib/services/public-api-service";
 import type { PublicAPIRequest } from "@/types/compliance.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Public API error:", error);
+    logger.error("[API] Public API error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -158,7 +159,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Public API error:", error);
+    logger.error("[API] Public API error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

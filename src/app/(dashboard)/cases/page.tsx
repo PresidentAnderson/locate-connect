@@ -5,7 +5,7 @@ export default function CasesDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Cases</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -14,7 +14,7 @@ export default function CasesDashboard() {
         </div>
         <Link
           href="/cases/new"
-          className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+          className="inline-flex items-center justify-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
         >
           + Report Missing Person
         </Link>
@@ -41,30 +41,30 @@ export default function CasesDashboard() {
       </div>
 
       {/* Active Case Card */}
-      <div className="rounded-xl border-2 border-cyan-200 bg-cyan-50 p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-4">
-            <div className="h-20 w-20 rounded-lg bg-gray-300" />
+      <div className="rounded-xl border-2 border-cyan-200 bg-cyan-50 p-4 sm:p-6" role="article" aria-label="Active case: Jamel D.">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="h-20 w-20 shrink-0 rounded-lg bg-gray-300" role="img" aria-label="Photo placeholder for Jamel D." />
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-xl font-bold text-gray-900">Jamel D.</h2>
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700" role="status">
                   PRIORITY 0
                 </span>
               </div>
               <p className="text-sm text-gray-600">Case #LC-2024-0089</p>
-              <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                 <span>Age: 34</span>
-                <span>•</span>
+                <span aria-hidden="true" className="hidden sm:inline">&#183;</span>
                 <span>Last seen: Montreal, QC</span>
-                <span>•</span>
+                <span aria-hidden="true" className="hidden sm:inline">&#183;</span>
                 <span className="font-medium text-red-600">Missing 48+ hours</span>
               </div>
             </div>
           </div>
           <Link
             href="/cases/LC-2024-0089"
-            className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700"
+            className="inline-flex items-center justify-center rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 shrink-0"
           >
             View Details
           </Link>
@@ -112,7 +112,7 @@ export default function CasesDashboard() {
               status="verified"
             />
           </div>
-          <button className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+          <button className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2">
             View All Leads
           </button>
         </div>

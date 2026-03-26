@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { phase2GatingService } from "@/lib/services/phase2-gating-service";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Phase 2 error:", error);
+    logger.error("[API] Phase 2 error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -148,7 +149,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Phase 2 error:", error);
+    logger.error("[API] Phase 2 error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

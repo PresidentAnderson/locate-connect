@@ -3,7 +3,20 @@ import { createClient } from "@/lib/supabase/server";
 import type {
   UpdateOutcomeReportRequest,
   CaseOutcomeReportWithRelations,
+  OutcomeReportDbRow,
+  RecommendationDbRow,
+  SimilarCaseDbRow,
+  LeadEffectivenessDbRow,
+  TimelineMilestoneDbRow,
+  OutcomeReportStatus,
+  DiscoveryMethod,
+  FoundByType,
+  RecommendationCategory,
+  RecommendationPriority,
+  LeadEffectivenessRating,
+  MilestoneType,
 } from "@/types/outcome-report.types";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/outcome-reports/[id]
@@ -115,7 +128,7 @@ export async function GET(
 
     return NextResponse.json(formatOutcomeReport(report));
   } catch (error) {
-    console.error("Error fetching outcome report:", error);
+    logger.error("Error fetching outcome report:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch outcome report" },
       { status: 500 }
@@ -161,7 +174,7 @@ export async function PATCH(
     }
 
     // Prepare update data
-    const updateData: Record<string, any> = {};
+    const updateData: Record<string, unknown> = {};
 
     if (body.status !== undefined) updateData.status = body.status;
     if (body.discoveryMethod !== undefined) updateData.discovery_method = body.discoveryMethod;
@@ -218,7 +231,7 @@ export async function PATCH(
 
     return NextResponse.json(formatOutcomeReport(updatedReport));
   } catch (error) {
-    console.error("Error updating outcome report:", error);
+    logger.error("Error updating outcome report:", { error: error });
     return NextResponse.json(
       { error: "Failed to update outcome report" },
       { status: 500 }
@@ -271,7 +284,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "Report archived" });
   } catch (error) {
-    console.error("Error deleting outcome report:", error);
+    logger.error("Error deleting outcome report:", { error: error });
     return NextResponse.json(
       { error: "Failed to delete outcome report" },
       { status: 500 }
@@ -280,18 +293,18 @@ export async function DELETE(
 }
 
 // Helper function to format outcome report
-function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
+function formatOutcomeReport(data: OutcomeReportDbRow): CaseOutcomeReportWithRelations {
   return {
     id: data.id,
     caseId: data.case_id,
     reportNumber: data.report_number,
-    status: data.status,
+    status: data.status as OutcomeReportStatus,
     version: data.version,
     totalDurationHours: parseFloat(data.total_duration_hours) || 0,
     initialPriorityLevel: data.initial_priority_level,
     finalPriorityLevel: data.final_priority_level,
     priorityChanges: data.priority_changes || 0,
-    discoveryMethod: data.discovery_method,
+    discoveryMethod: data.discovery_method as DiscoveryMethod | undefined,
     discoveryMethodOther: data.discovery_method_other,
     locationFound: data.location_found,
     locationFoundCity: data.location_found_city,
@@ -303,7 +316,7 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       : undefined,
     conditionAtResolution: data.condition_at_resolution,
     conditionNotes: data.condition_notes,
-    foundByType: data.found_by_type,
+    foundByType: data.found_by_type as FoundByType | undefined,
     foundByOrganizationId: data.found_by_organization_id,
     foundByUserId: data.found_by_user_id,
     foundByName: data.found_by_name,
@@ -378,11 +391,11 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
           resolutionDate: data.case.resolution_date,
         }
       : undefined,
-    recommendations: (data.recommendations || []).map((rec: any) => ({
+    recommendations: (data.recommendations || []).map((rec: RecommendationDbRow) => ({
       id: rec.id,
       outcomeReportId: rec.outcome_report_id,
-      category: rec.category,
-      priority: rec.priority,
+      category: rec.category as RecommendationCategory,
+      priority: rec.priority as RecommendationPriority,
       title: rec.title,
       description: rec.description,
       isActionable: rec.is_actionable,
@@ -397,7 +410,7 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       createdAt: rec.created_at,
       updatedAt: rec.updated_at,
     })),
-    similarCases: (data.similar_cases || []).map((sc: any) => ({
+    similarCases: (data.similar_cases || []).map((sc: SimilarCaseDbRow) => ({
       id: sc.id,
       outcomeReportId: sc.outcome_report_id,
       similarCaseId: sc.similar_case_id,
@@ -410,11 +423,11 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       leadEffectivenessComparison: sc.lead_effectiveness_comparison,
       createdAt: sc.created_at,
     })),
-    leadEffectivenessScores: (data.lead_effectiveness_scores || []).map((le: any) => ({
+    leadEffectivenessScores: (data.lead_effectiveness_scores || []).map((le: LeadEffectivenessDbRow) => ({
       id: le.id,
       outcomeReportId: le.outcome_report_id,
       leadId: le.lead_id,
-      effectivenessRating: le.effectiveness_rating,
+      effectivenessRating: le.effectiveness_rating as LeadEffectivenessRating,
       score: le.score,
       responseTimeHours: le.response_time_hours
         ? parseFloat(le.response_time_hours)
@@ -425,11 +438,11 @@ function formatOutcomeReport(data: any): CaseOutcomeReportWithRelations {
       createdAt: le.created_at,
     })),
     timeline: (data.timeline || [])
-      .sort((a: any, b: any) => a.display_order - b.display_order)
-      .map((tm: any) => ({
+      .sort((a: TimelineMilestoneDbRow, b: TimelineMilestoneDbRow) => a.display_order - b.display_order)
+      .map((tm: TimelineMilestoneDbRow) => ({
         id: tm.id,
         outcomeReportId: tm.outcome_report_id,
-        milestoneType: tm.milestone_type,
+        milestoneType: tm.milestone_type as MilestoneType,
         timestamp: tm.timestamp,
         title: tm.title,
         description: tm.description,

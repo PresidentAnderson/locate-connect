@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../../lib/logger";
 
 interface Alert {
   id: string;
@@ -100,7 +101,7 @@ export default function AlertsPage() {
         });
       }
     } catch (err) {
-      console.error('Failed to update alert:', err);
+      logger.error('Failed to update alert:', { error: err });
     } finally {
       setUpdating(null);
     }

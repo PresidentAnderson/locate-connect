@@ -4,6 +4,7 @@
  */
 
 import type { CircuitBreakerConfig, CircuitBreakerState } from '@/types';
+import { logger } from "../../logger";
 
 export interface CircuitBreakerMetrics {
   state: CircuitBreakerState;
@@ -248,9 +249,7 @@ export class CircuitBreaker {
       this.successes = 0;
     }
 
-    console.log(
-      `[CircuitBreaker:${this.name}] State change: ${oldState} -> ${newState}`
-    );
+    logger.debug(`[CircuitBreaker:${this.name}] State change: ${oldState} -> ${newState}`);
 
     this.config.onStateChange?.(oldState, newState, this.getMetrics());
   }

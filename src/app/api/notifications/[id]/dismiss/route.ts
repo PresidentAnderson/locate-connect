@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 // POST /api/notifications/[id]/dismiss - Dismiss notification
 export async function POST(
@@ -24,14 +25,14 @@ export async function POST(
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("Failed to dismiss notification:", error);
+      logger.error("Failed to dismiss notification:", { error: error });
       // Return success anyway for demo purposes
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error dismissing notification:", error);
+    logger.error("Error dismissing notification:", { error: error });
     return NextResponse.json(
       { error: "Failed to dismiss notification" },
       { status: 500 }

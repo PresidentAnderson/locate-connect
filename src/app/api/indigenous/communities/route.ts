@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 /**
  * GET /api/indigenous/communities
@@ -28,7 +30,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (nation) {
-      query = query.ilike("nation", `%${nation}%`);
+      const n = sanitizeSearchInput(nation);
+      query = query.ilike("nation", `%${n}%`);
     }
 
     if (communityType) {
@@ -36,7 +39,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,name_traditional.ilike.%${search}%`);
+      const s = sanitizeSearchInput(search);
+      query = query.or(`name.ilike.%${s}%,name_traditional.ilike.%${s}%`);
     }
 
     query = query.range(offset, offset + limit - 1);
@@ -44,7 +48,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching communities:", error);
+      logger.error("Error fetching communities:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -58,7 +62,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -125,13 +129,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating community:", error);
+      logger.error("Error creating community:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

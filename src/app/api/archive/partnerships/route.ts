@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/archive/partnerships
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Partnerships query error:', error);
+      logger.error('Partnerships query error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to fetch partnerships' },
         { status: 500 }
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('Partnerships API error:', error);
+    logger.error('Partnerships API error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Create partnership error:', error);
+      logger.error('Create partnership error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to submit partnership application' },
         { status: 500 }
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error('Partnership submission error:', error);
+    logger.error('Partnership submission error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -212,7 +213,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Update partnership error:', error);
+      logger.error('Update partnership error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to update partnership' },
         { status: 500 }
@@ -230,7 +231,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Partnership update error:', error);
+    logger.error('Partnership update error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

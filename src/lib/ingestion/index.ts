@@ -50,9 +50,10 @@ export {
   type ImportWarning,
   type ImportPreview,
 } from "./bulk-import";
+import { logger } from "../logger";
 
 // Initialize ingestion system
 export function initializeIngestion(): void {
   registerLeadSources();
-  console.log("[Ingestion] Initialized data ingestion system");
+  logger.debug("[Ingestion] Initialized data ingestion system");
 }

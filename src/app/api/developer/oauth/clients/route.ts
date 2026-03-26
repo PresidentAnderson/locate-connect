@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiServerError, apiCreated, apiForbidden } from '@/lib/api/response';
 import { generateClientId, generateClientSecret, hashApiKey } from '@/lib/api/crypto';
 import type { CreateOAuthClientInput, OAuthClientWithSecret } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/developer/oauth/clients
@@ -48,13 +49,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('OAuth clients fetch error:', error);
+      logger.error('OAuth clients fetch error:', { error: error });
       return apiServerError('Failed to fetch OAuth clients');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('OAuth clients API error:', error);
+    logger.error('OAuth clients API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('OAuth client creation error:', error);
+      logger.error('OAuth client creation error:', { error: error });
       return apiServerError('Failed to create OAuth client');
     }
 
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(response);
   } catch (error) {
-    console.error('OAuth clients API error:', error);
+    logger.error('OAuth clients API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

@@ -5,6 +5,7 @@ import {
   lookupGeoLocation,
   extractIPAddress,
 } from '@/lib/services/email-tracking-service';
+import { logger } from "../../../../../lib/logger";
 
 // Use service role client for this public endpoint
 function getServiceClient() {
@@ -99,12 +100,12 @@ export async function GET(
       .eq('id', trackingRecord.id);
 
     if (updateError) {
-      console.error('Failed to update tracking record:', updateError);
+      logger.error('Failed to update tracking record:', { error: updateError });
     }
 
     return pixelResponse();
   } catch (error) {
-    console.error('Tracking pixel error:', error);
+    logger.error('Tracking pixel error:', { error: error });
     return pixelResponse();
   }
 }

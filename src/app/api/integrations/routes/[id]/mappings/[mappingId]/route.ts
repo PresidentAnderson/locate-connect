@@ -7,6 +7,7 @@ import {
   apiForbidden,
   apiNotFound,
 } from '@/lib/api/response';
+import { logger } from "../../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string; mappingId: string }>;
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Mapping fetch error:', error);
+    logger.error('Mapping fetch error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -176,7 +177,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error updating mapping:', error);
+      logger.error('Error updating mapping:', { error: error });
       return apiServerError('Failed to update mapping');
     }
 
@@ -206,7 +207,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Mapping update error:', error);
+    logger.error('Mapping update error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -262,7 +263,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('route_id', id);
 
     if (error) {
-      console.error('Error deleting mapping:', error);
+      logger.error('Error deleting mapping:', { error: error });
       return apiServerError('Failed to delete mapping');
     }
 
@@ -277,7 +278,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: `Mapping to "${integrationName}" removed successfully`,
     });
   } catch (error) {
-    console.error('Mapping deletion error:', error);
+    logger.error('Mapping deletion error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

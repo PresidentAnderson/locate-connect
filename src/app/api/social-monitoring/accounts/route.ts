@@ -17,6 +17,7 @@ import type {
   SocialMediaPlatform,
   MonitoringStatus,
 } from '@/types/social-monitoring.types';
+import { logger } from "../../../../lib/logger";
 
 const VALID_PLATFORMS: SocialMediaPlatform[] = [
   'facebook',
@@ -114,13 +115,13 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Failed to fetch monitored accounts:', error);
+      logger.error('Failed to fetch monitored accounts:', { error: error });
       return apiServerError('Failed to fetch monitored accounts');
     }
 
     return apiPaginated(data || [], count || 0, params.page!, params.page_size!);
   } catch (error) {
-    console.error('Social monitoring accounts API error:', error);
+    logger.error('Social monitoring accounts API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -218,7 +219,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (reactivateError) {
-        console.error('Failed to reactivate monitoring:', reactivateError);
+        logger.error('Failed to reactivate monitoring:', { error: reactivateError });
         return apiServerError('Failed to reactivate monitoring');
       }
 
@@ -243,13 +244,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error('Failed to create monitoring record:', createError);
+      logger.error('Failed to create monitoring record:', { error: createError });
       return apiServerError('Failed to start monitoring');
     }
 
     return apiCreated(record);
   } catch (error) {
-    console.error('Social monitoring accounts API error:', error);
+    logger.error('Social monitoring accounts API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -314,13 +315,13 @@ export async function DELETE(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Failed to stop monitoring:', updateError);
+      logger.error('Failed to stop monitoring:', { error: updateError });
       return apiServerError('Failed to stop monitoring');
     }
 
     return apiSuccess(updated, { message: 'Monitoring stopped' });
   } catch (error) {
-    console.error('Social monitoring accounts API error:', error);
+    logger.error('Social monitoring accounts API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

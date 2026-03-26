@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { randomBytes } from "crypto";
+import { logger } from "../../../../../../lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
       .eq("user_id", userId);
 
     if (credError) {
-      console.error("Error fetching credentials:", credError);
+      logger.error("Error fetching credentials:", { error: credError });
       return NextResponse.json(
         { error: "Failed to fetch credentials" },
         { status: 500 }
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (challengeError) {
-      console.error("Error storing challenge:", challengeError);
+      logger.error("Error storing challenge:", { error: challengeError });
       return NextResponse.json(
         { error: "Failed to create authentication challenge" },
         { status: 500 }
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       timeout: 60000,
     });
   } catch (error) {
-    console.error("WebAuthn authentication options error:", error);
+    logger.error("WebAuthn authentication options error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/archive/statistics
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(statistics);
   } catch (error) {
-    console.error('Statistics API error:', error);
+    logger.error('Statistics API error:', { error: error });
     return NextResponse.json(
       { error: 'Failed to compute statistics' },
       { status: 500 }

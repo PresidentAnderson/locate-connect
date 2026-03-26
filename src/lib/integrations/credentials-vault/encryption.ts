@@ -4,6 +4,7 @@
  */
 
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync, createHash } from 'crypto';
+import { logger } from "../../logger";
 
 // Encryption constants
 const ALGORITHM = 'aes-256-gcm';
@@ -44,7 +45,7 @@ export class EncryptionService {
     // Get master key from environment
     const masterKey = process.env.CREDENTIALS_MASTER_KEY;
     if (!masterKey) {
-      console.warn('[EncryptionService] CREDENTIALS_MASTER_KEY not set, using fallback for development');
+      logger.warn('[EncryptionService] CREDENTIALS_MASTER_KEY not set, using fallback for development');
     }
 
     // Hash the master key for verification

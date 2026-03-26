@@ -8,6 +8,7 @@ import {
   apiNotFound,
   apiBadRequest,
 } from '@/lib/api/response';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (integrationError) {
-      console.error('Error creating integration:', integrationError);
+      logger.error('Error creating integration:', { error: integrationError });
       return apiServerError('Failed to create integration');
     }
 
@@ -192,7 +193,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       ],
     });
   } catch (error) {
-    console.error('Template install error:', error);
+    logger.error('Template install error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

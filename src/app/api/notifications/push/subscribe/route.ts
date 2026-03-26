@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         .eq("id", existing.id);
 
       if (updateError) {
-        console.error("Error updating subscription:", updateError);
+        logger.error("Error updating subscription:", { error: updateError });
         return NextResponse.json(
           { error: "Failed to update subscription" },
           { status: 500 }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error("Error creating subscription:", insertError);
+      logger.error("Error creating subscription:", { error: insertError });
       return NextResponse.json(
         { error: "Failed to create subscription" },
         { status: 500 }
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       message: "Subscription created",
     });
   } catch (error) {
-    console.error("Push subscribe error:", error);
+    logger.error("Push subscribe error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

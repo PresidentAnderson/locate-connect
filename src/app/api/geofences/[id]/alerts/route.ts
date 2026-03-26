@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 // =============================================================================
 // Types
@@ -69,7 +70,7 @@ export async function GET(
     const { data: dbAlerts, error } = await query;
 
     if (error) {
-      console.error("Database error, using mock data:", error);
+      logger.error("Database error, using mock data:", { error: error });
       // Return mock alerts
       const mockAlerts: GeofenceAlert[] = [
         {
@@ -134,7 +135,7 @@ export async function GET(
       unacknowledgedCount: alerts.filter((a) => !a.acknowledged).length,
     });
   } catch (error) {
-    console.error("Failed to fetch alerts:", error);
+    logger.error("Failed to fetch alerts:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch alerts" },
       { status: 500 }
@@ -187,7 +188,7 @@ export async function POST(
       .single();
 
     if (error) {
-      console.error("Failed to create alert:", error);
+      logger.error("Failed to create alert:", { error: error });
       // Return mock success
       return NextResponse.json(
         {
@@ -231,7 +232,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error) {
-    console.error("Failed to create alert:", error);
+    logger.error("Failed to create alert:", { error: error });
     return NextResponse.json(
       { error: "Failed to create alert" },
       { status: 500 }

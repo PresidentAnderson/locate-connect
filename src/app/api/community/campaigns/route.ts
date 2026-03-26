@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../lib/logger";
 
 interface CreateCampaignPayload {
   name: string;
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching campaigns:", error);
+      logger.error("Error fetching campaigns:", { error: error });
       return NextResponse.json(
         { error: "Failed to fetch campaigns" },
         { status: 500 }
@@ -148,7 +149,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("Error fetching campaigns:", error);
+    logger.error("Error fetching campaigns:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch campaigns" },
       { status: 500 }
@@ -204,7 +205,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .single();
 
     if (insertError) {
-      console.error("Error inserting campaign:", insertError);
+      logger.error("Error inserting campaign:", { error: insertError });
       return NextResponse.json(
         { error: "Failed to create campaign" },
         { status: 500 }
@@ -241,7 +242,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("Error creating campaign:", error);
+    logger.error("Error creating campaign:", { error: error });
     return NextResponse.json(
       { error: "Failed to create campaign" },
       { status: 500 }

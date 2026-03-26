@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/archive/access-requests
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Access requests query error:', error);
+      logger.error('Access requests query error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to fetch access requests' },
         { status: 500 }
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('Access requests API error:', error);
+    logger.error('Access requests API error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Create access request error:', error);
+      logger.error('Create access request error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to submit access request' },
         { status: 500 }
@@ -166,7 +167,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error('Access request submission error:', error);
+    logger.error('Access request submission error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -239,7 +240,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Update access request error:', error);
+      logger.error('Update access request error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to update access request' },
         { status: 500 }
@@ -257,7 +258,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Access request review error:', error);
+    logger.error('Access request review error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

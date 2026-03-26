@@ -4,6 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { RateLimitInfo } from '@/types';
+import { logger } from "../logger";
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -24,7 +25,7 @@ export async function checkRateLimit(
     .rpc('check_rate_limits', { p_application_id: applicationId });
 
   if (error) {
-    console.error('Rate limit check error:', error);
+    logger.error('Rate limit check error:', { error: error });
     // On error, allow the request but log it
     return {
       allowed: true,
@@ -90,7 +91,7 @@ export async function getRateLimitStatus(
     .rpc('check_rate_limits', { p_application_id: applicationId });
 
   if (error) {
-    console.error('Rate limit status error:', error);
+    logger.error('Rate limit status error:', { error: error });
     return null;
   }
 
@@ -116,7 +117,7 @@ export async function getRateLimitConfig(
     .single();
 
   if (error) {
-    console.error('Rate limit config error:', error);
+    logger.error('Rate limit config error:', { error: error });
     return null;
   }
 

@@ -9,6 +9,7 @@ import type {
   ComparisonPoint,
 } from '@/types/facial-recognition.types';
 import { FACE_MATCH_STATUS_LABELS } from '@/types/facial-recognition.types';
+import { logger } from "../../lib/logger";
 
 interface MatchReviewDashboardProps {
   caseId?: string;
@@ -48,7 +49,7 @@ export function MatchReviewDashboard({ caseId, initialFilters }: MatchReviewDash
       setMatches(data.data);
       setTotal(data.meta.total);
     } catch (error) {
-      console.error('Error fetching matches:', error);
+      logger.error('Error fetching matches:', { error: error });
     } finally {
       setLoading(false);
     }

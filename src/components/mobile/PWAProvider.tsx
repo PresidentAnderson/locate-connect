@@ -34,6 +34,7 @@ import {
   requestPersistentStorage,
   getStorageEstimate,
 } from "@/lib/pwa/indexeddb";
+import { logger } from "../../lib/logger";
 
 interface PWAContextValue {
   // Installation
@@ -218,7 +219,7 @@ export function PWAProvider({ children, vapidPublicKey }: PWAProviderProps) {
   // Subscribe to push
   const subscribePushHandler = useCallback(async () => {
     if (!vapidPublicKey) {
-      console.warn("VAPID public key not provided");
+      logger.warn("VAPID public key not provided");
       return null;
     }
 

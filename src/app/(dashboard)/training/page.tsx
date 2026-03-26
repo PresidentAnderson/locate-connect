@@ -9,6 +9,7 @@ import type {
   UserBadge,
   TrainingStats,
 } from "@/types/training.types";
+import { logger } from "../../../lib/logger";
 
 interface DashboardData {
   tracks: TrainingTrackWithProgress[];
@@ -42,7 +43,7 @@ export default function TrainingPage() {
         setData(result.data);
       }
     } catch (error) {
-      console.error("Failed to fetch training dashboard:", error);
+      logger.error("Failed to fetch training dashboard:", { error: error });
     } finally {
       setLoading(false);
     }

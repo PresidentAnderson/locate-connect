@@ -11,6 +11,7 @@ import {
   FaceMatchStatus,
   MatchReviewDecision,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/matches
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching face matches:', error);
+    logger.error('Error fetching face matches:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -215,7 +216,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating match:', updateError);
+      logger.error('Error updating match:', { error: updateError });
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -242,7 +243,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Match update error:', error);
+    logger.error('Match update error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -321,6 +322,6 @@ async function sendMatchNotification(
       .eq('id', matchId);
 
   } catch (error) {
-    console.error('Error sending match notification:', error);
+    logger.error('Error sending match notification:', { error: error });
   }
 }

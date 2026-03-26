@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiNotFound, apiServerError, apiForbidden, apiNoContent } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return apiNotFound('API key not found');
       }
-      console.error('Key fetch error:', error);
+      logger.error('Key fetch error:', { error: error });
       return apiServerError('Failed to fetch API key');
     }
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(keyData);
   } catch (error) {
-    console.error('Key API error:', error);
+    logger.error('Key API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -116,13 +117,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Key update error:', error);
+      logger.error('Key update error:', { error: error });
       return apiServerError('Failed to update API key');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Key API error:', error);
+    logger.error('Key API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -191,13 +192,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Key revoke error:', error);
+      logger.error('Key revoke error:', { error: error });
       return apiServerError('Failed to revoke API key');
     }
 
     return apiNoContent();
   } catch (error) {
-    console.error('Key API error:', error);
+    logger.error('Key API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

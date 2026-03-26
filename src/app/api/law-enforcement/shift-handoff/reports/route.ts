@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 interface ShiftReportRow {
   id: string;
@@ -79,7 +80,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching shift reports:", error);
+      logger.error("Error fetching shift reports:", { error: error });
       return NextResponse.json(
         { error: "Failed to fetch reports" },
         { status: 500 }
@@ -116,7 +117,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error("Error fetching shift reports:", error);
+    logger.error("Error fetching shift reports:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch reports" },
       { status: 500 }
@@ -184,7 +185,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       .single();
 
     if (error) {
-      console.error("Error creating shift report:", error);
+      logger.error("Error creating shift report:", { error: error });
       return NextResponse.json(
         { error: "Failed to create report" },
         { status: 500 }
@@ -193,7 +194,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ report: data }, { status: 201 });
   } catch (error) {
-    console.error("Error creating shift report:", error);
+    logger.error("Error creating shift report:", { error: error });
     return NextResponse.json(
       { error: "Failed to create report" },
       { status: 500 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 /**
  * GET /api/archive
@@ -54,7 +56,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (query) {
-      dbQuery = dbQuery.or(`lessons_learned.ilike.%${query}%,region.ilike.%${query}%`);
+      const s = sanitizeSearchInput(query);
+      dbQuery = dbQuery.or(`lessons_learned.ilike.%${s}%,region.ilike.%${s}%`);
     }
 
     // Pagination
@@ -67,7 +70,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Archive search error:', error);
+      logger.error('Archive search error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to search archived cases' },
         { status: 500 }
@@ -81,7 +84,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('Archive API error:', error);
+    logger.error('Archive API error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -9,6 +9,7 @@ import type {
   LayerVisibility,
   HeatMapQueryParams,
 } from "@/types/heatmap.types";
+import { logger } from "../../../../lib/logger";
 
 const DEFAULT_FILTERS: HeatMapFilters = {
   caseTypes: [],
@@ -67,7 +68,7 @@ export default function ResolutionHeatMapPage() {
       const result: HeatMapDataResponse = await response.json();
       setData(result);
     } catch (err) {
-      console.error("Error fetching heat map data:", err);
+      logger.error("Error fetching heat map data:", { error: err });
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
@@ -95,11 +96,11 @@ export default function ResolutionHeatMapPage() {
     west: number;
   }) => {
     // Could use this for lazy loading more data as the user pans
-    console.log("Map bounds changed:", bounds);
+    logger.debug("Map bounds changed:", { data: bounds });
   };
 
   const handleClusterClick = (cluster: HeatMapDataResponse["clusters"][0]) => {
-    console.log("Cluster clicked:", cluster);
+    logger.debug("Cluster clicked:", { data: cluster });
     // Could open a detailed view or zoom in
   };
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 // GET /api/cases/[caseId]/map - Get map data for a case
 export async function GET(
@@ -134,7 +135,7 @@ export async function GET(
       activityPoints: [],
     });
   } catch (error) {
-    console.error("Failed to fetch map data:", error);
+    logger.error("Failed to fetch map data:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch map data" },
       { status: 500 }

@@ -11,6 +11,7 @@ import {
 import { getConnectorFactory } from '@/lib/integrations/connector-framework';
 import { getRateLimiterRegistry } from '@/lib/integrations/connector-framework/rate-limiter';
 import { getCacheRegistry } from '@/lib/integrations/connector-framework/response-cache';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       cache: cacheStats || null,
     });
   } catch (error) {
-    console.error('Connector status error:', error);
+    logger.error('Connector status error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -284,7 +285,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(result);
   } catch (error) {
-    console.error('Connector control error:', error);
+    logger.error('Connector control error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

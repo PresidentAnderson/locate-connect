@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { logger } from "../../lib/logger";
 
 // Types for the search map
 interface Coordinates {
@@ -173,7 +174,7 @@ export function CaseSearchMap({
         setActivityPoints(data.activityPoints || []);
       }
     } catch (error) {
-      console.error("Failed to fetch map data:", error);
+      logger.error("Failed to fetch map data:", { error: error });
       // Use mock data for demo
       setSightings([
         {

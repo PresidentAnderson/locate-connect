@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { PartnerMember, PartnerMemberInsert } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { data, error } = await query;
 
   if (error) {
-    console.error('Partner members fetch error:', error);
+    logger.error('Partner members fetch error:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (insertError) {
-    console.error('Member invite error:', insertError);
+    logger.error('Member invite error:', { error: insertError });
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 

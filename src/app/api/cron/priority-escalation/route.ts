@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPriorityEscalationAgent, agentRegistry } from '@/lib/agents';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/cron/priority-escalation
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     const result = await agent.run();
 
     // Log run to console for Vercel logs
-    console.log('[Cron] Priority Escalation Agent completed:', {
+    logger.debug('[Cron] Priority Escalation Agent completed:', {
       runId: result.runId,
       duration: result.duration,
       itemsProcessed: result.itemsProcessed,
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
       metrics: result.metrics,
     });
   } catch (error) {
-    console.error('[Cron] Priority Escalation Agent failed:', error);
+    logger.error('[Cron] Priority Escalation Agent failed:', { error: error });
 
     return NextResponse.json(
       {

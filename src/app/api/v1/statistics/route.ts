@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { authenticateRequest, hasScope, meetsAccessLevel } from '@/lib/api/auth';
 import { checkRateLimit, updateRateLimitCounters } from '@/lib/api/rate-limiter';
 import { apiSuccess, apiUnauthorized, apiForbidden, apiRateLimited, apiServerError, withRateLimitHeaders, withCorsHeaders } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/v1/statistics
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
     const { data: cases, error } = await baseFilter;
 
     if (error) {
-      console.error('Statistics API error:', error);
+      logger.error('Statistics API error:', { error: error });
       return withCorsHeaders(apiServerError('Failed to fetch statistics'));
     }
 
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     return withCorsHeaders(response);
   } catch (error) {
-    console.error('Statistics API error:', error);
+    logger.error('Statistics API error:', { error: error });
     return withCorsHeaders(apiServerError('Internal server error'));
   }
 }

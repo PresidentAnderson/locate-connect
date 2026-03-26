@@ -8,6 +8,7 @@ import type {
   VehicleSighting,
   VehicleAlert,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateVehicleInput {
   caseId: string;
@@ -75,9 +76,7 @@ class VehicleTrackingService {
     };
 
     this.vehicles.set(id, vehicle);
-    console.log(
-      `[VehicleService] Created vehicle ${id}: ${vehicle.licensePlate}`
-    );
+    logger.debug(`[VehicleService] Created vehicle ${id}: ${vehicle.licensePlate}`);
     return vehicle;
   }
 
@@ -173,9 +172,7 @@ class VehicleTrackingService {
     // Check if any alerts should be triggered
     await this.checkAlerts(vehicle, sighting);
 
-    console.log(
-      `[VehicleService] Sighting reported for ${vehicle.licensePlate}`
-    );
+    logger.debug(`[VehicleService] Sighting reported for ${vehicle.licensePlate}`);
     return sighting;
   }
 
@@ -243,9 +240,7 @@ class VehicleTrackingService {
     vehicle.updatedAt = new Date().toISOString();
     this.vehicles.set(input.vehicleId, vehicle);
 
-    console.log(
-      `[VehicleService] Alert created for ${vehicle.licensePlate}: ${alert.type}`
-    );
+    logger.debug(`[VehicleService] Alert created for ${vehicle.licensePlate}: ${alert.type}`);
     return alert;
   }
 
@@ -309,13 +304,11 @@ class VehicleTrackingService {
     const activeAlerts = await this.getActiveAlerts(vehicle.id);
 
     if (activeAlerts.length > 0) {
-      console.log(
-        `[VehicleService] ALERT! Vehicle ${vehicle.licensePlate} spotted with active alerts`
-      );
+      logger.debug(`[VehicleService] ALERT! Vehicle ${vehicle.licensePlate} spotted with active alerts`);
 
       // Would send notifications here
       for (const alert of activeAlerts) {
-        console.log(`  - ${alert.type}: ${alert.description}`);
+        logger.debug(`  - ${alert.type}: ${alert.description}`);
       }
     }
   }
@@ -357,7 +350,7 @@ class VehicleTrackingService {
       }
     }
 
-    console.log(`[VehicleService] Processed ${data.length} LPR entries, ${matched} matched`);
+    logger.debug(`[VehicleService] Processed ${data.length} LPR entries, ${matched} matched`);
     return { matched, sightings };
   }
 

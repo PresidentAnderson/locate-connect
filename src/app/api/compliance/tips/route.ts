@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { anonymousTipsService } from "@/lib/services/anonymous-tips-service";
 import type { AnonymousTip } from "@/types/compliance.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Tips error:", error);
+    logger.error("[API] Tips error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Tips error:", error);
+    logger.error("[API] Tips error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -11,6 +11,7 @@ import {
   DataRequestType,
   ComprehensiveAuditLog,
 } from '@/types/audit.types';
+import { logger } from "../logger";
 
 // =============================================================================
 // AUDIT LOGGING SERVICE
@@ -79,13 +80,13 @@ export async function createAuditLog(params: AuditLogParams): Promise<string | n
       .single();
 
     if (error) {
-      console.error('Error creating audit log:', error);
+      logger.error('Error creating audit log:', { error: error });
       return null;
     }
 
     return data.id;
   } catch (error) {
-    console.error('Error in createAuditLog:', error);
+    logger.error('Error in createAuditLog:', { error: error });
     return null;
   }
 }
@@ -153,7 +154,7 @@ export async function logDataAccess(params: DataAccessParams): Promise<void> {
       user_agent: params.userAgent,
     });
   } catch (error) {
-    console.error('Error in logDataAccess:', error);
+    logger.error('Error in logDataAccess:', { error: error });
   }
 }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/cron/notification-digest
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
           .eq('status', 'active');
 
         if (casesError) {
-          console.error('Error fetching cases:', casesError);
+          logger.error('Error fetching cases:', { error: casesError });
         }
 
         // Group notifications by type
@@ -150,7 +151,7 @@ export async function GET(request: NextRequest) {
       errors: errors.length > 0 ? errors : null,
     });
 
-    console.log('[Cron] Notification Digest completed:', {
+    logger.debug('[Cron] Notification Digest completed:', {
       runId,
       usersProcessed: usersWithDigest?.length || 0,
       digestsSent: digestsSent.length,
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    console.error('[Cron] Notification Digest failed:', error);
+    logger.error('[Cron] Notification Digest failed:', { error: error });
 
     return NextResponse.json(
       {

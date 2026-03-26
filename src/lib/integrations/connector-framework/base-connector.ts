@@ -17,6 +17,7 @@ import type {
 import { CircuitBreaker, CircuitBreakerOpenError } from './circuit-breaker';
 import { RetryHandler, RetryExhaustedError } from './retry-handler';
 import { createAuthAdapter, type AuthAdapter } from './auth-adapters';
+import { logger } from "../../logger";
 
 export interface BaseConnectorOptions {
   config: ConnectorConfig;
@@ -77,9 +78,7 @@ export abstract class BaseConnector {
     this.retryHandler = new RetryHandler({
       ...options.config.retryPolicy,
       onRetry: (context) => {
-        console.log(
-          `[${this.name}] Retry attempt ${context.attempt}/${context.totalAttempts}`
-        );
+        logger.debug(`[${this.name}] Retry attempt ${context.attempt}/${context.totalAttempts}`);
       },
     });
   }
@@ -127,7 +126,7 @@ export abstract class BaseConnector {
     }
 
     this.state = 'connecting';
-    console.log(`[${this.name}] Connecting...`);
+    logger.debug(`[${this.name}] Connecting...`);
 
     try {
       // Initialize auth adapter if not done
@@ -144,10 +143,10 @@ export abstract class BaseConnector {
 
       this.state = 'connected';
       this.connectedAt = new Date();
-      console.log(`[${this.name}] Connected successfully`);
+      logger.debug(`[${this.name}] Connected successfully`);
     } catch (error) {
       this.state = 'error';
-      console.error(`[${this.name}] Connection failed:`, error);
+      logger.error(`[${this.name}] Connection failed:`, { error: error });
       throw error;
     }
   }
@@ -160,7 +159,7 @@ export abstract class BaseConnector {
       return;
     }
 
-    console.log(`[${this.name}] Disconnecting...`);
+    logger.debug(`[${this.name}] Disconnecting...`);
 
     // Clear auth
     this.authAdapter?.clear();
@@ -169,7 +168,7 @@ export abstract class BaseConnector {
     this.state = 'disconnected';
     this.connectedAt = undefined;
 
-    console.log(`[${this.name}] Disconnected`);
+    logger.debug(`[${this.name}] Disconnected`);
   }
 
   /**

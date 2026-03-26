@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../lib/logger";
 
 // =============================================================================
 // Types
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
     const { data: dbGeofences, error } = await query;
 
     if (error) {
-      console.error("Database error, using mock data:", error);
+      logger.error("Database error, using mock data:", { error: error });
       // Return mock data for demo
       const mockGeofences: Geofence[] = [
         {
@@ -196,7 +197,7 @@ export async function GET(request: NextRequest) {
       total: geofences.length,
     });
   } catch (error) {
-    console.error("Failed to fetch geofences:", error);
+    logger.error("Failed to fetch geofences:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch geofences" },
       { status: 500 }
@@ -280,7 +281,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Failed to create geofence:", error);
+      logger.error("Failed to create geofence:", { error: error });
       // Return mock success for demo
       const mockGeofence: Geofence = {
         id: `geo-${Date.now()}`,
@@ -321,7 +322,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ geofence }, { status: 201 });
   } catch (error) {
-    console.error("Failed to create geofence:", error);
+    logger.error("Failed to create geofence:", { error: error });
     return NextResponse.json(
       { error: "Failed to create geofence" },
       { status: 500 }

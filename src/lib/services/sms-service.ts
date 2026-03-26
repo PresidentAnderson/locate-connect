@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../logger";
 
 // =============================================================================
 // Types
@@ -68,7 +69,7 @@ class SmsServiceImpl {
 
     // Log in development or when SMS is not configured
     if (!this.isConfigured || process.env.NODE_ENV === 'development') {
-      console.log(`[SMS] Would send SMS:`, {
+      logger.debug(`[SMS] Would send SMS:`, {
         to: cleanedNumber,
         from,
         messageLength: message.length,
@@ -88,7 +89,7 @@ class SmsServiceImpl {
     try {
       return await this.sendViaTwilio({ to: cleanedNumber, message, from, mediaUrl });
     } catch (error) {
-      console.error('[SMS] Send failed:', error);
+      logger.error('[SMS] Send failed:', { error: error });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -133,7 +134,7 @@ class SmsServiceImpl {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('[SMS] Twilio error:', data);
+      logger.error('[SMS] Twilio error:', { error: data });
       return { success: false, error: data.message || `Twilio error: ${response.status}` };
     }
 
@@ -274,7 +275,7 @@ class SmsServiceImpl {
       });
     } catch (error) {
       // Don't fail the SMS send if logging fails
-      console.error('[SMS] Failed to log SMS:', error);
+      logger.error('[SMS] Failed to log SMS:', { error: error });
     }
   }
 }

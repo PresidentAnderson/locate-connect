@@ -11,6 +11,7 @@ import type {
   HealthCheckResult,
 } from '@/types';
 import { BaseConnector, type BaseConnectorOptions } from './base-connector';
+import { logger } from "../../logger";
 
 /**
  * Connector Registry Entry
@@ -50,7 +51,7 @@ export class ConnectorFactory {
     connectorClass: new (options: BaseConnectorOptions) => BaseConnector
   ): void {
     this.connectorTypes.set(type, connectorClass);
-    console.log(`[ConnectorFactory] Registered connector type: ${type}`);
+    logger.debug(`[ConnectorFactory] Registered connector type: ${type}`);
   }
 
   /**
@@ -80,7 +81,7 @@ export class ConnectorFactory {
       createdAt: new Date(),
     });
 
-    console.log(`[ConnectorFactory] Created connector: ${config.name} (${config.id})`);
+    logger.debug(`[ConnectorFactory] Created connector: ${config.name} (${config.id})`);
 
     return connector;
   }
@@ -137,7 +138,7 @@ export class ConnectorFactory {
     await entry.connector.disconnect();
     this.connectors.delete(id);
 
-    console.log(`[ConnectorFactory] Removed connector: ${id}`);
+    logger.debug(`[ConnectorFactory] Removed connector: ${id}`);
     return true;
   }
 
@@ -201,7 +202,7 @@ export class ConnectorFactory {
       )
     );
 
-    console.log('[ConnectorFactory] Disconnected all connectors');
+    logger.debug('[ConnectorFactory] Disconnected all connectors');
   }
 
   /**
@@ -221,7 +222,7 @@ export class ConnectorFactory {
     }
 
     if (cleaned > 0) {
-      console.log(`[ConnectorFactory] Cleaned up ${cleaned} idle connectors`);
+      logger.debug(`[ConnectorFactory] Cleaned up ${cleaned} idle connectors`);
     }
 
     return cleaned;

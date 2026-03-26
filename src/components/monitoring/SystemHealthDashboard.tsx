@@ -13,6 +13,7 @@ import type {
   SERVICE_STATUS_COLORS,
   ALERT_SEVERITY_COLORS,
 } from "@/types/monitoring.types";
+import { logger } from "../../lib/logger";
 
 interface SystemHealthDashboardProps {
   initialData?: DashboardData;
@@ -37,7 +38,7 @@ export function SystemHealthDashboard({
           setLastUpdated(new Date());
         }
       } catch (error) {
-        console.error("Failed to fetch system health:", error);
+        logger.error("Failed to fetch system health:", { error: error });
       } finally {
         setLoading(false);
       }

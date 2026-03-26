@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (error) {
-      console.error("Error fetching nearby cases:", error);
+      logger.error("Error fetching nearby cases:", { error: error });
 
       // Fallback query if the function doesn't exist
       const { data: fallbackCases, error: fallbackError } = await supabase
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
       count: transformedCases.length,
     });
   } catch (error) {
-    console.error("Nearby alerts error:", error);
+    logger.error("Nearby alerts error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

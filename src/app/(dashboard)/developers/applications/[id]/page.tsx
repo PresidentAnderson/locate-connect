@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { logger } from "../../../../../lib/logger";
 
 interface Application {
   id: string;
@@ -67,7 +68,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
         setApplication(data.data);
       }
     } catch (error) {
-      console.error("Failed to fetch application:", error);
+      logger.error("Failed to fetch application:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
         setApiKeys(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch API keys:", error);
+      logger.error("Failed to fetch API keys:", { error: error });
     }
   }
 
@@ -93,7 +94,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
         setWebhooks(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch webhooks:", error);
+      logger.error("Failed to fetch webhooks:", { error: error });
     }
   }
 
@@ -110,7 +111,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
         fetchApiKeys();
       }
     } catch (error) {
-      console.error("Failed to create API key:", error);
+      logger.error("Failed to create API key:", { error: error });
     }
   }
 
@@ -127,7 +128,7 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
         fetchApiKeys();
       }
     } catch (error) {
-      console.error("Failed to revoke API key:", error);
+      logger.error("Failed to revoke API key:", { error: error });
     }
   }
 
@@ -498,7 +499,7 @@ function CreateKeyModal({
         onCreated(data.data.key);
       }
     } catch (error) {
-      console.error("Failed to create key:", error);
+      logger.error("Failed to create key:", { error: error });
     } finally {
       setLoading(false);
     }

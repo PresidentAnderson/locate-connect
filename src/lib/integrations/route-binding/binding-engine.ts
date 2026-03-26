@@ -15,6 +15,7 @@ import type {
 import { getConnectorFactory, type ConnectorFactory } from '../connector-framework';
 import { DataTransformer, getDataTransformer } from './transformer';
 import { ResponseAggregator, getResponseAggregator } from './aggregator';
+import { logger } from "../../logger";
 
 export interface BindingExecutionOptions {
   timeout?: number;
@@ -68,7 +69,7 @@ export class RouteBindingEngine {
       }
     }
 
-    console.log(`[RouteBindingEngine] Registered binding: ${binding.name}`);
+    logger.debug(`[RouteBindingEngine] Registered binding: ${binding.name}`);
   }
 
   /**
@@ -93,7 +94,7 @@ export class RouteBindingEngine {
     }
 
     this.bindings.delete(bindingId);
-    console.log(`[RouteBindingEngine] Unregistered binding: ${binding.name}`);
+    logger.debug(`[RouteBindingEngine] Unregistered binding: ${binding.name}`);
     return true;
   }
 
@@ -107,15 +108,11 @@ export class RouteBindingEngine {
     const matchingBindings = this.findMatchingBindings(trigger);
 
     if (matchingBindings.length === 0) {
-      console.log(
-        `[RouteBindingEngine] No bindings matched trigger: ${trigger.type}:${trigger.eventName}`
-      );
+      logger.debug(`[RouteBindingEngine] No bindings matched trigger: ${trigger.type}:${trigger.eventName}`);
       return [];
     }
 
-    console.log(
-      `[RouteBindingEngine] Executing ${matchingBindings.length} bindings for trigger: ${trigger.type}:${trigger.eventName}`
-    );
+    logger.debug(`[RouteBindingEngine] Executing ${matchingBindings.length} bindings for trigger: ${trigger.type}:${trigger.eventName}`);
 
     const executeBinding = async (
       registered: RegisteredBinding
@@ -179,7 +176,7 @@ export class RouteBindingEngine {
     const executionId = crypto.randomUUID();
     const startTime = Date.now();
 
-    console.log(`[RouteBindingEngine] Executing binding: ${binding.name}`);
+    logger.debug(`[RouteBindingEngine] Executing binding: ${binding.name}`);
 
     try {
       // Check conditions

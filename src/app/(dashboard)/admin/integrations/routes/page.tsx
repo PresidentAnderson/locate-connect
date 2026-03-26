@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteMapping {
   id: string;
@@ -85,7 +86,7 @@ export default function RouteBindingsPage() {
         fetchRoutes();
       }
     } catch (err) {
-      console.error('Failed to toggle route:', err);
+      logger.error('Failed to toggle route:', { error: err });
     }
   };
 

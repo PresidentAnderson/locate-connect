@@ -13,6 +13,7 @@ import {
   apiServerError,
   apiUnauthorized,
 } from "@/lib/api/response";
+import { logger } from "../../../../lib/logger";
 
 type RevivalTriggerPayload = {
   caseId?: string;
@@ -87,7 +88,7 @@ export async function GET(request: Request) {
     .range(offset, offset + pageSize - 1);
 
   if (error) {
-    console.error("Error fetching revival triggers:", error);
+    logger.error("Error fetching revival triggers:", { error: error });
     return apiServerError(error.message);
   }
 
@@ -143,7 +144,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    console.error("Error creating revival trigger:", error);
+    logger.error("Error creating revival trigger:", { error: error });
     return apiServerError(error.message);
   }
 

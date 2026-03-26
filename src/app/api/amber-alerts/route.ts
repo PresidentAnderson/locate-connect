@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { amberDistributionService } from "@/lib/services/amber-distribution";
 import type { AmberAlertRequest } from "@/components/alerts/AmberAlertForm";
 import type { AmberAlert, AmberDistributionChannel } from "@/types";
+import { logger } from "../../../lib/logger";
 
 function buildUpdateSummary(request: AmberAlertRequest) {
   const targetArea = request.targetProvinces.length > 0
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (alertError) {
-    console.error("AMBER Alert creation error:", alertError);
+    logger.error("AMBER Alert creation error:", { error: alertError });
     return NextResponse.json({ error: alertError.message }, { status: 500 });
   }
 
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
         target_provinces: body.targetProvinces,
       });
     } catch (err) {
-      console.error("Distribution error:", err);
+      logger.error("Distribution error:", { error: err });
       // Don't fail the request, distribution can be retried
     }
   }

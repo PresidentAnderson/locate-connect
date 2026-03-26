@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHospitalRegistryAgent, agentRegistry } from '@/lib/agents';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/cron/hospital-registry
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     const result = await agent.run();
 
     // Log run to console for Vercel logs
-    console.log('[Cron] Hospital Registry Agent completed:', {
+    logger.debug('[Cron] Hospital Registry Agent completed:', {
       runId: result.runId,
       duration: result.duration,
       itemsProcessed: result.itemsProcessed,
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       metrics: result.metrics,
     });
   } catch (error) {
-    console.error('[Cron] Hospital Registry Agent failed:', error);
+    logger.error('[Cron] Hospital Registry Agent failed:', { error: error });
 
     return NextResponse.json(
       {

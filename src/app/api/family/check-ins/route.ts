@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/family/check-ins
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error("Error fetching check-ins:", error);
+      logger.error("Error fetching check-ins:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -148,13 +149,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating check-in:", error);
+      logger.error("Error creating check-in:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -217,13 +218,13 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error updating check-in:", error);
+      logger.error("Error updating check-in:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

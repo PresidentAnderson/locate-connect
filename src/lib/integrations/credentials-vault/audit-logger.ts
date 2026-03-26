@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server';
 import type { CredentialAccessLog } from '@/types';
 import type { AccessControlContext } from './access-control';
+import { logger } from "../../logger";
 
 export type AuditAction =
   | 'retrieve'
@@ -125,7 +126,7 @@ export class AuditLoggerService {
         }
       }
     } catch (error) {
-      console.error('[AuditLogger] Database persistence error:', error);
+      logger.error('[AuditLogger] Database persistence error:', { error: error });
     }
   }
 
@@ -152,7 +153,7 @@ export class AuditLoggerService {
       });
     } catch {
       // Last resort - ensure it's at least logged
-      console.error('[AuditLogger] CRITICAL: Failed to log security event', entry);
+      logger.error('[AuditLogger] CRITICAL: Failed to log security event', { error: entry });
     }
   }
 
@@ -325,7 +326,7 @@ export class AuditLoggerService {
         metadata: row.metadata as Record<string, unknown>,
       }));
     } catch (error) {
-      console.error('[AuditLogger] Error fetching logs:', error);
+      logger.error('[AuditLogger] Error fetching logs:', { error: error });
       // Fall back to in-memory logs
       return this.getLogsFromMemory(filter);
     }

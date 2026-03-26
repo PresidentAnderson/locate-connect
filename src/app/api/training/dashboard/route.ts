@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/training/dashboard
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       .order("display_order", { ascending: true });
 
     if (tracksError) {
-      console.error("Error fetching tracks:", tracksError);
+      logger.error("Error fetching tracks:", { error: tracksError });
       return NextResponse.json({ error: tracksError.message }, { status: 500 });
     }
 
@@ -220,7 +221,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -8,6 +8,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { EmailTrackingAnalytics, EmailTrackingQueryParams } from '@/types/email-tracking.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/email/tracking
@@ -100,7 +101,7 @@ export async function GET(request: NextRequest) {
     const { data: records, error: fetchError, count } = await query;
 
     if (fetchError) {
-      console.error('Failed to fetch email tracking records:', fetchError);
+      logger.error('Failed to fetch email tracking records:', { error: fetchError });
       return apiServerError('Failed to fetch email tracking records');
     }
 
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / params.page_size!),
     });
   } catch (error) {
-    console.error('Email tracking API error:', error);
+    logger.error('Email tracking API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

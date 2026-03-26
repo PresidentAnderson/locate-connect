@@ -7,6 +7,7 @@ import type {
   AnonymizationLevel,
   StoryVisibility,
 } from "@/types/success-story.types";
+import { logger } from "../../lib/logger";
 
 interface StorySubmissionFormProps {
   caseId: string;
@@ -143,7 +144,7 @@ export function StorySubmissionForm({
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error("Error submitting story:", error);
+      logger.error("Error submitting story:", { error: error });
       setErrors({ submit: "Failed to submit story. Please try again." });
     } finally {
       setIsSubmitting(false);

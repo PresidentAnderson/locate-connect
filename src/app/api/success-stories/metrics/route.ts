@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/success-stories/metrics
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
   const { data: metrics, error } = await query;
 
   if (error) {
-    console.error('Error fetching metrics:', error);
+    logger.error('Error fetching metrics:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
     .lte('resolution_date', periodEnd.toISOString());
 
   if (casesError) {
-    console.error('Error fetching cases for metrics:', casesError);
+    logger.error('Error fetching cases for metrics:', { error: casesError });
     return NextResponse.json({ error: casesError.message }, { status: 500 });
   }
 
@@ -242,7 +243,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (upsertError) {
-    console.error('Error saving metrics:', upsertError);
+    logger.error('Error saving metrics:', { error: upsertError });
     return NextResponse.json({ error: upsertError.message }, { status: 500 });
   }
 

@@ -18,6 +18,7 @@ import type {
   ColdCaseSearchFilters,
   CreateColdCaseProfileRequest,
 } from '@/types/cold-case.types';
+import { logger } from "../../../lib/logger";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching cold case profiles:', error);
+    logger.error('Error fetching cold case profiles:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -243,7 +244,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    console.error('Error creating cold case profile:', error);
+    logger.error('Error creating cold case profile:', { error: error });
     return apiServerError(error.message);
   }
 

@@ -11,6 +11,7 @@ import type {
   SocialMediaPlatform,
   SocialActivityType,
 } from '@/types/social-monitoring.types';
+import { logger } from "../../../../lib/logger";
 
 const VALID_PLATFORMS: SocialMediaPlatform[] = [
   'facebook',
@@ -145,13 +146,13 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Failed to fetch activity events:', error);
+      logger.error('Failed to fetch activity events:', { error: error });
       return apiServerError('Failed to fetch activity events');
     }
 
     return apiPaginated(data || [], count || 0, params.page!, params.page_size!);
   } catch (error) {
-    console.error('Social monitoring activity API error:', error);
+    logger.error('Social monitoring activity API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

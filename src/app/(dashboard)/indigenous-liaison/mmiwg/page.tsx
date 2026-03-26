@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 interface MMIWGCase {
   id: string;
@@ -97,7 +98,7 @@ export default function MMIWGDashboard() {
           setCases(casesData.data || []);
         }
       } catch (err) {
-        console.error("Error fetching MMIWG data:", err);
+        logger.error("Error fetching MMIWG data:", { error: err });
         setError("Failed to load MMIWG data. Please try again.");
       } finally {
         setLoading(false);

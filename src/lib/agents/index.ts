@@ -45,6 +45,7 @@ export {
   createPublicRecordsCrawlerAgent,
 } from "./public-records-crawler";
 import { createPublicRecordsCrawlerAgent } from "./public-records-crawler";
+import { logger } from "../logger";
 
 // Initialize all default agents
 export function initializeAgents(): void {
@@ -63,5 +64,5 @@ export function initializeAgents(): void {
   agentRegistry.register(newsCrawler);
   agentRegistry.register(publicRecords);
 
-  console.log("[Agents] Initialized all default agents");
+  logger.debug("[Agents] Initialized all default agents");
 }

@@ -7,6 +7,7 @@ import type {
   VoiceMemo,
   EvidenceChainEntry,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateVoiceMemoInput {
   caseId: string;
@@ -78,7 +79,7 @@ class VoiceMemoService {
       this.queueTranscription(id);
     }
 
-    console.log(`[VoiceMemoService] Created memo ${id} for case ${input.caseId}`);
+    logger.debug(`[VoiceMemoService] Created memo ${id} for case ${input.caseId}`);
     return memo;
   }
 
@@ -229,7 +230,7 @@ class VoiceMemoService {
     memo.transcriptionStatus = "completed";
 
     this.memos.set(memoId, memo);
-    console.log(`[VoiceMemoService] Transcription completed for memo ${memoId}`);
+    logger.debug(`[VoiceMemoService] Transcription completed for memo ${memoId}`);
     return true;
   }
 
@@ -279,7 +280,7 @@ class VoiceMemoService {
 
     // Process transcription asynchronously
     this.processTranscription(memoId).catch((error) => {
-      console.error(`[VoiceMemoService] Transcription failed for memo ${memoId}:`, error);
+      logger.error(`[VoiceMemoService] Transcription failed for memo ${memoId}:`, { error: error });
       const failedMemo = this.memos.get(memoId);
       if (failedMemo) {
         failedMemo.transcriptionStatus = "failed";
@@ -287,7 +288,7 @@ class VoiceMemoService {
       }
     });
 
-    console.log(`[VoiceMemoService] Queued transcription for memo ${memoId}`);
+    logger.debug(`[VoiceMemoService] Queued transcription for memo ${memoId}`);
   }
 
   /**
@@ -330,7 +331,7 @@ class VoiceMemoService {
     }
 
     // No transcription service configured
-    console.warn("[VoiceMemoService] No transcription service configured");
+    logger.warn("[VoiceMemoService] No transcription service configured");
     await this.setTranscription(
       memoId,
       "[Transcription service not configured. Please set OPENAI_API_KEY, DEEPGRAM_API_KEY, or ASSEMBLYAI_API_KEY]"
@@ -342,7 +343,7 @@ class VoiceMemoService {
    */
   private async transcribeWithWhisper(audioUrl: string, apiKey: string): Promise<string | null> {
     try {
-      console.log("[VoiceMemoService] Transcribing with OpenAI Whisper");
+      logger.debug("[VoiceMemoService] Transcribing with OpenAI Whisper");
 
       // Fetch the audio file
       const audioResponse = await fetch(audioUrl);
@@ -370,15 +371,15 @@ class VoiceMemoService {
 
       if (!response.ok) {
         const error = await response.text();
-        console.error("[VoiceMemoService] Whisper API error:", error);
+        logger.error("[VoiceMemoService] Whisper API error:", { error: error });
         return null;
       }
 
       const transcription = await response.text();
-      console.log("[VoiceMemoService] Whisper transcription complete");
+      logger.debug("[VoiceMemoService] Whisper transcription complete");
       return transcription.trim();
     } catch (error) {
-      console.error("[VoiceMemoService] Whisper transcription error:", error);
+      logger.error("[VoiceMemoService] Whisper transcription error:", { error: error });
       return null;
     }
   }
@@ -388,7 +389,7 @@ class VoiceMemoService {
    */
   private async transcribeWithDeepgram(audioUrl: string, apiKey: string): Promise<string | null> {
     try {
-      console.log("[VoiceMemoService] Transcribing with Deepgram");
+      logger.debug("[VoiceMemoService] Transcribing with Deepgram");
 
       // Fetch the audio file
       const audioResponse = await fetch(audioUrl);
@@ -413,7 +414,7 @@ class VoiceMemoService {
 
       if (!response.ok) {
         const error = await response.text();
-        console.error("[VoiceMemoService] Deepgram API error:", error);
+        logger.error("[VoiceMemoService] Deepgram API error:", { error: error });
         return null;
       }
 
@@ -427,13 +428,13 @@ class VoiceMemoService {
 
       const transcription = result.results?.channels?.[0]?.alternatives?.[0]?.transcript;
       if (transcription) {
-        console.log("[VoiceMemoService] Deepgram transcription complete");
+        logger.debug("[VoiceMemoService] Deepgram transcription complete");
         return transcription;
       }
 
       return null;
     } catch (error) {
-      console.error("[VoiceMemoService] Deepgram transcription error:", error);
+      logger.error("[VoiceMemoService] Deepgram transcription error:", { error: error });
       return null;
     }
   }
@@ -443,7 +444,7 @@ class VoiceMemoService {
    */
   private async transcribeWithAssemblyAI(audioUrl: string, apiKey: string): Promise<string | null> {
     try {
-      console.log("[VoiceMemoService] Transcribing with AssemblyAI");
+      logger.debug("[VoiceMemoService] Transcribing with AssemblyAI");
 
       // Step 1: Submit transcription request
       const submitResponse = await fetch("https://api.assemblyai.com/v2/transcript", {
@@ -460,7 +461,7 @@ class VoiceMemoService {
 
       if (!submitResponse.ok) {
         const error = await submitResponse.text();
-        console.error("[VoiceMemoService] AssemblyAI submit error:", error);
+        logger.error("[VoiceMemoService] AssemblyAI submit error:", { error: error });
         return null;
       }
 
@@ -490,20 +491,20 @@ class VoiceMemoService {
         };
 
         if (pollResult.status === "completed" && pollResult.text) {
-          console.log("[VoiceMemoService] AssemblyAI transcription complete");
+          logger.debug("[VoiceMemoService] AssemblyAI transcription complete");
           return pollResult.text;
         }
 
         if (pollResult.status === "error") {
-          console.error("[VoiceMemoService] AssemblyAI error:", pollResult.error);
+          logger.error("[VoiceMemoService] AssemblyAI error:", { error: pollResult.error });
           return null;
         }
       }
 
-      console.error("[VoiceMemoService] AssemblyAI transcription timed out");
+      logger.error("[VoiceMemoService] AssemblyAI transcription timed out");
       return null;
     } catch (error) {
-      console.error("[VoiceMemoService] AssemblyAI transcription error:", error);
+      logger.error("[VoiceMemoService] AssemblyAI transcription error:", { error: error });
       return null;
     }
   }

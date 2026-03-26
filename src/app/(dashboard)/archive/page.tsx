@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../lib/logger";
 
 interface ArchivedCase {
   id: string;
@@ -99,7 +100,7 @@ export default function ArchivePage() {
       setCases(data.cases || []);
       setTotal(data.total || 0);
     } catch (error) {
-      console.error("Failed to fetch archived cases:", error);
+      logger.error("Failed to fetch archived cases:", { error: error });
     } finally {
       setLoading(false);
     }

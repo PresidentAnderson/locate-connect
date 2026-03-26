@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ function MentalHealthContent() {
           setGroups(data.data ?? []);
         }
       } catch (error) {
-        console.error("Error fetching mental health resources:", error);
+        logger.error("Error fetching mental health resources:", { error: error });
       } finally {
         setLoading(false);
       }

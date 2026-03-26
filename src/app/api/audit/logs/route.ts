@@ -10,6 +10,7 @@ import {
   mapAuditLogFromDb,
   AuditActionType,
 } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/audit/logs
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching audit logs:', error);
+    logger.error('Error fetching audit logs:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -180,7 +181,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating audit log:', error);
+    logger.error('Error creating audit log:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

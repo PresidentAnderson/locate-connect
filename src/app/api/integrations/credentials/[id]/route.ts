@@ -11,7 +11,9 @@ import {
 import {
   getCredentialsVault,
   type AccessControlContext,
+  type Role,
 } from '@/lib/integrations/credentials-vault';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -47,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const context: AccessControlContext = {
       userId: user.id,
-      userRole: profile.role as any,
+      userRole: profile.role as Role,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
       userAgent: request.headers.get('user-agent') || undefined,
     };
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess(metadata);
   } catch (error) {
-    console.error('Credential GET error:', error);
+    logger.error('Credential GET error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -104,7 +106,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       'allowedUsers',
       'allowedRoles',
     ];
-    const updateFields: Record<string, any> = {};
+    const updateFields: Record<string, string | number | boolean | string[] | null | undefined> = {};
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
@@ -134,13 +136,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return apiNotFound('Credential not found');
       }
-      console.error('Credential update error:', error);
+      logger.error('Credential update error:', { error: error });
       return apiServerError('Failed to update credential');
     }
 
     return apiSuccess(data);
   } catch (error) {
-    console.error('Credential PATCH error:', error);
+    logger.error('Credential PATCH error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -175,7 +177,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const context: AccessControlContext = {
       userId: user.id,
-      userRole: profile.role as any,
+      userRole: profile.role as Role,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
       userAgent: request.headers.get('user-agent') || undefined,
     };
@@ -195,7 +197,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       throw error;
     }
   } catch (error) {
-    console.error('Credential DELETE error:', error);
+    logger.error('Credential DELETE error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../lib/logger";
 
 // =============================================================================
 // GET /api/geofences/[id] - Get single geofence
@@ -34,7 +35,7 @@ export async function GET(
       .single();
 
     if (error) {
-      console.error("Failed to fetch geofence:", error);
+      logger.error("Failed to fetch geofence:", { error: error });
       return NextResponse.json(
         { error: "Geofence not found" },
         { status: 404 }
@@ -63,7 +64,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error fetching geofence:", error);
+    logger.error("Error fetching geofence:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch geofence" },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Failed to update geofence:", error);
+      logger.error("Failed to update geofence:", { error: error });
       // Return success for demo
       return NextResponse.json({
         success: true,
@@ -143,7 +144,7 @@ export async function PATCH(
       },
     });
   } catch (error) {
-    console.error("Error updating geofence:", error);
+    logger.error("Error updating geofence:", { error: error });
     return NextResponse.json(
       { error: "Failed to update geofence" },
       { status: 500 }
@@ -176,14 +177,14 @@ export async function DELETE(
       .eq("id", id);
 
     if (error) {
-      console.error("Failed to delete geofence:", error);
+      logger.error("Failed to delete geofence:", { error: error });
       // Return success for demo
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting geofence:", error);
+    logger.error("Error deleting geofence:", { error: error });
     return NextResponse.json(
       { error: "Failed to delete geofence" },
       { status: 500 }

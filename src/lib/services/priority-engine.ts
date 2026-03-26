@@ -13,7 +13,6 @@ interface PriorityAssessment {
 interface AssessmentInput {
   age: number;
   hoursMissing?: number;
-  hourssMissing?: number;
   hasMedicalCondition: boolean;
   requiresDailyMedication: boolean;
   hasMentalHealthCondition: boolean;
@@ -36,7 +35,7 @@ export function assessPriority(
 ): PriorityAssessment {
   const profile = getJurisdictionProfile(jurisdictionId);
   const weights = profile.priorityWeights;
-  const hoursMissing = input.hoursMissing ?? input.hourssMissing ?? 0;
+  const hoursMissing = input.hoursMissing ?? 0;
 
   const factors: PriorityFactor[] = [];
   let totalScore = 0;

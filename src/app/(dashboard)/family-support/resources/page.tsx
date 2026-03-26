@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { logger } from "../../../../lib/logger";
 
 interface SupportResource {
   id: string;
@@ -82,7 +83,7 @@ export default function ResourcesPage() {
         setResources(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch resources:", error);
+      logger.error("Failed to fetch resources:", { error: error });
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import type {
   InsightPattern,
   DistanceInsight,
 } from "@/types/heatmap.types";
+import { logger } from "../../../../lib/logger";
 
 const MINIMUM_PRIVACY_THRESHOLD = 10;
 
@@ -78,11 +79,11 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (patternsResult.error) {
-      console.error("Error fetching patterns:", patternsResult.error);
+      logger.error("Error fetching patterns:", { error: patternsResult.error });
     }
 
     if (clustersResult.error) {
-      console.error("Error fetching clusters:", clustersResult.error);
+      logger.error("Error fetching clusters:", { error: clustersResult.error });
     }
 
     const patterns = patternsResult.data || [];
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error in insights API:", error);
+    logger.error("Error in insights API:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

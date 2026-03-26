@@ -11,6 +11,7 @@ import type {
   EscalationEvent,
   EscalationCondition,
 } from "@/types/agent.types";
+import { logger } from "../logger";
 
 interface PriorityEscalationAgentSettings {
   rules: EscalationRule[];
@@ -95,10 +96,7 @@ export class PriorityEscalationAgent extends BaseAgent {
           }
         }
       } catch (error) {
-        console.error(
-          `[PriorityEscalationAgent] Error evaluating case ${caseData.id}:`,
-          error
-        );
+        logger.error(`[PriorityEscalationAgent] Error evaluating case ${caseData.id}:`, { error: error });
         this.errors.push(this.createError(error));
       }
     }
@@ -145,7 +143,7 @@ export class PriorityEscalationAgent extends BaseAgent {
       .limit(100);
 
     if (error) {
-      console.error("[PriorityEscalationAgent] Error fetching cases:", error);
+      logger.error("[PriorityEscalationAgent] Error fetching cases:", { error: error });
       return [];
     }
 
@@ -352,9 +350,7 @@ export class PriorityEscalationAgent extends BaseAgent {
   ): Promise<void> {
     const supabase = await createClient();
 
-    console.log(
-      `[PriorityEscalationAgent] Escalating case ${caseData.caseNumber} from P${caseData.priority} to P${newPriority} (rule: ${rule.name})`
-    );
+    logger.debug(`[PriorityEscalationAgent] Escalating case ${caseData.caseNumber} from P${caseData.priority} to P${newPriority} (rule: ${rule.name})`);
 
     // Update case priority in database
     const { error: updateError } = await supabase
@@ -366,7 +362,7 @@ export class PriorityEscalationAgent extends BaseAgent {
       .eq("id", caseData.id);
 
     if (updateError) {
-      console.error("[PriorityEscalationAgent] Error updating priority:", updateError);
+      logger.error("[PriorityEscalationAgent] Error updating priority:", { error: updateError });
       throw updateError;
     }
 
@@ -479,9 +475,9 @@ export class PriorityEscalationAgent extends BaseAgent {
     });
 
     if (error) {
-      console.error("[PriorityEscalationAgent] Error logging event:", error);
+      logger.error("[PriorityEscalationAgent] Error logging event:", { error: error });
     } else {
-      console.log(`[PriorityEscalationAgent] Logged escalation event: ${event.id}`);
+      logger.debug(`[PriorityEscalationAgent] Logged escalation event: ${event.id}`);
     }
   }
 

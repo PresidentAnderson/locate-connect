@@ -4,6 +4,7 @@ import { authenticateRequest, hasScope, meetsAccessLevel } from '@/lib/api/auth'
 import { checkRateLimit, updateRateLimitCounters } from '@/lib/api/rate-limiter';
 import { apiSuccess, apiUnauthorized, apiForbidden, apiNotFound, apiRateLimited, apiServerError, withRateLimitHeaders, withCorsHeaders } from '@/lib/api/response';
 import type { PublicCase, PublicCaseDetail } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (error.code === 'PGRST116') {
         return withCorsHeaders(apiNotFound('Case not found'));
       }
-      console.error('Case API error:', error);
+      logger.error('Case API error:', { error: error });
       return withCorsHeaders(apiServerError('Failed to fetch case'));
     }
 
@@ -134,7 +135,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const response = apiSuccess(caseData, undefined, rateLimit.headers);
     return withCorsHeaders(response);
   } catch (error) {
-    console.error('Case API error:', error);
+    logger.error('Case API error:', { error: error });
     return withCorsHeaders(apiServerError('Internal server error'));
   }
 }

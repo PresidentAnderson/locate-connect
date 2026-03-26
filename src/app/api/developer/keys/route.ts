@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiServerError, apiCreated, apiForbidden } from '@/lib/api/response';
 import { generateApiKey, hashApiKey, getApiKeyPrefix } from '@/lib/api/crypto';
 import type { CreateApiKeyInput, ApiKeyWithSecret } from '@/types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/developer/keys
@@ -48,13 +49,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Keys fetch error:', error);
+      logger.error('Keys fetch error:', { error: error });
       return apiServerError('Failed to fetch API keys');
     }
 
     return apiSuccess(data, { total: count || 0 });
   } catch (error) {
-    console.error('Keys API error:', error);
+    logger.error('Keys API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Key creation error:', error);
+      logger.error('Key creation error:', { error: error });
       return apiServerError('Failed to create API key');
     }
 
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(response);
   } catch (error) {
-    console.error('Keys API error:', error);
+    logger.error('Keys API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

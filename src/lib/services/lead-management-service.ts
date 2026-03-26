@@ -12,6 +12,7 @@ import type {
   LeadActivity,
   LeadAttachment,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateLeadInput {
   caseId: string;
@@ -138,7 +139,7 @@ class LeadManagementService {
       await this.escalateLead(lead);
     }
 
-    console.log(`[LeadService] Created lead ${id} for case ${input.caseId}`);
+    logger.debug(`[LeadService] Created lead ${id} for case ${input.caseId}`);
     return lead;
   }
 
@@ -397,9 +398,7 @@ class LeadManagementService {
       const similarity = this.calculateSimilarity(lead, existing);
       if (similarity > 0.8) {
         lead.duplicateOf = existing.id;
-        console.log(
-          `[LeadService] Potential duplicate: ${lead.id} -> ${existing.id}`
-        );
+        logger.debug(`[LeadService] Potential duplicate: ${lead.id} -> ${existing.id}`);
         break;
       }
     }
@@ -470,7 +469,7 @@ class LeadManagementService {
    * Escalate a lead - send notifications to investigators and supervisors
    */
   private async escalateLead(lead: Lead): Promise<void> {
-    console.log(`[LeadService] Escalating critical lead ${lead.id}`);
+    logger.debug(`[LeadService] Escalating critical lead ${lead.id}`);
 
     const supabase = await createClient();
 
@@ -483,7 +482,7 @@ class LeadManagementService {
         .single();
 
       if (caseError || !caseData) {
-        console.error("[LeadService] Failed to fetch case for escalation:", caseError);
+        logger.error("[LeadService] Failed to fetch case for escalation:", { error: caseError });
         return;
       }
 
@@ -494,7 +493,7 @@ class LeadManagementService {
         .or("role.eq.supervisor,role.eq.admin,id.eq." + (caseData.assigned_to || ""));
 
       if (usersError || !usersToNotify?.length) {
-        console.error("[LeadService] No users to notify for escalation");
+        logger.error("[LeadService] No users to notify for escalation");
         return;
       }
 
@@ -525,9 +524,9 @@ class LeadManagementService {
         .insert(notifications);
 
       if (notifyError) {
-        console.error("[LeadService] Failed to create escalation notifications:", notifyError);
+        logger.error("[LeadService] Failed to create escalation notifications:", { error: notifyError });
       } else {
-        console.log(`[LeadService] Sent escalation notifications to ${notifications.length} users`);
+        logger.debug(`[LeadService] Sent escalation notifications to ${notifications.length} users`);
       }
 
       // Log the escalation to case activity
@@ -550,7 +549,7 @@ class LeadManagementService {
         await this.checkProximityAlerts(lead, caseData.case_number);
       }
     } catch (error) {
-      console.error("[LeadService] Escalation error:", error);
+      logger.error("[LeadService] Escalation error:", { error: error });
     }
   }
 
@@ -594,7 +593,7 @@ class LeadManagementService {
 
       // If within 5km, create a pattern alert
       if (distance < 5) {
-        console.log(`[LeadService] Proximity alert: Lead ${lead.id} is ${distance.toFixed(2)}km from lead ${recentLead.id}`);
+        logger.debug(`[LeadService] Proximity alert: Lead ${lead.id} is ${distance.toFixed(2)}km from lead ${recentLead.id}`);
 
         // Get supervisors to notify about the pattern
         const { data: supervisors } = await supabase

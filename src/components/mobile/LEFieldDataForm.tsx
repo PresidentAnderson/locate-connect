@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { saveFieldData, saveDraftForm, getDraftForm, deleteDraftForm } from "@/lib/pwa/indexeddb";
 import { registerBackgroundSync } from "@/lib/pwa/service-worker";
+import { logger } from "../../lib/logger";
 
 export interface FieldEntry {
   id: string;
@@ -245,7 +246,7 @@ export function LEFieldDataForm({
         });
       },
       (error) => {
-        console.error("Location error:", error);
+        logger.error("Location error:", { error: error });
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
@@ -305,7 +306,7 @@ export function LEFieldDataForm({
 
       onSubmit(entry);
     } catch (error) {
-      console.error("Submission error:", error);
+      logger.error("Submission error:", { error: error });
     } finally {
       setIsSubmitting(false);
     }

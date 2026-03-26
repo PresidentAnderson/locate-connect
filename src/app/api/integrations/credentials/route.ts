@@ -8,8 +8,9 @@ import {
   apiCreated,
   apiForbidden,
 } from '@/lib/api/response';
-import { getCredentialsVault, type AccessControlContext } from '@/lib/integrations/credentials-vault';
+import { getCredentialsVault, type AccessControlContext, type Role } from '@/lib/integrations/credentials-vault';
 import type { AuthenticationType, CredentialData } from '@/types';
+import { logger } from "../../../../lib/logger";
 
 interface CreateCredentialInput {
   name: string;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Credentials fetch error:', error);
+      logger.error('Credentials fetch error:', { error: error });
       return apiServerError('Failed to fetch credentials');
     }
 
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Credentials API error:', error);
+    logger.error('Credentials API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
     // Build access control context
     const context: AccessControlContext = {
       userId: user.id,
-      userRole: profile.role as any,
+      userRole: profile.role as Role,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
       userAgent: request.headers.get('user-agent') || undefined,
     };
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Credential storage error:', error);
+      logger.error('Credential storage error:', { error: error });
       return apiServerError('Failed to store credential');
     }
 
@@ -182,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(data);
   } catch (error) {
-    console.error('Credentials API error:', error);
+    logger.error('Credentials API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

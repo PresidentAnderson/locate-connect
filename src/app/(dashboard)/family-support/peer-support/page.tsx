@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { logger } from "../../../../lib/logger";
 
 interface SupportGroup {
   id: string;
@@ -72,7 +73,7 @@ export default function PeerSupportPage() {
         setSupportGroups(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch support groups:", error);
+      logger.error("Failed to fetch support groups:", { error: error });
     } finally {
       setLoading(false);
     }

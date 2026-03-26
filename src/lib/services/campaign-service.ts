@@ -12,6 +12,7 @@ import { socialService } from "@/lib/services/social-service";
 import { emailService } from "@/lib/services/email-service";
 import { smsService } from "@/lib/services/sms-service";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../logger";
 
 export interface CreateCampaignInput {
   caseId: string;
@@ -90,7 +91,7 @@ class CampaignService {
     };
 
     this.campaigns.set(id, campaign);
-    console.log(`[CampaignService] Created campaign ${id} for case ${input.caseId}`);
+    logger.debug(`[CampaignService] Created campaign ${id} for case ${input.caseId}`);
     return campaign;
   }
 
@@ -153,7 +154,7 @@ class CampaignService {
     await this.postToChannels(campaign);
 
     this.campaigns.set(campaignId, campaign);
-    console.log(`[CampaignService] Launched campaign ${campaignId}`);
+    logger.debug(`[CampaignService] Launched campaign ${campaignId}`);
     return campaign;
   }
 
@@ -317,10 +318,7 @@ class CampaignService {
         channel.status = "active";
         channel.lastPostedAt = new Date().toISOString();
       } catch (error) {
-        console.error(
-          `[CampaignService] Failed to post to ${channel.type}:`,
-          error
-        );
+        logger.error(`[CampaignService] Failed to post to ${channel.type}:`, { error: error });
         channel.status = "failed";
       }
     }
@@ -335,7 +333,7 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Posting to ${channel.type}`);
+    logger.debug(`[CampaignService] Posting to ${channel.type}`);
 
     switch (channel.type) {
       case "facebook":
@@ -369,7 +367,7 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Facebook post: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Facebook post: ${campaign.headline}`);
 
     const supabase = await createClient();
 
@@ -382,7 +380,7 @@ class CampaignService {
       .eq("is_connected", true);
 
     if (!accounts?.length) {
-      console.log("[CampaignService] No Facebook accounts configured");
+      logger.debug("[CampaignService] No Facebook accounts configured");
       return;
     }
 
@@ -398,9 +396,9 @@ class CampaignService {
       });
 
       if (result.success) {
-        console.log(`[CampaignService] Posted to Facebook: ${result.postId}`);
+        logger.debug(`[CampaignService] Posted to Facebook: ${result.postId}`);
       } else {
-        console.error(`[CampaignService] Facebook post failed: ${result.error}`);
+        logger.error(`[CampaignService] Facebook post failed: ${result.error}`);
       }
     }
   }
@@ -412,7 +410,7 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Twitter post: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Twitter post: ${campaign.headline}`);
 
     const supabase = await createClient();
 
@@ -425,7 +423,7 @@ class CampaignService {
       .eq("is_connected", true);
 
     if (!accounts?.length) {
-      console.log("[CampaignService] No Twitter accounts configured");
+      logger.debug("[CampaignService] No Twitter accounts configured");
       return;
     }
 
@@ -442,9 +440,9 @@ class CampaignService {
       });
 
       if (result.success) {
-        console.log(`[CampaignService] Posted to Twitter: ${result.postId}`);
+        logger.debug(`[CampaignService] Posted to Twitter: ${result.postId}`);
       } else {
-        console.error(`[CampaignService] Twitter post failed: ${result.error}`);
+        logger.error(`[CampaignService] Twitter post failed: ${result.error}`);
       }
     }
   }
@@ -456,11 +454,11 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Instagram post: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Instagram post: ${campaign.headline}`);
 
     // Instagram requires an image
     if (!campaign.imageUrls?.length) {
-      console.log("[CampaignService] Instagram requires an image, skipping");
+      logger.debug("[CampaignService] Instagram requires an image, skipping");
       return;
     }
 
@@ -475,7 +473,7 @@ class CampaignService {
       .eq("is_connected", true);
 
     if (!accounts?.length) {
-      console.log("[CampaignService] No Instagram accounts configured");
+      logger.debug("[CampaignService] No Instagram accounts configured");
       return;
     }
 
@@ -491,9 +489,9 @@ class CampaignService {
       });
 
       if (result.success) {
-        console.log(`[CampaignService] Posted to Instagram: ${result.postId}`);
+        logger.debug(`[CampaignService] Posted to Instagram: ${result.postId}`);
       } else {
-        console.error(`[CampaignService] Instagram post failed: ${result.error}`);
+        logger.error(`[CampaignService] Instagram post failed: ${result.error}`);
       }
     }
   }
@@ -505,12 +503,12 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Nextdoor post: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Nextdoor post: ${campaign.headline}`);
 
     // Nextdoor integration would require their Agency API
     // For now, log the intent
-    console.log("[CampaignService] Nextdoor posting not yet implemented");
-    console.log("[CampaignService] Would post:", {
+    logger.debug("[CampaignService] Nextdoor posting not yet implemented");
+    logger.debug("[CampaignService] Would post:", {
       headline: campaign.headline,
       description: campaign.description,
       targetArea: campaign.targetArea,
@@ -524,7 +522,7 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Sending email campaign: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Sending email campaign: ${campaign.headline}`);
 
     const supabase = await createClient();
 
@@ -543,7 +541,7 @@ class CampaignService {
     const { data: subscribers, error } = await query;
 
     if (error || !subscribers?.length) {
-      console.log("[CampaignService] No email subscribers found");
+      logger.debug("[CampaignService] No email subscribers found");
       return;
     }
 
@@ -561,9 +559,7 @@ class CampaignService {
       tags: ["campaign", campaign.type, campaign.id],
     });
 
-    console.log(
-      `[CampaignService] Email campaign sent: ${result.sent} delivered, ${result.failed} failed`
-    );
+    logger.debug(`[CampaignService] Email campaign sent: ${result.sent} delivered, ${result.failed} failed`);
   }
 
   /**
@@ -573,7 +569,7 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(`[CampaignService] Sending SMS campaign: ${campaign.headline}`);
+    logger.debug(`[CampaignService] Sending SMS campaign: ${campaign.headline}`);
 
     const supabase = await createClient();
 
@@ -592,7 +588,7 @@ class CampaignService {
     const { data: subscribers, error } = await query;
 
     if (error || !subscribers?.length) {
-      console.log("[CampaignService] No SMS subscribers found");
+      logger.debug("[CampaignService] No SMS subscribers found");
       return;
     }
 
@@ -606,9 +602,7 @@ class CampaignService {
       message,
     });
 
-    console.log(
-      `[CampaignService] SMS campaign sent: ${result.sent} delivered, ${result.failed} failed`
-    );
+    logger.debug(`[CampaignService] SMS campaign sent: ${result.sent} delivered, ${result.failed} failed`);
   }
 
   /**
@@ -618,14 +612,12 @@ class CampaignService {
     campaign: AwarenessCampaign,
     channel: CampaignChannel
   ): Promise<void> {
-    console.log(
-      `[CampaignService] Digital billboard campaign: ${campaign.headline}`
-    );
+    logger.debug(`[CampaignService] Digital billboard campaign: ${campaign.headline}`);
 
     // Digital billboard integration would require partnership with billboard networks
     // (e.g., Clear Channel, Lamar, Outfront Media)
-    console.log("[CampaignService] Digital billboard posting not yet implemented");
-    console.log("[CampaignService] Would submit:", {
+    logger.debug("[CampaignService] Digital billboard posting not yet implemented");
+    logger.debug("[CampaignService] Would submit:", {
       headline: campaign.headline,
       imageUrl: campaign.imageUrls?.[0],
       targetArea: campaign.targetArea,
@@ -766,7 +758,7 @@ This alert was sent by LocateConnect.
     campaign.flyerUrl = flyerUrl;
     this.campaigns.set(campaignId, campaign);
 
-    console.log(`[CampaignService] Generated flyer for campaign ${campaignId}`);
+    logger.debug(`[CampaignService] Generated flyer for campaign ${campaignId}`);
     return { flyerUrl };
   }
 

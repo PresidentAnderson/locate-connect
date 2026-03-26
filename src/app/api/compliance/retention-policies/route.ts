@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ComplianceFramework, RetentionPolicyStatus } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 interface CreateRetentionPolicyInput {
   name: string;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching retention policies:', error);
+    logger.error('Error fetching retention policies:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating retention policy:', error);
+    logger.error('Error creating retention policy:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -194,7 +195,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error updating retention policy:', error);
+    logger.error('Error updating retention policy:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

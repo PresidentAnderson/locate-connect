@@ -3,8 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+interface PeriodAggregate {
+  periodStart: string;
+  totalCasesResolved: number;
+  casesFoundAliveSafe: number;
+  avgResolutionHours?: number;
+}
+
 interface AnalyticsData {
-  aggregates: any[];
+  aggregates: PeriodAggregate[];
   summary: {
     totalReports: number;
     avgResolutionHours: number;

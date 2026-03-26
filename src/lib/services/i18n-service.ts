@@ -8,6 +8,7 @@ import type {
   LanguageConfig,
   TranslationNamespace,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 // Language configurations
 const LANGUAGE_CONFIGS: Record<SupportedLanguage, LanguageConfig> = {
@@ -462,7 +463,7 @@ class I18nService {
   setLanguage(language: SupportedLanguage): void {
     if (LANGUAGE_CONFIGS[language]) {
       this.currentLanguage = language;
-      console.log(`[i18n] Language set to ${language}`);
+      logger.debug(`[i18n] Language set to ${language}`);
     }
   }
 

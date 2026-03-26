@@ -15,6 +15,7 @@ import type {
   ResolutionSource,
   TimeOfDayCategory,
 } from "@/types/heatmap.types";
+import { logger } from "../../../lib/logger";
 
 const MINIMUM_PRIVACY_THRESHOLD = 10;
 
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching heat map data:", error);
+    logger.error("Error fetching heat map data:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch heat map data" },
       { status: 500 }
@@ -583,7 +584,7 @@ async function logAccess(
       patterns_returned: metadata.totalPatterns,
     });
   } catch (error) {
-    console.error("Failed to log heat map access:", error);
+    logger.error("Failed to log heat map access:", { error: error });
     // Don't fail the request if logging fails
   }
 }

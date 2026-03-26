@@ -5,6 +5,7 @@ import type {
   AgeGroupCategory,
   PatternType,
 } from "@/types/heatmap.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching patterns:", error);
+      logger.error("Error fetching patterns:", { error: error });
       return NextResponse.json(
         { error: "Failed to fetch patterns" },
         { status: 500 }
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
       total: patterns.length,
     });
   } catch (error) {
-    console.error("Error in patterns API:", error);
+    logger.error("Error in patterns API:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

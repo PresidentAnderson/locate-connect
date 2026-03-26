@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 interface OverviewStats {
   totalCases: number;
@@ -89,7 +90,7 @@ export default function StatisticsPage() {
           break;
       }
     } catch (error) {
-      console.error("Failed to fetch statistics:", error);
+      logger.error("Failed to fetch statistics:", { error: error });
     } finally {
       setLoading(false);
     }

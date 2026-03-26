@@ -6,6 +6,7 @@ import {
   apiServerError,
   apiNotFound,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/[id]/health
@@ -74,7 +75,7 @@ export async function GET(
       history: healthHistory || [],
     });
   } catch (error) {
-    console.error('Health API error:', error);
+    logger.error('Health API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -183,7 +184,7 @@ export async function POST(
       });
     }
   } catch (error) {
-    console.error('Health check API error:', error);
+    logger.error('Health check API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiBadRequest, apiUnauthorized, apiServerError } from '@/lib/api/response';
 import { generateAuthorizationCode, hashApiKey } from '@/lib/api/crypto';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/developer/oauth/authorize
@@ -137,7 +138,7 @@ export async function GET(request: NextRequest) {
       headers: { 'Content-Type': 'text/html' },
     });
   } catch (error) {
-    console.error('OAuth authorize error:', error);
+    logger.error('OAuth authorize error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -215,7 +216,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      console.error('Authorization code insert error:', insertError);
+      logger.error('Authorization code insert error:', { error: insertError });
       redirectUrl.searchParams.set('error', 'server_error');
       if (state) redirectUrl.searchParams.set('state', state);
       return NextResponse.redirect(redirectUrl);
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.redirect(redirectUrl);
   } catch (error) {
-    console.error('OAuth authorize POST error:', error);
+    logger.error('OAuth authorize POST error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

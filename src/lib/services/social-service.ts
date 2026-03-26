@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import type { SocialMediaPlatform } from '@/types';
+import { logger } from "../logger";
 
 // =============================================================================
 // Types
@@ -87,7 +88,7 @@ class SocialServiceImpl {
 
     // Log in development or when not configured
     if (!this.isConfigured || process.env.NODE_ENV === 'development') {
-      console.log('[SOCIAL] Would post to:', {
+      logger.debug('[SOCIAL] Would post to:', {
         platform: account.platform,
         account: account.account_name,
         messageLength: options.message.length,
@@ -117,7 +118,7 @@ class SocialServiceImpl {
           return { success: false, error: `Unsupported platform: ${account.platform}` };
       }
     } catch (err) {
-      console.error('[SOCIAL] Post error:', err);
+      logger.error('[SOCIAL] Post error:', { error: err });
       return {
         success: false,
         error: err instanceof Error ? err.message : 'Unknown error',
@@ -155,7 +156,7 @@ class SocialServiceImpl {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('[SOCIAL] Facebook error:', data);
+      logger.error('[SOCIAL] Facebook error:', { error: data });
       return { success: false, error: data.error?.message || 'Facebook API error' };
     }
 
@@ -213,8 +214,8 @@ class SocialServiceImpl {
 
     // In production, you would properly sign the request with OAuth 1.0a
     // For now, we'll log and simulate
-    console.log('[SOCIAL] Twitter OAuth would be signed with params:', oauthParams);
-    console.log('[SOCIAL] Would post tweet:', tweetText.substring(0, 100) + '...');
+    logger.debug('[SOCIAL] Twitter OAuth would be signed with params:', { data: oauthParams });
+    logger.debug('[SOCIAL] Would post tweet:', { data: tweetText.substring(0, 100) + '...' });
 
     await this.logPost({
       accountId: options.accountId,
@@ -264,7 +265,7 @@ class SocialServiceImpl {
     const containerData = await containerResponse.json();
 
     if (!containerResponse.ok) {
-      console.error('[SOCIAL] Instagram container error:', containerData);
+      logger.error('[SOCIAL] Instagram container error:', { error: containerData });
       return { success: false, error: containerData.error?.message || 'Instagram API error' };
     }
 
@@ -284,7 +285,7 @@ class SocialServiceImpl {
     const publishData = await publishResponse.json();
 
     if (!publishResponse.ok) {
-      console.error('[SOCIAL] Instagram publish error:', publishData);
+      logger.error('[SOCIAL] Instagram publish error:', { error: publishData });
       return { success: false, error: publishData.error?.message || 'Instagram publish error' };
     }
 
@@ -327,7 +328,7 @@ class SocialServiceImpl {
       .eq('auto_post_amber', true);
 
     if (error || !accounts?.length) {
-      console.log('[SOCIAL] No social media accounts configured for AMBER alert auto-posting');
+      logger.debug('[SOCIAL] No social media accounts configured for AMBER alert auto-posting');
       return { success: true, posted: 0, failed: 0, results: [] };
     }
 
@@ -423,7 +424,7 @@ class SocialServiceImpl {
         external_post_id: data.externalPostId,
       });
     } catch (error) {
-      console.error('[SOCIAL] Failed to log post:', error);
+      logger.error('[SOCIAL] Failed to log post:', { error: error });
     }
   }
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PublicGallery } from "@/components/success-stories";
 import type { StoryGalleryItem, SuccessMetrics } from "@/types/success-story.types";
+import { logger } from "../../../lib/logger";
 
 export default function SuccessStoriesPage() {
   const [stories, setStories] = useState<StoryGalleryItem[]>([]);
@@ -26,7 +27,7 @@ export default function SuccessStoriesPage() {
       setMetrics(data.metrics);
       setFilters(data.filters);
     } catch (error) {
-      console.error("Error fetching stories:", error);
+      logger.error("Error fetching stories:", { error: error });
     } finally {
       setIsLoading(false);
     }

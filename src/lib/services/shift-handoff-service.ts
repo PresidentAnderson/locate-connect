@@ -10,6 +10,7 @@ import type {
   CaseHandoffSummary,
   HandoffActionItem,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateHandoffInput {
   toOfficerId: string;
@@ -69,7 +70,7 @@ class ShiftHandoffService {
     };
 
     this.handoffs.set(id, handoff);
-    console.log(`[ShiftHandoffService] Created handoff ${id}`);
+    logger.debug(`[ShiftHandoffService] Created handoff ${id}`);
     return handoff;
   }
 
@@ -227,7 +228,7 @@ class ShiftHandoffService {
     // Notify incoming officer
     await this.notifyIncomingOfficer(handoff);
 
-    console.log(`[ShiftHandoffService] Submitted handoff ${handoffId}`);
+    logger.debug(`[ShiftHandoffService] Submitted handoff ${handoffId}`);
     return handoff;
   }
 
@@ -253,7 +254,7 @@ class ShiftHandoffService {
     handoff.acknowledgedAt = new Date().toISOString();
 
     this.handoffs.set(handoffId, handoff);
-    console.log(`[ShiftHandoffService] Acknowledged handoff ${handoffId}`);
+    logger.debug(`[ShiftHandoffService] Acknowledged handoff ${handoffId}`);
     return handoff;
   }
 
@@ -358,9 +359,7 @@ class ShiftHandoffService {
    * Notify incoming officer of pending handoff
    */
   private async notifyIncomingOfficer(handoff: ShiftHandoff): Promise<void> {
-    console.log(
-      `[ShiftHandoffService] Notifying ${handoff.toOfficerName} of pending handoff`
-    );
+    logger.debug(`[ShiftHandoffService] Notifying ${handoff.toOfficerName} of pending handoff`);
 
     const supabase = await createClient();
 
@@ -372,7 +371,7 @@ class ShiftHandoffService {
       .single();
 
     if (officerError || !officer) {
-      console.error("[ShiftHandoffService] Failed to get officer profile:", officerError);
+      logger.error("[ShiftHandoffService] Failed to get officer profile:", { error: officerError });
       return;
     }
 
@@ -470,7 +469,7 @@ Please review this handoff report and mark it as acknowledged when you begin you
       },
     });
 
-    console.log(`[ShiftHandoffService] Notified officer ${officer.email} of handoff ${handoff.id}`);
+    logger.debug(`[ShiftHandoffService] Notified officer ${officer.email} of handoff ${handoff.id}`);
   }
 
   /**
@@ -500,7 +499,7 @@ Please review this handoff report and mark it as acknowledged when you begin you
       .in("id", caseIds);
 
     if (casesError) {
-      console.error("[ShiftHandoffService] Failed to fetch cases:", casesError);
+      logger.error("[ShiftHandoffService] Failed to fetch cases:", { error: casesError });
       return [];
     }
 
@@ -550,7 +549,7 @@ Please review this handoff report and mark it as acknowledged when you begin you
     // Sort by priority (lower number = higher priority)
     summaries.sort((a, b) => a.priority - b.priority);
 
-    console.log(`[ShiftHandoffService] Generated summaries for ${summaries.length} cases`);
+    logger.debug(`[ShiftHandoffService] Generated summaries for ${summaries.length} cases`);
     return summaries;
   }
 }

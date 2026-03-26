@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     .download(exportRecord.file_path);
 
   if (downloadError || !fileData) {
-    console.error('Error downloading export file:', downloadError);
+    logger.error('Error downloading export file:', { error: downloadError });
     return NextResponse.json({ error: 'Failed to download export file' }, { status: 500 });
   }
 

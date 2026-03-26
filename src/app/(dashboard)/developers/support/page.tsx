@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { logger } from "../../../../lib/logger";
 
 interface SupportTicket {
   id: string;
@@ -48,7 +49,7 @@ export default function SupportPage() {
         setTickets(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch tickets:", error);
+      logger.error("Failed to fetch tickets:", { error: error });
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { PartnerActivity, PartnerActivityType } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Partner activity fetch error:', error);
+    logger.error('Partner activity fetch error:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

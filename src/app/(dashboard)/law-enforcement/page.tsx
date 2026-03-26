@@ -4,7 +4,7 @@ export default function LawEnforcementPage() {
   return (
     <div className="space-y-6">
       {/* Header with Live Status */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Law Enforcement Dashboard</h1>
           <p className="mt-1 text-sm text-gray-500">
@@ -12,11 +12,11 @@ export default function LawEnforcementPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2">
-            <span className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+          <div className="flex items-center gap-2 rounded-full bg-green-50 px-4 py-2" role="status">
+            <span className="h-3 w-3 rounded-full bg-green-500 animate-pulse" aria-hidden="true" />
             <span className="text-sm font-medium text-green-700">Live Feed Active</span>
           </div>
-          <button className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700">
+          <button className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2">
             New Case Alert
           </button>
         </div>
@@ -36,13 +36,13 @@ export default function LawEnforcementPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Active Cases - Real-Time</h2>
             <div className="flex items-center gap-2">
-              <select className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
+              <select aria-label="Filter by priority" className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
                 <option>All Priorities</option>
                 <option>Priority 0 - Critical</option>
                 <option>Priority 1 - High</option>
                 <option>Priority 2 - Medium</option>
               </select>
-              <select className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm">
+              <select aria-label="Filter by jurisdiction" className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
                 <option>Montreal (SPVM)</option>
                 <option>All Jurisdictions</option>
               </select>

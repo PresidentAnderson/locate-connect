@@ -8,6 +8,7 @@ import type {
   TipPriorityBucket,
 } from '@/types/tip-verification.types';
 import { TipReviewModal } from './TipReviewModal';
+import { logger } from "../../lib/logger";
 
 interface VerificationQueuePanelProps {
   onStatsChange?: () => void;
@@ -40,7 +41,7 @@ export function VerificationQueuePanel({ onStatsChange }: VerificationQueuePanel
         setItems(data.items);
       }
     } catch (error) {
-      console.error('Failed to fetch queue:', error);
+      logger.error('Failed to fetch queue:', { error: error });
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +73,7 @@ export function VerificationQueuePanel({ onStatsChange }: VerificationQueuePanel
         }
       }
     } catch (error) {
-      console.error('Failed to claim item:', error);
+      logger.error('Failed to claim item:', { error: error });
     }
   }
 

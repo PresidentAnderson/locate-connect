@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { ComplianceFramework, ComplianceStatus } from '@/types/audit.types';
+import { logger } from "../../../../lib/logger";
 
 interface CreateAssessmentInput {
   framework: ComplianceFramework;
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching compliance assessments:', error);
+    logger.error('Error fetching compliance assessments:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -138,7 +139,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating compliance assessment:', error);
+    logger.error('Error creating compliance assessment:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

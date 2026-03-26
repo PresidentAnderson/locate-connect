@@ -10,6 +10,7 @@ import {
   apiServerError,
   apiUnauthorized,
 } from "@/lib/api/response";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -71,7 +72,7 @@ export async function GET(request: Request) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error("Error fetching review queue:", error);
+    logger.error("Error fetching review queue:", { error: error });
     return apiServerError(error.message);
   }
 

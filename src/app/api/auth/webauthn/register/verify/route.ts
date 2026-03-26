@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../../lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (insertError) {
-      console.error("Error storing credential:", insertError);
+      logger.error("Error storing credential:", { error: insertError });
       return NextResponse.json(
         { error: "Failed to store credential" },
         { status: 500 }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
       message: "WebAuthn credential registered successfully",
     });
   } catch (error) {
-    console.error("WebAuthn registration verify error:", error);
+    logger.error("WebAuthn registration verify error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

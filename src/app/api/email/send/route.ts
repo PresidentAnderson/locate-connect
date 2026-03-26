@@ -12,6 +12,7 @@ import {
   generateTrackingPixelHtml,
 } from '@/lib/services/email-tracking-service';
 import type { CreateEmailTrackingInput, EmailTrackingResponse } from '@/types/email-tracking.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * POST /api/email/send
@@ -94,7 +95,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError || !trackingRecord) {
-      console.error('Failed to create email tracking record:', createError);
+      logger.error('Failed to create email tracking record:', { error: createError });
       return apiServerError('Failed to create email tracking record');
     }
 
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     return apiCreated(response);
   } catch (error) {
-    console.error('Email send API error:', error);
+    logger.error('Email send API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

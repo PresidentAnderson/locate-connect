@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { CreateThankYouMessageInput } from '@/types/success-story.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/success-stories/thank-you
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
   const { data: messages, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching thank you messages:', error);
+    logger.error('Error fetching thank you messages:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -170,7 +171,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (createError) {
-    console.error('Error creating thank you message:', createError);
+    logger.error('Error creating thank you message:', { error: createError });
     return NextResponse.json({ error: createError.message }, { status: 500 });
   }
 

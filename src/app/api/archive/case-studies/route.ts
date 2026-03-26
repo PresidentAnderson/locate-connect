@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 /**
  * GET /api/archive/case-studies
@@ -43,7 +45,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (query) {
-      dbQuery = dbQuery.or(`title.ilike.%${query}%,abstract.ilike.%${query}%`);
+      const s = sanitizeSearchInput(query);
+      dbQuery = dbQuery.or(`title.ilike.%${s}%,abstract.ilike.%${s}%`);
     }
 
     const offset = (page - 1) * pageSize;
@@ -54,7 +57,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Case studies query error:', error);
+      logger.error('Case studies query error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to fetch case studies' },
         { status: 500 }
@@ -68,7 +71,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('Case studies API error:', error);
+    logger.error('Case studies API error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -137,7 +140,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Create case study error:', error);
+      logger.error('Create case study error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to create case study' },
         { status: 500 }
@@ -155,7 +158,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error('Case study creation error:', error);
+    logger.error('Case study creation error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { amberDistributionService } from "@/lib/services/amber-distribution";
 import type { AmberDistributionChannel } from "@/types";
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(result);
   } catch (err) {
-    console.error("Distribution error:", err);
+    logger.error("Distribution error:", { error: err });
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Distribution failed" },
       { status: 500 }

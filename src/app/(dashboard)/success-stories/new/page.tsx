@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { StorySubmissionForm } from "@/components/success-stories";
 import type { CreateStoryInput } from "@/types/success-story.types";
+import { logger } from "../../../../lib/logger";
 
 interface ResolvedCase {
   id: string;
@@ -57,7 +58,7 @@ function NewStoryForm() {
 
       setResolvedCases(cases);
     } catch (error) {
-      console.error("Error fetching cases:", error);
+      logger.error("Error fetching cases:", { error: error });
     } finally {
       setIsLoading(false);
     }

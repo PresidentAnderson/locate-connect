@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { VerificationQueuePanel } from '@/components/tip-verification/VerificationQueuePanel';
 import { VerificationStatsPanel } from '@/components/tip-verification/VerificationStatsPanel';
 import { TipsterLeaderboard } from '@/components/tip-verification/TipsterLeaderboard';
+import { logger } from "../../../lib/logger";
 
 interface QueueStats {
   totalPending: number;
@@ -64,7 +65,7 @@ export default function TipVerificationPage() {
         setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      logger.error('Failed to fetch stats:', { error: error });
     } finally {
       setIsLoading(false);
     }

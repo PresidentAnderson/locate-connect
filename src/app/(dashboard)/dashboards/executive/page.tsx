@@ -71,7 +71,7 @@ export default function ExecutiveDashboard() {
     setDateRange({
       startDate: startDate.toISOString().split("T")[0],
       endDate: now.toISOString().split("T")[0],
-      preset: preset as any,
+      preset: preset as DateRangeFilter["preset"],
     });
   }
 

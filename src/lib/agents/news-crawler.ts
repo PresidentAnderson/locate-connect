@@ -6,6 +6,7 @@
 import { BaseAgent } from "./base-agent";
 import { createClient } from "@/lib/supabase/server";
 import type { AgentConfig, NewsArticle } from "@/types/agent.types";
+import { logger } from "../logger";
 
 interface NewsCrawlerSettings {
   sources: NewsSource[];
@@ -84,10 +85,7 @@ export class NewsCrawlerAgent extends BaseAgent {
 
         this.addMetric(`source_${source.id}_articles`, articles.length);
       } catch (error) {
-        console.error(
-          `[NewsCrawlerAgent] Error searching source ${source.name}:`,
-          error
-        );
+        logger.error(`[NewsCrawlerAgent] Error searching source ${source.name}:`, { error: error });
         this.errors.push(this.createError(error));
       }
 
@@ -122,7 +120,7 @@ export class NewsCrawlerAgent extends BaseAgent {
       .limit(50);
 
     if (error || !cases) {
-      console.error("[NewsCrawlerAgent] Error fetching cases:", error);
+      logger.error("[NewsCrawlerAgent] Error fetching cases:", { error: error });
       return [];
     }
 
@@ -216,7 +214,7 @@ export class NewsCrawlerAgent extends BaseAgent {
     terms: string[]
   ): Promise<NewsArticle[]> {
     this.addMetric("rss_feeds_searched", 1);
-    console.log(`[NewsCrawlerAgent] Searching RSS feed: ${source.name}`);
+    logger.debug(`[NewsCrawlerAgent] Searching RSS feed: ${source.name}`);
 
     try {
       // Build search URL for Google News RSS
@@ -235,14 +233,14 @@ export class NewsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[NewsCrawlerAgent] RSS fetch failed: ${response.status}`);
+        logger.error(`[NewsCrawlerAgent] RSS fetch failed: ${response.status}`);
         return [];
       }
 
       const xmlText = await response.text();
       return this.parseRSSFeed(xmlText, source, terms);
     } catch (error) {
-      console.error(`[NewsCrawlerAgent] RSS error:`, error);
+      logger.error(`[NewsCrawlerAgent] RSS error:`, { error: error });
       return [];
     }
   }
@@ -316,7 +314,7 @@ export class NewsCrawlerAgent extends BaseAgent {
       }
     }
 
-    console.log(`[NewsCrawlerAgent] Found ${articles.length} relevant articles from ${source.name}`);
+    logger.debug(`[NewsCrawlerAgent] Found ${articles.length} relevant articles from ${source.name}`);
     return articles;
   }
 
@@ -354,12 +352,12 @@ export class NewsCrawlerAgent extends BaseAgent {
     terms: string[]
   ): Promise<NewsArticle[]> {
     this.addMetric("api_searches", 1);
-    console.log(`[NewsCrawlerAgent] Searching news API: ${source.name}`);
+    logger.debug(`[NewsCrawlerAgent] Searching news API: ${source.name}`);
 
     // Check for API key
     const apiKey = source.apiKey || process.env.NEWSAPI_KEY;
     if (!apiKey) {
-      console.log(`[NewsCrawlerAgent] No API key for ${source.name}, skipping`);
+      logger.debug(`[NewsCrawlerAgent] No API key for ${source.name}, skipping`);
       return [];
     }
 
@@ -373,8 +371,8 @@ export class NewsCrawlerAgent extends BaseAgent {
       const lookbackDate = new Date();
       lookbackDate.setDate(lookbackDate.getDate() - this.settings.lookbackDays);
 
-      console.log(`[NewsCrawlerAgent] Query: ${query}`);
-      console.log(`[NewsCrawlerAgent] Since: ${lookbackDate.toISOString()}`);
+      logger.debug(`[NewsCrawlerAgent] Query: ${query}`);
+      logger.debug(`[NewsCrawlerAgent] Since: ${lookbackDate.toISOString()}`);
 
       // NewsAPI endpoint
       const url = new URL(`${source.url}/everything`);
@@ -393,7 +391,7 @@ export class NewsCrawlerAgent extends BaseAgent {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`[NewsCrawlerAgent] NewsAPI error: ${response.status} - ${errorText}`);
+        logger.error(`[NewsCrawlerAgent] NewsAPI error: ${response.status} - ${errorText}`);
         return [];
       }
 
@@ -413,7 +411,7 @@ export class NewsCrawlerAgent extends BaseAgent {
       };
 
       if (data.status !== "ok") {
-        console.error("[NewsCrawlerAgent] NewsAPI returned error status");
+        logger.error("[NewsCrawlerAgent] NewsAPI returned error status");
         return [];
       }
 
@@ -459,10 +457,10 @@ export class NewsCrawlerAgent extends BaseAgent {
         }
       }
 
-      console.log(`[NewsCrawlerAgent] Found ${articles.length} relevant articles from NewsAPI`);
+      logger.debug(`[NewsCrawlerAgent] Found ${articles.length} relevant articles from NewsAPI`);
       return articles;
     } catch (error) {
-      console.error(`[NewsCrawlerAgent] NewsAPI error:`, error);
+      logger.error(`[NewsCrawlerAgent] NewsAPI error:`, { error: error });
       return [];
     }
   }
@@ -472,7 +470,7 @@ export class NewsCrawlerAgent extends BaseAgent {
     terms: string[]
   ): Promise<NewsArticle[]> {
     this.addMetric("pages_scraped", 1);
-    console.log(`[NewsCrawlerAgent] Scraping: ${source.name}`);
+    logger.debug(`[NewsCrawlerAgent] Scraping: ${source.name}`);
 
     // Web scraping for news sites - uses basic HTML parsing
     // Note: More robust scraping would use puppeteer or playwright
@@ -490,14 +488,14 @@ export class NewsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.log(`[NewsCrawlerAgent] Scrape failed: ${response.status}`);
+        logger.debug(`[NewsCrawlerAgent] Scrape failed: ${response.status}`);
         return [];
       }
 
       const html = await response.text();
       return this.parseScrapedHTML(html, source, terms);
     } catch (error) {
-      console.error(`[NewsCrawlerAgent] Scrape error:`, error);
+      logger.error(`[NewsCrawlerAgent] Scrape error:`, { error: error });
       return [];
     }
   }
@@ -563,7 +561,7 @@ export class NewsCrawlerAgent extends BaseAgent {
       }
     }
 
-    console.log(`[NewsCrawlerAgent] Scraped ${articles.length} articles from ${source.name}`);
+    logger.debug(`[NewsCrawlerAgent] Scraped ${articles.length} articles from ${source.name}`);
     return articles;
   }
 
@@ -616,9 +614,7 @@ export class NewsCrawlerAgent extends BaseAgent {
   ): Promise<void> {
     const supabase = await createClient();
 
-    console.log(
-      `[NewsCrawlerAgent] Storing article for case ${caseId}: ${article.title}`
-    );
+    logger.debug(`[NewsCrawlerAgent] Storing article for case ${caseId}: ${article.title}`);
 
     try {
       // Check if article already exists (by URL)
@@ -659,7 +655,7 @@ export class NewsCrawlerAgent extends BaseAgent {
         .single();
 
       if (error) {
-        console.error("[NewsCrawlerAgent] Error storing article:", error);
+        logger.error("[NewsCrawlerAgent] Error storing article:", { error: error });
         return;
       }
 
@@ -689,7 +685,7 @@ export class NewsCrawlerAgent extends BaseAgent {
         });
       }
     } catch (error) {
-      console.error("[NewsCrawlerAgent] Error storing article:", error);
+      logger.error("[NewsCrawlerAgent] Error storing article:", { error: error });
     }
   }
 
@@ -699,9 +695,7 @@ export class NewsCrawlerAgent extends BaseAgent {
   ): Promise<void> {
     const supabase = await createClient();
 
-    console.log(
-      `[NewsCrawlerAgent] High-relevance article alert for case ${caseId}`
-    );
+    logger.debug(`[NewsCrawlerAgent] High-relevance article alert for case ${caseId}`);
 
     try {
       // Get case details for the notification
@@ -744,7 +738,7 @@ export class NewsCrawlerAgent extends BaseAgent {
         },
       });
     } catch (error) {
-      console.error("[NewsCrawlerAgent] Error triggering alert:", error);
+      logger.error("[NewsCrawlerAgent] Error triggering alert:", { error: error });
     }
   }
 

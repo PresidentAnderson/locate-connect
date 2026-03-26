@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mediaFAQService } from "@/lib/services/media-faq-service";
 import type { MediaRequest, SupportedLanguage } from "@/types/compliance.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -81,7 +82,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Media FAQ error:", error);
+    logger.error("[API] Media FAQ error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("[API] Media FAQ error:", error);
+    logger.error("[API] Media FAQ error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

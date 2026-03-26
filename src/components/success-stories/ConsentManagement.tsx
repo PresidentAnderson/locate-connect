@@ -9,6 +9,7 @@ import type {
   ConsentWorkflowState,
   CreateConsentInput,
 } from "@/types/success-story.types";
+import { logger } from "../../lib/logger";
 
 interface ConsentManagementProps {
   storyId: string;
@@ -110,7 +111,7 @@ export function ConsentManagement({
       });
       onRefresh();
     } catch (error) {
-      console.error("Error adding consent:", error);
+      logger.error("Error adding consent:", { error: error });
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +128,7 @@ export function ConsentManagement({
       setWithdrawalReason("");
       onRefresh();
     } catch (error) {
-      console.error("Error withdrawing consent:", error);
+      logger.error("Error withdrawing consent:", { error: error });
     } finally {
       setIsSubmitting(false);
     }

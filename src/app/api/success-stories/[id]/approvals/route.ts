@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { CreateApprovalInput, SubmitApprovalInput } from '@/types/success-story.types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     .order('approval_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching approvals:', error);
+    logger.error('Error fetching approvals:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -229,7 +230,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (createError) {
-    console.error('Error creating approval:', createError);
+    logger.error('Error creating approval:', { error: createError });
     return NextResponse.json({ error: createError.message }, { status: 500 });
   }
 

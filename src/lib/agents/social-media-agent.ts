@@ -20,6 +20,7 @@ import type {
   MonitoredAccountInfo,
   SocialAlertPriority,
 } from "@/types/social-monitoring.types";
+import { logger } from "../logger";
 
 // =============================================================================
 // TYPES
@@ -86,9 +87,9 @@ export class SocialMediaAgent extends BaseAgent {
         try {
           await adapter.authenticate();
           this.adapters.set(platform, adapter);
-          console.log(`[SocialMediaAgent] Initialized adapter for ${platform}`);
+          logger.debug(`[SocialMediaAgent] Initialized adapter for ${platform}`);
         } catch (error) {
-          console.error(`[SocialMediaAgent] Failed to initialize ${platform} adapter:`, error);
+          logger.error(`[SocialMediaAgent] Failed to initialize ${platform} adapter:`, { error: error });
         }
       }
     }
@@ -111,7 +112,7 @@ export class SocialMediaAgent extends BaseAgent {
     this.addMetric("cases_checked", cases.length);
 
     if (cases.length === 0) {
-      console.log("[SocialMediaAgent] No active cases with monitored accounts found");
+      logger.debug("[SocialMediaAgent] No active cases with monitored accounts found");
       return { itemsProcessed, leadsGenerated, alertsTriggered };
     }
 
@@ -148,7 +149,7 @@ export class SocialMediaAgent extends BaseAgent {
         // Update last activity time for the case's accounts
         await this.updateAccountLastActivity(caseData.accounts);
       } catch (error) {
-        console.error(`[SocialMediaAgent] Error checking case ${caseData.caseId}:`, error);
+        logger.error(`[SocialMediaAgent] Error checking case ${caseData.caseId}:`, { error: error });
         this.errors.push(this.createError(error));
       }
     }
@@ -188,7 +189,7 @@ export class SocialMediaAgent extends BaseAgent {
         .order("last_activity_at", { ascending: true, nullsFirst: true });
 
       if (error) {
-        console.error("[SocialMediaAgent] Error fetching cases:", error);
+        logger.error("[SocialMediaAgent] Error fetching cases:", { error: error });
         return [];
       }
 
@@ -228,7 +229,7 @@ export class SocialMediaAgent extends BaseAgent {
 
       return Array.from(caseMap.values());
     } catch (error) {
-      console.error("[SocialMediaAgent] Error in getActiveCasesWithAccounts:", error);
+      logger.error("[SocialMediaAgent] Error in getActiveCasesWithAccounts:", { error: error });
       return [];
     }
   }
@@ -291,14 +292,14 @@ export class SocialMediaAgent extends BaseAgent {
         .single();
 
       if (error) {
-        console.error("[SocialMediaAgent] Error storing activity:", error);
+        logger.error("[SocialMediaAgent] Error storing activity:", { error: error });
         throw error;
       }
 
-      console.log(`[SocialMediaAgent] Stored activity: ${activity.activityType} (${data.id})`);
+      logger.debug(`[SocialMediaAgent] Stored activity: ${activity.activityType} (${data.id})`);
       return { id: data.id, isNew: true };
     } catch (error) {
-      console.error("[SocialMediaAgent] Error in storeActivity:", error);
+      logger.error("[SocialMediaAgent] Error in storeActivity:", { error: error });
       throw error;
     }
   }
@@ -321,7 +322,7 @@ export class SocialMediaAgent extends BaseAgent {
           .eq("id", account.id);
       }
     } catch (error) {
-      console.error("[SocialMediaAgent] Error updating account activity:", error);
+      logger.error("[SocialMediaAgent] Error updating account activity:", { error: error });
     }
   }
 
@@ -347,10 +348,7 @@ export class SocialMediaAgent extends BaseAgent {
         );
         activities.push(...platformActivities);
       } catch (error) {
-        console.error(
-          `[SocialMediaAgent] Error checking ${account.platform}/${account.username}:`,
-          error
-        );
+        logger.error(`[SocialMediaAgent] Error checking ${account.platform}/${account.username}:`, { error: error });
         await this.recordAccountError(account.id, error);
       }
 
@@ -373,7 +371,7 @@ export class SocialMediaAgent extends BaseAgent {
     const adapter = this.adapters.get(platform);
 
     if (!adapter) {
-      console.warn(`[SocialMediaAgent] No adapter available for ${platform}`);
+      logger.warn(`[SocialMediaAgent] No adapter available for ${platform}`);
       return [];
     }
 
@@ -388,7 +386,7 @@ export class SocialMediaAgent extends BaseAgent {
         this.convertToAgentActivity(platformActivity, caseId, platform, account)
       );
     } catch (error) {
-      console.error(`[SocialMediaAgent] Adapter error for ${platform}/${username}:`, error);
+      logger.error(`[SocialMediaAgent] Adapter error for ${platform}/${username}:`, { error: error });
       this.addMetric(`${platform}_errors`, 1);
       throw error;
     }
@@ -443,7 +441,7 @@ export class SocialMediaAgent extends BaseAgent {
         })
         .eq("id", accountId);
     } catch (err) {
-      console.error("[SocialMediaAgent] Error recording account error:", err);
+      logger.error("[SocialMediaAgent] Error recording account error:", { error: err });
     }
   }
 
@@ -494,10 +492,10 @@ export class SocialMediaAgent extends BaseAgent {
       // Link the lead to the activity event
       await this.linkLeadToActivity(activityEventId, lead.id);
 
-      console.log(`[SocialMediaAgent] Generated lead ${lead.id} for case ${caseId}`);
+      logger.debug(`[SocialMediaAgent] Generated lead ${lead.id} for case ${caseId}`);
       return true;
     } catch (error) {
-      console.error(`[SocialMediaAgent] Error generating lead for case ${caseId}:`, error);
+      logger.error(`[SocialMediaAgent] Error generating lead for case ${caseId}:`, { error: error });
       return false;
     }
   }
@@ -518,7 +516,7 @@ export class SocialMediaAgent extends BaseAgent {
         })
         .eq("id", activityEventId);
     } catch (error) {
-      console.error("[SocialMediaAgent] Error linking lead to activity:", error);
+      logger.error("[SocialMediaAgent] Error linking lead to activity:", { error: error });
     }
   }
 
@@ -618,13 +616,13 @@ export class SocialMediaAgent extends BaseAgent {
       if (result.success) {
         // Mark the activity as having sent an alert
         await this.markActivityAlertSent(activityEventId, alertConfig.priority);
-        console.log(`[SocialMediaAgent] Alert triggered for case ${caseData.caseId}`);
+        logger.debug(`[SocialMediaAgent] Alert triggered for case ${caseData.caseId}`);
         return true;
       }
 
       return false;
     } catch (error) {
-      console.error(`[SocialMediaAgent] Error triggering alert for case ${caseData.caseId}:`, error);
+      logger.error(`[SocialMediaAgent] Error triggering alert for case ${caseData.caseId}:`, { error: error });
       return false;
     }
   }
@@ -666,7 +664,7 @@ export class SocialMediaAgent extends BaseAgent {
         })
         .eq("id", activityEventId);
     } catch (error) {
-      console.error("[SocialMediaAgent] Error marking alert sent:", error);
+      logger.error("[SocialMediaAgent] Error marking alert sent:", { error: error });
     }
   }
 

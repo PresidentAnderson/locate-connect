@@ -15,6 +15,7 @@ import {
   COMPLIANCE_STATUS_CONFIG,
   VIOLATION_SEVERITY_CONFIG,
 } from '@/types/audit.types';
+import { logger } from "../../lib/logger";
 
 interface ComplianceScore {
   framework: ComplianceFramework;
@@ -77,7 +78,7 @@ export function ComplianceDashboard() {
       };
       setData(mockData);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      logger.error('Error loading dashboard data:', { error: error });
     } finally {
       setLoading(false);
     }
@@ -96,7 +97,7 @@ export function ComplianceDashboard() {
         await loadDashboardData();
       }
     } catch (error) {
-      console.error('Error running compliance check:', error);
+      logger.error('Error running compliance check:', { error: error });
     } finally {
       setRunningCheck(false);
     }

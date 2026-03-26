@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { FRAuditAction, FRAuditCategory } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 interface FRAuditLog {
   id: string;
@@ -129,7 +130,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching FR audit logs:', error);
+    logger.error('Error fetching FR audit logs:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
     const { data: logs, error } = await query;
 
     if (error) {
-      console.error('Error fetching audit summary:', error);
+      logger.error('Error fetching audit summary:', { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -214,7 +215,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ data: summary });
 
   } catch (error) {
-    console.error('Audit summary error:', error);
+    logger.error('Audit summary error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

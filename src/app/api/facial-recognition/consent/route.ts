@@ -12,6 +12,7 @@ import {
   ConsentStatus,
   AllowedUses,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/consent
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching consent records:', error);
+    logger.error('Error fetching consent records:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Error creating consent record:', dbError);
+      logger.error('Error creating consent record:', { error: dbError });
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
@@ -229,7 +230,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Consent creation error:', error);
+    logger.error('Consent creation error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -346,7 +347,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating consent:', updateError);
+      logger.error('Error updating consent:', { error: updateError });
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -355,7 +356,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Consent update error:', error);
+    logger.error('Consent update error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -446,6 +447,6 @@ async function logConsentAudit(
       ip_address: ipAddress,
     });
   } catch (error) {
-    console.error('Error logging consent audit:', error);
+    logger.error('Error logging consent audit:', { error: error });
   }
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 interface LiaisonContact {
   id: string;
@@ -93,7 +94,7 @@ export default function LiaisonContactsPage() {
           setContacts(data.data || []);
         }
       } catch (err) {
-        console.error("Error fetching contacts:", err);
+        logger.error("Error fetching contacts:", { error: err });
         setError("Failed to load liaison contacts. Please try again.");
       } finally {
         setLoading(false);

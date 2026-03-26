@@ -6,6 +6,7 @@
 import { BaseAgent } from "./base-agent";
 import { createClient } from "@/lib/supabase/server";
 import type { AgentConfig, HospitalMatch } from "@/types/agent.types";
+import { logger } from "../logger";
 
 interface HospitalRegistryAgentSettings {
   hospitals: HospitalConfig[];
@@ -115,10 +116,7 @@ export class HospitalRegistryAgent extends BaseAgent {
 
           this.addMetric(`hospital_${hospital.id}_queries`, 1);
         } catch (error) {
-          console.error(
-            `[HospitalRegistryAgent] Error querying ${hospital.name} for case ${caseData.caseId}:`,
-            error
-          );
+          logger.error(`[HospitalRegistryAgent] Error querying ${hospital.name} for case ${caseData.caseId}:`, { error: error });
           this.errors.push(this.createError(error));
         }
 
@@ -162,7 +160,7 @@ export class HospitalRegistryAgent extends BaseAgent {
       .limit(this.settings.maxCasesPerRun * 2);
 
     if (error) {
-      console.error("[HospitalRegistryAgent] Error fetching cases:", error);
+      logger.error("[HospitalRegistryAgent] Error fetching cases:", { error: error });
       return [];
     }
 
@@ -221,10 +219,10 @@ export class HospitalRegistryAgent extends BaseAgent {
     hospital: HospitalConfig,
     criteria: CaseSearchCriteria
   ): Promise<HospitalPatient[]> {
-    console.log(`[HospitalRegistryAgent] Querying ${hospital.name} for ${criteria.firstName} ${criteria.lastName}`);
+    logger.debug(`[HospitalRegistryAgent] Querying ${hospital.name} for ${criteria.firstName} ${criteria.lastName}`);
 
     if (!hospital.apiUrl) {
-      console.log(`[HospitalRegistryAgent] No API URL configured for ${hospital.name}`);
+      logger.debug(`[HospitalRegistryAgent] No API URL configured for ${hospital.name}`);
       return [];
     }
 
@@ -261,7 +259,7 @@ export class HospitalRegistryAgent extends BaseAgent {
           });
 
           if (!fhirResponse.ok) {
-            console.error(`[HospitalRegistryAgent] FHIR API error: ${fhirResponse.status}`);
+            logger.error(`[HospitalRegistryAgent] FHIR API error: ${fhirResponse.status}`);
             return [];
           }
 
@@ -315,7 +313,7 @@ export class HospitalRegistryAgent extends BaseAgent {
           });
 
           if (!hl7Response.ok) {
-            console.error(`[HospitalRegistryAgent] HL7 API error: ${hl7Response.status}`);
+            logger.error(`[HospitalRegistryAgent] HL7 API error: ${hl7Response.status}`);
             return [];
           }
 
@@ -350,7 +348,7 @@ export class HospitalRegistryAgent extends BaseAgent {
           });
 
           if (!response.ok) {
-            console.error(`[HospitalRegistryAgent] API error: ${response.status}`);
+            logger.error(`[HospitalRegistryAgent] API error: ${response.status}`);
             return [];
           }
 
@@ -384,7 +382,7 @@ export class HospitalRegistryAgent extends BaseAgent {
           }));
       }
     } catch (error) {
-      console.error(`[HospitalRegistryAgent] Query error for ${hospital.name}:`, error);
+      logger.error(`[HospitalRegistryAgent] Query error for ${hospital.name}:`, { error: error });
       return [];
     }
   }
@@ -610,9 +608,7 @@ export class HospitalRegistryAgent extends BaseAgent {
   private async storeMatch(match: HospitalMatch, caseData: CaseSearchCriteria): Promise<void> {
     const supabase = await createClient();
 
-    console.log(
-      `[HospitalRegistryAgent] Storing match: ${caseData.caseNumber} -> ${match.hospitalName} (${match.matchScore}%)`
-    );
+    logger.debug(`[HospitalRegistryAgent] Storing match: ${caseData.caseNumber} -> ${match.hospitalName} (${match.matchScore}%)`);
 
     // Store the match
     const { error: matchError } = await supabase.from("hospital_matches").insert({
@@ -629,7 +625,7 @@ export class HospitalRegistryAgent extends BaseAgent {
     });
 
     if (matchError) {
-      console.error("[HospitalRegistryAgent] Error storing match:", matchError);
+      logger.error("[HospitalRegistryAgent] Error storing match:", { error: matchError });
       throw matchError;
     }
 
@@ -659,9 +655,7 @@ export class HospitalRegistryAgent extends BaseAgent {
   private async triggerAlert(caseData: CaseSearchCriteria, match: HospitalMatch): Promise<void> {
     const supabase = await createClient();
 
-    console.log(
-      `[HospitalRegistryAgent] High-confidence match alert for case ${caseData.caseNumber}`
-    );
+    logger.debug(`[HospitalRegistryAgent] High-confidence match alert for case ${caseData.caseNumber}`);
 
     // Create notification for assigned investigator
     if (caseData.assignedTo) {
@@ -748,7 +742,7 @@ export function createHospitalRegistryAgent(
       const parsed = JSON.parse(hospitalConfigStr) as HospitalConfig[];
       hospitals.push(...parsed);
     } catch {
-      console.error("[HospitalRegistryAgent] Failed to parse HOSPITAL_REGISTRIES env");
+      logger.error("[HospitalRegistryAgent] Failed to parse HOSPITAL_REGISTRIES env");
     }
   }
 

@@ -9,6 +9,8 @@ import {
   apiForbidden,
 } from '@/lib/api/response';
 import type { IntegrationCategory, IntegrationTemplate } from '@/types';
+import { logger } from "../../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 interface CreateTemplateInput {
   name: string;
@@ -51,10 +53,12 @@ export async function GET(request: NextRequest) {
       query = query.eq('category', category);
     }
     if (provider) {
-      query = query.ilike('provider', `%${provider}%`);
+      const p = sanitizeSearchInput(provider);
+      query = query.ilike('provider', `%${p}%`);
     }
     if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+      const s = sanitizeSearchInput(search);
+      query = query.or(`name.ilike.%${s}%,description.ilike.%${s}%`);
     }
     if (tags && tags.length > 0) {
       query = query.overlaps('tags', tags);
@@ -69,7 +73,7 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Templates fetch error:', error);
+      logger.error('Templates fetch error:', { error: error });
       return apiServerError('Failed to fetch templates');
     }
 
@@ -80,7 +84,7 @@ export async function GET(request: NextRequest) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Templates API error:', error);
+    logger.error('Templates API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -159,13 +163,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Template creation error:', error);
+      logger.error('Template creation error:', { error: error });
       return apiServerError('Failed to create template');
     }
 
     return apiCreated(data);
   } catch (error) {
-    console.error('Templates API error:', error);
+    logger.error('Templates API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

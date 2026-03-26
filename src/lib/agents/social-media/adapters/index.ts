@@ -12,6 +12,7 @@ import {
   DEFAULT_RETRY_CONFIG,
 } from './base-adapter';
 import { MockSocialMediaAdapter, createActiveUserScenario } from './mock-adapter';
+import { logger } from "../../../logger";
 
 // Re-export types and classes for convenience
 export * from './base-adapter';
@@ -105,13 +106,13 @@ class AdapterRegistry {
 
     const entry = this.adapters.get(platform);
     if (!entry || !entry.isAvailable) {
-      console.warn(`[AdapterRegistry] No adapter available for platform: ${platform}`);
+      logger.warn(`[AdapterRegistry] No adapter available for platform: ${platform}`);
       return null;
     }
 
     // Check if credentials are required but not provided
     if (entry.requiresCredentials && !credentials) {
-      console.warn(`[AdapterRegistry] Credentials required for platform: ${platform}`);
+      logger.warn(`[AdapterRegistry] Credentials required for platform: ${platform}`);
       return null;
     }
 
@@ -151,7 +152,7 @@ class AdapterRegistry {
   enableMockMode(enabled = true): void {
     this.useMockAdapters = enabled;
     if (enabled) {
-      console.log('[AdapterRegistry] Mock mode enabled - all adapters will return mock data');
+      logger.debug('[AdapterRegistry] Mock mode enabled - all adapters will return mock data');
     }
   }
 
@@ -257,9 +258,7 @@ export async function getCredentialsFromVault(
   // In production, this would integrate with VaultService
   // For now, return null to indicate no credentials available
   // The system will fall back to mock adapters in development
-  console.log(
-    `[AdapterRegistry] Credential retrieval for ${platform}/${accountId} - using mock mode`
-  );
+  logger.debug(`[AdapterRegistry] Credential retrieval for ${platform}/${accountId} - using mock mode`);
   return null;
 }
 
@@ -276,7 +275,7 @@ export function initializeAdapters(): void {
 
   if (isDevelopment) {
     adapterRegistry.enableMockMode(true);
-    console.log('[AdapterRegistry] Development mode - using mock adapters');
+    logger.debug('[AdapterRegistry] Development mode - using mock adapters');
   }
 }
 

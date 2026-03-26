@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/cron/stale-case-check
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
       errors: null,
     });
 
-    console.log('[Cron] Stale Case Check completed:', {
+    logger.debug('[Cron] Stale Case Check completed:', {
       runId,
       casesProcessed: activeCases?.length || 0,
       staleCases: staleCases.length,
@@ -162,7 +163,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Cron] Stale Case Check failed:', error);
+    logger.error('[Cron] Stale Case Check failed:', { error: error });
 
     return NextResponse.json(
       {

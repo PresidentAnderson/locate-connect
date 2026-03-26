@@ -8,6 +8,7 @@ import type {
   DispositionRecord,
   DispositionAnalytics,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 export interface CreateDispositionInput {
   caseId: string;
@@ -69,9 +70,7 @@ class DispositionService {
     };
 
     this.dispositions.set(id, record);
-    console.log(
-      `[DispositionService] Created disposition for case ${input.caseNumber}: ${input.disposition}`
-    );
+    logger.debug(`[DispositionService] Created disposition for case ${input.caseNumber}: ${input.disposition}`);
     return record;
   }
 

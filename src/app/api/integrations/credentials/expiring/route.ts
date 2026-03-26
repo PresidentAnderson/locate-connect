@@ -9,7 +9,9 @@ import {
 import {
   getCredentialsVault,
   type AccessControlContext,
+  type Role,
 } from '@/lib/integrations/credentials-vault';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/credentials/expiring
@@ -50,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     const context: AccessControlContext = {
       userId: user.id,
-      userRole: profile.role as any,
+      userRole: profile.role as Role,
       ipAddress: request.headers.get('x-forwarded-for') || undefined,
       userAgent: request.headers.get('user-agent') || undefined,
     };
@@ -82,7 +84,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Expiring credentials error:', error);
+    logger.error('Expiring credentials error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

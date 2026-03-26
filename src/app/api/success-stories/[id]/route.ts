@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import type { UpdateStoryInput } from '@/types/success-story.types';
+import { logger } from "../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return NextResponse.json({ error: 'Story not found' }, { status: 404 });
     }
-    console.error('Error fetching story:', error);
+    logger.error('Error fetching story:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -195,7 +196,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (updateError) {
-    console.error('Error updating story:', updateError);
+    logger.error('Error updating story:', { error: updateError });
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
@@ -255,7 +256,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     .eq('id', id);
 
   if (deleteError) {
-    console.error('Error deleting story:', deleteError);
+    logger.error('Error deleting story:', { error: deleteError });
     return NextResponse.json({ error: deleteError.message }, { status: 500 });
   }
 

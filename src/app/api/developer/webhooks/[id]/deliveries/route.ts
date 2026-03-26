@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { apiSuccess, apiBadRequest, apiUnauthorized, apiNotFound, apiServerError, apiForbidden } from '@/lib/api/response';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (webhookError.code === 'PGRST116') {
         return apiNotFound('Webhook not found');
       }
-      console.error('Webhook fetch error:', webhookError);
+      logger.error('Webhook fetch error:', { error: webhookError });
       return apiServerError('Failed to fetch webhook');
     }
 
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .range(offset, offset + pageSize - 1);
 
     if (error) {
-      console.error('Deliveries fetch error:', error);
+      logger.error('Deliveries fetch error:', { error: error });
       return apiServerError('Failed to fetch deliveries');
     }
 
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       total_pages: Math.ceil((count || 0) / pageSize),
     });
   } catch (error) {
-    console.error('Webhook deliveries API error:', error);
+    logger.error('Webhook deliveries API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

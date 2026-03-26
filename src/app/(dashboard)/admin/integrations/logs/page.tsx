@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../lib/logger";
 
 interface LogEntry {
   id: string;
@@ -64,7 +65,7 @@ export default function IntegrationLogsPage() {
           setLogs([]);
         }
       } catch (err) {
-        console.error('Failed to fetch integration logs:', err);
+        logger.error('Failed to fetch integration logs:', { error: err });
         setError(err instanceof Error ? err.message : 'Failed to fetch logs');
       } finally {
         setLoading(false);

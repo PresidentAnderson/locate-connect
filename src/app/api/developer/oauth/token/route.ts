@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { hashApiKey, generateAccessToken, generateRefreshToken, verifyCodeChallenge } from '@/lib/api/crypto';
 import type { OAuthTokenResponse, OAuthErrorResponse } from '@/types';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * POST /api/developer/oauth/token
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
         return oauthError('unsupported_grant_type', `Unsupported grant type: ${grantType}`);
     }
   } catch (error) {
-    console.error('OAuth token error:', error);
+    logger.error('OAuth token error:', { error: error });
     return oauthError('server_error', 'Internal server error');
   }
 }
@@ -174,7 +175,7 @@ async function handleAuthorizationCodeGrant(
     .single();
 
   if (tokenError) {
-    console.error('Token insert error:', tokenError);
+    logger.error('Token insert error:', { error: tokenError });
     return oauthError('server_error', 'Failed to create access token');
   }
 
@@ -188,7 +189,7 @@ async function handleAuthorizationCodeGrant(
     });
 
   if (refreshError) {
-    console.error('Refresh token insert error:', refreshError);
+    logger.error('Refresh token insert error:', { error: refreshError });
     return oauthError('server_error', 'Failed to create refresh token');
   }
 
@@ -304,7 +305,7 @@ async function handleRefreshTokenGrant(
     .single();
 
   if (newTokenError) {
-    console.error('Token insert error:', newTokenError);
+    logger.error('Token insert error:', { error: newTokenError });
     return oauthError('server_error', 'Failed to create access token');
   }
 
@@ -318,7 +319,7 @@ async function handleRefreshTokenGrant(
     });
 
   if (refreshError) {
-    console.error('Refresh token insert error:', refreshError);
+    logger.error('Refresh token insert error:', { error: refreshError });
     return oauthError('server_error', 'Failed to create refresh token');
   }
 
@@ -374,7 +375,7 @@ async function handleClientCredentialsGrant(
     });
 
   if (tokenError) {
-    console.error('Token insert error:', tokenError);
+    logger.error('Token insert error:', { error: tokenError });
     return oauthError('server_error', 'Failed to create access token');
   }
 

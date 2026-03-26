@@ -6,6 +6,7 @@ import {
   apiServerError,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/monitoring/dashboard
@@ -168,7 +169,7 @@ export async function GET(request: NextRequest) {
       recentAlerts: recentAlerts?.map(a => ({
         id: a.id,
         integrationId: a.integration_id,
-        integrationName: (a.integrations as any)?.name,
+        integrationName: (a.integrations as { name?: string } | null)?.name,
         type: a.type,
         severity: a.severity,
         title: a.title,
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest) {
       categoryBreakdown,
     });
   } catch (error) {
-    console.error('Dashboard API error:', error);
+    logger.error('Dashboard API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

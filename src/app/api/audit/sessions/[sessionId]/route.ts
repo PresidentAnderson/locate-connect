@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { mapUserSessionFromDb } from '@/types/audit.types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ sessionId: string }>;
@@ -113,7 +114,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (error) {
-    console.error('Error updating session:', error);
+    logger.error('Error updating session:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -174,7 +175,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     .eq('id', sessionId);
 
   if (error) {
-    console.error('Error terminating session:', error);
+    logger.error('Error terminating session:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 interface ExportRequest {
   format: 'json' | 'csv';
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
   const { data: auditLogs, error } = await query;
 
   if (error) {
-    console.error('Error fetching audit logs for export:', error);
+    logger.error('Error fetching audit logs for export:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

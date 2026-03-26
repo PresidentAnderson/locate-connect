@@ -5,7 +5,10 @@ import type {
   GeneratedReport,
   ReportGenerationRequest,
   ReportGenerationResponse,
+  ReportFrequency,
+  ReportFormat,
 } from "@/types/dashboard.types";
+import { logger } from "../../../../lib/logger";
 
 // GET - Fetch scheduled and generated reports
 export async function GET(request: NextRequest) {
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(results);
   } catch (error) {
-    console.error("Error fetching reports:", error);
+    logger.error("Error fetching reports:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch reports" },
       { status: 500 }
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
       .eq("id", report.id);
 
     if (updateError) {
-      console.error("Error updating report status:", updateError);
+      logger.error("Error updating report status:", { error: updateError });
     }
 
     const response: ReportGenerationResponse = {
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error("Error generating report:", error);
+    logger.error("Error generating report:", { error: error });
     return NextResponse.json(
       { error: "Failed to generate report" },
       { status: 500 }
@@ -130,8 +133,58 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// Helper types for DB row shapes
+interface ScheduledReportDbRow {
+  id: string;
+  name: string;
+  description?: string;
+  report_type: string;
+  frequency: ReportFrequency;
+  next_run_at: string;
+  last_run_at?: string;
+  timezone: string;
+  jurisdiction_id?: string;
+  organization_id?: string;
+  date_range_days: number;
+  custom_filters?: Record<string, unknown>;
+  format: ReportFormat;
+  include_charts: boolean;
+  include_branding: boolean;
+  recipients?: { email: string; name: string }[];
+  cc_recipients?: { email: string; name: string }[];
+  subject_template?: string;
+  body_template?: string;
+  created_by: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface GeneratedReportDbRow {
+  id: string;
+  scheduled_report_id?: string;
+  name: string;
+  report_type: string;
+  format: ReportFormat;
+  date_from: string;
+  date_to: string;
+  jurisdiction_id?: string;
+  organization_id?: string;
+  filters_applied?: Record<string, unknown>;
+  file_url?: string;
+  file_size_bytes?: number;
+  generated_by?: string;
+  generation_started_at?: string;
+  generation_completed_at?: string;
+  generation_error?: string;
+  delivery_status: "sent" | "failed" | "pending";
+  delivered_at?: string;
+  delivery_error?: string;
+  created_at: string;
+}
+
 // Helper functions
-function formatScheduledReport(data: any): ScheduledReport {
+function formatScheduledReport(data: ScheduledReportDbRow): ScheduledReport {
   return {
     id: data.id,
     name: data.name,
@@ -159,7 +212,7 @@ function formatScheduledReport(data: any): ScheduledReport {
   };
 }
 
-function formatGeneratedReport(data: any): GeneratedReport {
+function formatGeneratedReport(data: GeneratedReportDbRow): GeneratedReport {
   return {
     id: data.id,
     scheduledReportId: data.scheduled_report_id,

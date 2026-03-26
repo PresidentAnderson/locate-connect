@@ -21,8 +21,10 @@ import {
   AccessControlService,
   getAccessControlService,
   type AccessControlContext,
+  type Role,
 } from './access-control';
 import { AuditLoggerService, getAuditLogger } from './audit-logger';
+import { logger } from '../../logger';
 
 export interface VaultServiceConfig {
   enableCaching?: boolean;
@@ -145,7 +147,7 @@ export class CredentialsVaultService {
       });
 
     if (error) {
-      console.error('[CredentialsVault] Store error:', error);
+      logger.error('[CredentialsVault] Store error:', { error: error });
       throw new Error('Failed to store credential');
     }
 
@@ -571,7 +573,7 @@ export class CredentialsVaultService {
     const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[CredentialsVault] List error:', error);
+      logger.error('[CredentialsVault] List error:', { error: error });
       return [];
     }
 
@@ -583,7 +585,7 @@ export class CredentialsVaultService {
         return (
           c.allowedUsers.includes(context.userId) ||
           c.allowedRoles.some((role) =>
-            this.accessControl.userHasRole(context, role as any)
+            this.accessControl.userHasRole(context, role as Role)
           )
         );
       });
@@ -740,7 +742,7 @@ export class CredentialsVaultService {
       .order('expires_at', { ascending: true });
 
     if (error) {
-      console.error('[CredentialsVault] Get expiring error:', error);
+      logger.error('[CredentialsVault] Get expiring error:', { error: error });
       return [];
     }
 
@@ -778,7 +780,7 @@ export class CredentialsVaultService {
       .select('id');
 
     if (error) {
-      console.error('[CredentialsVault] Process expired error:', error);
+      logger.error('[CredentialsVault] Process expired error:', { error: error });
       return 0;
     }
 
@@ -801,7 +803,8 @@ export class CredentialsVaultService {
   /**
    * Map database row to VaultCredential
    */
-  private mapRowToCredential(row: any): VaultCredential {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private mapRowToCredential(row: Record<string, any>): VaultCredential {
     return {
       id: row.id,
       name: row.name,

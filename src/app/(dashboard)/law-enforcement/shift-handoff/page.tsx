@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib";
+import { logger } from "../../../../lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -90,7 +91,7 @@ export default function ShiftHandoffPage() {
         setReports(data.reports || []);
       }
     } catch (error) {
-      console.error("Error loading shift handoff data:", error);
+      logger.error("Error loading shift handoff data:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -110,7 +111,7 @@ export default function ShiftHandoffPage() {
         setNotes("");
       }
     } catch (error) {
-      console.error("Error generating report:", error);
+      logger.error("Error generating report:", { error: error });
     } finally {
       setGenerating(false);
     }

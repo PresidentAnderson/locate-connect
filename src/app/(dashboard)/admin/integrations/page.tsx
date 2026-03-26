@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../lib/logger";
 
 type IntegrationStatus = 'active' | 'inactive' | 'error' | 'pending' | 'configuring';
 type IntegrationCategory = 'hospital' | 'border' | 'transit' | 'morgue' | 'social_media' | 'custom';
@@ -111,7 +112,7 @@ export default function IntegrationsPage() {
         setMetrics(data.data.summary);
       }
     } catch (err) {
-      console.error('Failed to fetch metrics:', err);
+      logger.error('Failed to fetch metrics:', { error: err });
     }
   }, []);
 
@@ -176,7 +177,7 @@ export default function IntegrationsPage() {
         fetchIntegrations();
       }
     } catch (err) {
-      console.error('Failed to toggle integration status:', err);
+      logger.error('Failed to toggle integration status:', { error: err });
     }
   };
 

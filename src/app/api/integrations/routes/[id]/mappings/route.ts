@@ -9,6 +9,7 @@ import {
   apiNotFound,
   apiBadRequest,
 } from '@/lib/api/response';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .order('priority');
 
     if (error) {
-      console.error('Error fetching mappings:', error);
+      logger.error('Error fetching mappings:', { error: error });
       return apiServerError('Failed to fetch mappings');
     }
 
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       mappings: transformedMappings,
     });
   } catch (error) {
-    console.error('Mapping listing error:', error);
+    logger.error('Mapping listing error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -241,7 +242,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error creating mapping:', error);
+      logger.error('Error creating mapping:', { error: error });
       return apiServerError('Failed to create mapping');
     }
 
@@ -271,7 +272,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Mapping creation error:', error);
+    logger.error('Mapping creation error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -361,7 +362,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }),
     });
   } catch (error) {
-    console.error('Mapping reorder error:', error);
+    logger.error('Mapping reorder error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

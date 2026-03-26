@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { authenticateRequest, hasScope } from '@/lib/api/auth';
 import { checkRateLimit, updateRateLimitCounters } from '@/lib/api/rate-limiter';
 import { apiPaginated, apiUnauthorized, apiForbidden, apiRateLimited, apiServerError, withRateLimitHeaders, withCorsHeaders } from '@/lib/api/response';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/v1/alerts
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Alerts API error:', error);
+      logger.error('Alerts API error:', { error: error });
       return withCorsHeaders(apiServerError('Failed to fetch alerts'));
     }
 
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
     const response = apiPaginated(alerts, count || 0, page, pageSize, rateLimit.headers);
     return withCorsHeaders(response);
   } catch (error) {
-    console.error('Alerts API error:', error);
+    logger.error('Alerts API error:', { error: error });
     return withCorsHeaders(apiServerError('Internal server error'));
   }
 }

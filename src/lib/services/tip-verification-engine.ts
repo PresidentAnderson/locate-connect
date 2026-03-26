@@ -28,32 +28,49 @@ import type {
 // CONFIGURATION
 // =============================================================================
 
+/**
+ * Helper to read a numeric environment variable with a default fallback.
+ */
+function envInt(name: string, defaultValue: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return defaultValue;
+  const parsed = parseInt(raw, 10);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}
+
+function envFloat(name: string, defaultValue: number): number {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return defaultValue;
+  const parsed = parseFloat(raw);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}
+
 const VERIFICATION_CONFIG = {
   // Minimum credibility score to auto-verify
-  autoVerifyThreshold: 75,
+  autoVerifyThreshold: envInt('TIP_AUTO_VERIFY_THRESHOLD', 75),
   // Maximum spam score before marking as spam
-  spamThreshold: 70,
+  spamThreshold: envInt('TIP_SPAM_THRESHOLD', 70),
   // Minimum score to require human review
-  reviewThreshold: 40,
+  reviewThreshold: envInt('TIP_REVIEW_THRESHOLD', 40),
   // Maximum distance (km) for location plausibility
-  maxPlausibleDistance: 500,
+  maxPlausibleDistance: envInt('TIP_MAX_PLAUSIBLE_DISTANCE', 500),
   // Maximum travel speed (km/h) for time plausibility
-  maxTravelSpeed: 200,
+  maxTravelSpeed: envInt('TIP_MAX_TRAVEL_SPEED', 200),
   // Weights for credibility calculation
   weights: {
-    photo: 0.20,
-    location: 0.20,
-    time: 0.15,
-    text: 0.15,
-    crossReference: 0.15,
-    tipsterReliability: 0.15,
+    photo: envFloat('TIP_WEIGHT_PHOTO', 0.20),
+    location: envFloat('TIP_WEIGHT_LOCATION', 0.20),
+    time: envFloat('TIP_WEIGHT_TIME', 0.15),
+    text: envFloat('TIP_WEIGHT_TEXT', 0.15),
+    crossReference: envFloat('TIP_WEIGHT_CROSS_REFERENCE', 0.15),
+    tipsterReliability: envFloat('TIP_WEIGHT_TIPSTER_RELIABILITY', 0.15),
   },
   // SLA hours by priority
   slaHours: {
-    critical: 1,
-    high: 4,
-    medium: 24,
-    low: 72,
+    critical: envInt('TIP_SLA_CRITICAL_HOURS', 1),
+    high: envInt('TIP_SLA_HIGH_HOURS', 4),
+    medium: envInt('TIP_SLA_MEDIUM_HOURS', 24),
+    low: envInt('TIP_SLA_LOW_HOURS', 72),
   },
 };
 

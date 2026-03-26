@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../logger";
 
 // =============================================================================
 // Types
@@ -118,7 +119,7 @@ class PushServiceImpl {
     notification: PushNotification
   ): Promise<PushResult> {
     if (!this.isConfigured || process.env.NODE_ENV === 'development') {
-      console.log('[PUSH] Would send notification:', {
+      logger.debug('[PUSH] Would send notification:', {
         endpoint: subscription.endpoint.substring(0, 50) + '...',
         title: notification.title,
         body: notification.body,
@@ -163,7 +164,7 @@ class PushServiceImpl {
 
       return { success: true, messageId: `push-${Date.now()}` };
     } catch (error) {
-      console.error('[PUSH] Send error:', error);
+      logger.error('[PUSH] Send error:', { error: error });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -233,7 +234,7 @@ class PushServiceImpl {
       .in('profiles.province', provinces);
 
     if (error || !subscriptions?.length) {
-      console.log('[PUSH] No subscribers found for provinces:', provinces);
+      logger.debug('[PUSH] No subscribers found for provinces:', { data: provinces });
       return { success: true, sent: 0, failed: 0, expired: 0 };
     }
 
@@ -243,7 +244,7 @@ class PushServiceImpl {
       return prefs?.amber_alerts !== false;
     });
 
-    console.log(`[PUSH] Sending to ${eligibleSubscriptions.length} subscribers in provinces:`, provinces);
+    logger.debug(`[PUSH] Sending to ${eligibleSubscriptions.length} subscribers in provinces:`, { data: provinces });
 
     let sent = 0;
     let failed = 0;
@@ -425,10 +426,10 @@ class PushServiceImpl {
       }
 
       const errorText = await response.text();
-      console.error(`[PUSH] Push failed: ${response.status}`, errorText);
+      logger.error(`[PUSH] Push failed: ${response.status}`, { error: errorText });
       return { success: false, error: `Push failed: ${response.status} - ${errorText}` };
     } catch (error) {
-      console.error('[PUSH] Web push error:', error);
+      logger.error('[PUSH] Web push error:', { error: error });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Web push encryption error',
@@ -677,7 +678,7 @@ class PushServiceImpl {
         error_message: data.error,
       });
     } catch (error) {
-      console.error('[PUSH] Failed to log push notification:', error);
+      logger.error('[PUSH] Failed to log push notification:', { error: error });
     }
   }
 

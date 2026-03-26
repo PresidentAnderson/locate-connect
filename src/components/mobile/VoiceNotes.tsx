@@ -7,6 +7,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { logger } from "../../lib/logger";
 
 // Web Speech API type declarations
 interface SpeechRecognitionEvent extends Event {
@@ -140,7 +141,7 @@ export function VoiceNotes({
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         if (event.error !== "no-speech") {
-          console.error("Speech recognition error:", event.error);
+          logger.error("Speech recognition error:", { error: event.error });
         }
       };
 

@@ -7,6 +7,7 @@ import {
   apiForbidden,
   apiNotFound,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return apiSuccess({ route: transformedRoute });
   } catch (error) {
-    console.error('Route fetch error:', error);
+    logger.error('Route fetch error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -173,7 +174,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error updating route:', error);
+      logger.error('Error updating route:', { error: error });
       return apiServerError('Failed to update route');
     }
 
@@ -194,7 +195,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Route update error:', error);
+    logger.error('Route update error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -245,13 +246,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting route:', error);
+      logger.error('Error deleting route:', { error: error });
       return apiServerError('Failed to delete route');
     }
 
     return apiSuccess({ message: `Route "${existing.name}" deleted successfully` });
   } catch (error) {
-    console.error('Route deletion error:', error);
+    logger.error('Route deletion error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 interface CreateLegalHoldInput {
   holdName: string;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching legal holds:', error);
+    logger.error('Error fetching legal holds:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error creating legal hold:', error);
+    logger.error('Error creating legal hold:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -237,7 +238,7 @@ export async function PATCH(request: NextRequest) {
     .single();
 
   if (error) {
-    console.error('Error updating legal hold:', error);
+    logger.error('Error updating legal hold:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

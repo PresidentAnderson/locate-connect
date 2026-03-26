@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { logger } from "../../../../../../lib/logger";
 
 interface AlertRule {
   id: string;
@@ -106,7 +107,7 @@ export default function AlertRulesPage() {
         setIntegrations(result.data?.integrations?.map((i: { id: string; name: string }) => ({ id: i.id, name: i.name })) || []);
       }
     } catch (err) {
-      console.error('Failed to fetch integrations:', err);
+      logger.error('Failed to fetch integrations:', { error: err });
     }
   }, []);
 
@@ -204,7 +205,7 @@ export default function AlertRulesPage() {
         fetchRules();
       }
     } catch (err) {
-      console.error('Failed to delete rule:', err);
+      logger.error('Failed to delete rule:', { error: err });
     } finally {
       setDeleting(null);
     }
@@ -222,7 +223,7 @@ export default function AlertRulesPage() {
         fetchRules();
       }
     } catch (err) {
-      console.error('Failed to toggle rule:', err);
+      logger.error('Failed to toggle rule:', { error: err });
     }
   };
 

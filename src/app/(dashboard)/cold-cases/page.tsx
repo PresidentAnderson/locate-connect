@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { ColdCaseDashboardStats, ColdCaseProfile, ColdCaseReview } from "@/types/cold-case.types";
+import { logger } from "../../../lib/logger";
 
 export default function ColdCasesPage() {
   const [stats, setStats] = useState<ColdCaseDashboardStats | null>(null);
@@ -32,7 +33,7 @@ export default function ColdCasesPage() {
         setColdCases(casesData.data || []);
       }
     } catch (error) {
-      console.error("Error fetching cold case data:", error);
+      logger.error("Error fetching cold case data:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -525,7 +526,7 @@ function ReviewsList() {
         setReviews(data.data || []);
       }
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      logger.error("Error fetching reviews:", { error: error });
     } finally {
       setLoading(false);
     }
@@ -615,7 +616,7 @@ function CampaignsList() {
         setCampaigns(data.data || []);
       }
     } catch (error) {
-      console.error("Error fetching campaigns:", error);
+      logger.error("Error fetching campaigns:", { error: error });
     } finally {
       setLoading(false);
     }

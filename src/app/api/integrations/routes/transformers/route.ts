@@ -6,6 +6,7 @@ import {
   apiServerError,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/routes/transformers
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
     const { data: transformers, error } = await query;
 
     if (error) {
-      console.error('Error fetching transformers:', error);
+      logger.error('Error fetching transformers:', { error: error });
       return apiServerError('Failed to fetch transformers');
     }
 
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
       total: transformers?.length || 0,
     });
   } catch (error) {
-    console.error('Transformer listing error:', error);
+    logger.error('Transformer listing error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

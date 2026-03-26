@@ -10,6 +10,7 @@ import {
   FacialRecognitionRequest,
   SearchScope,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/search
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching FR requests:', error);
+    logger.error('Error fetching FR requests:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Error creating FR request:', dbError);
+      logger.error('Error creating FR request:', { error: dbError });
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('FR search error:', error);
+    logger.error('FR search error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

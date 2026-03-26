@@ -7,6 +7,7 @@ import {
   apiServerError,
   apiForbidden,
 } from '@/lib/api/response';
+import { logger } from "../../../../../lib/logger";
 
 /**
  * GET /api/integrations/monitoring/rules
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
-      console.error('Alert rules fetch error:', error);
+      logger.error('Alert rules fetch error:', { error: error });
       return apiServerError('Failed to fetch alert rules');
     }
 
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       })) || [],
     });
   } catch (error) {
-    console.error('Alert rules API error:', error);
+    logger.error('Alert rules API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Alert rule creation error:', error);
+      logger.error('Alert rule creation error:', { error: error });
       return apiServerError('Failed to create alert rule');
     }
 
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Alert rules API error:', error);
+    logger.error('Alert rules API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -233,7 +234,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Alert rule update error:', error);
+      logger.error('Alert rule update error:', { error: error });
       return apiServerError('Failed to update alert rule');
     }
 
@@ -247,7 +248,7 @@ export async function PATCH(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Alert rules API error:', error);
+    logger.error('Alert rules API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }
@@ -289,13 +290,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', ruleId);
 
     if (error) {
-      console.error('Alert rule deletion error:', error);
+      logger.error('Alert rule deletion error:', { error: error });
       return apiServerError('Failed to delete alert rule');
     }
 
     return apiSuccess({ message: 'Alert rule deleted successfully' });
   } catch (error) {
-    console.error('Alert rules API error:', error);
+    logger.error('Alert rules API error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

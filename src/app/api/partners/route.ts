@@ -8,6 +8,8 @@ import type {
   PartnerStatus,
   PartnerAccessLevel,
 } from '@/types';
+import { logger } from "../../../lib/logger";
+import { sanitizeSearchInput } from "@/lib/api/sanitize";
 
 /**
  * GET /api/partners
@@ -52,7 +54,8 @@ export async function GET(request: NextRequest) {
 
   // Apply filters
   if (search) {
-    query = query.or(`name.ilike.%${search}%,contact_name.ilike.%${search}%,contact_email.ilike.%${search}%`);
+    const s = sanitizeSearchInput(search);
+    query = query.or(`name.ilike.%${s}%,contact_name.ilike.%${s}%,contact_email.ilike.%${s}%`);
   }
 
   if (type) {
@@ -81,7 +84,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Partners list error:', error);
+    logger.error('Partners list error:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -159,7 +162,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError) {
-    console.error('Partner creation error:', insertError);
+    logger.error('Partner creation error:', { error: insertError });
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 

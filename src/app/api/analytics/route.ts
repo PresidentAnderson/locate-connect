@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getExecutiveDashboardData } from '@/lib/services/analytics';
 import type { TimeRange } from '@/types/analytics.types';
+import { logger } from "../../../lib/logger";
 
 /**
  * GET /api/analytics
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('[API] Analytics error:', error);
+    logger.error('[API] Analytics error:', { error: error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

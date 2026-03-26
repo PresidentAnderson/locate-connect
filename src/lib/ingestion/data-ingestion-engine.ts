@@ -4,6 +4,7 @@
  */
 
 import { EventEmitter } from "events";
+import { logger } from "../logger";
 
 // Data source types
 export type DataSourceType =
@@ -120,7 +121,7 @@ export class DataIngestionEngine extends EventEmitter {
    */
   registerSource(source: DataSource): void {
     this.sources.set(source.id, source);
-    console.log(`[IngestionEngine] Registered source: ${source.name}`);
+    logger.debug(`[IngestionEngine] Registered source: ${source.name}`);
     this.emit("source:registered", source);
   }
 
@@ -129,9 +130,7 @@ export class DataIngestionEngine extends EventEmitter {
    */
   registerPipeline(sourceType: DataSourceType, steps: PipelineStep[]): void {
     this.pipelines.set(sourceType, steps);
-    console.log(
-      `[IngestionEngine] Registered pipeline for ${sourceType} with ${steps.length} steps`
-    );
+    logger.debug(`[IngestionEngine] Registered pipeline for ${sourceType} with ${steps.length} steps`);
   }
 
   /**
@@ -172,7 +171,7 @@ export class DataIngestionEngine extends EventEmitter {
 
     // Process asynchronously
     this.processJob(job, source, data).catch((error) => {
-      console.error(`[IngestionEngine] Job ${job.id} failed:`, error);
+      logger.error(`[IngestionEngine] Job ${job.id} failed:`, { error: error });
       job.status = "failed";
       job.errors.push({
         field: "_system",
@@ -281,10 +280,7 @@ export class DataIngestionEngine extends EventEmitter {
             try {
               await step.rollback(record.normalizedData);
             } catch (rollbackError) {
-              console.error(
-                `[IngestionEngine] Rollback failed for step ${step.name}:`,
-                rollbackError
-              );
+              logger.error(`[IngestionEngine] Rollback failed for step ${step.name}:`, { error: rollbackError });
             }
           }
         }

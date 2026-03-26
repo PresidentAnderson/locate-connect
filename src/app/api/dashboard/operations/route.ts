@@ -8,10 +8,27 @@ import type {
   BottleneckTracking,
   SLAComplianceSummary,
 } from "@/types/dashboard.types";
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
+
+    // Verify authentication and admin/LE role
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["admin", "developer", "law_enforcement"].includes(profile.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
@@ -258,7 +275,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(dashboardData);
   } catch (error) {
-    console.error("Error fetching operations dashboard:", error);
+    logger.error("Error fetching operations dashboard:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch operations dashboard data" },
       { status: 500 }
@@ -266,7 +283,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function calculatePerformanceScore(productivity: any): number {
+interface ProductivityMetrics {
+  cases_resolved: number;
+  leads_verified: number;
+  tips_reviewed: number;
+  avg_response_time?: number;
+  total_actions: number;
+  case_updates_made: number;
+}
+
+function calculatePerformanceScore(productivity: ProductivityMetrics): number {
   // Weight different metrics to calculate a performance score out of 100
   let score = 0;
 

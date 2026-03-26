@@ -8,6 +8,7 @@ import type {
   AccessibilityAuditResult,
   AccessibilityViolation,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 const DEFAULT_CONFIG: AccessibilityConfig = {
   highContrastMode: false,
@@ -179,7 +180,7 @@ class AccessibilityService {
       },
     };
 
-    console.log(`[AccessibilityService] Audit completed for ${url}: ${result.score}/100`);
+    logger.debug(`[AccessibilityService] Audit completed for ${url}: ${result.score}/100`);
     return result;
   }
 

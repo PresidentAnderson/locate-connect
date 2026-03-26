@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/archive/exports
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await dbQuery;
 
     if (error) {
-      console.error('Exports query error:', error);
+      logger.error('Exports query error:', { error: error });
       return NextResponse.json(
         { error: 'Failed to fetch exports' },
         { status: 500 }
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('Exports API error:', error);
+    logger.error('Exports API error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (exportError) {
-      console.error('Create export error:', exportError);
+      logger.error('Create export error:', { error: exportError });
       return NextResponse.json(
         { error: 'Failed to create export' },
         { status: 500 }
@@ -183,7 +184,7 @@ export async function POST(request: NextRequest) {
     const { data: exportData, error: dataError } = await dataQuery;
 
     if (dataError) {
-      console.error('Export data query error:', dataError);
+      logger.error('Export data query error:', { error: dataError });
       await supabase
         .from('research_exports')
         .update({ status: 'failed', error_message: 'Failed to query data' })
@@ -247,7 +248,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Export creation error:', error);
+    logger.error('Export creation error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

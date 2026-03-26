@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import type { OutcomeAnalyticsResponse } from "@/types/outcome-report.types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { OutcomeAnalyticsResponse, DiscoveryMethod } from "@/types/outcome-report.types";
+import { logger } from "../../../../lib/logger";
+
+/** Shape of a row returned from the case_outcome_reports query used in this file */
+interface OutcomeReportRow {
+  id: string;
+  total_duration_hours: string;
+  discovery_method: string | null;
+  total_leads_generated: number;
+  leads_verified: number;
+  false_positive_rate: string | null;
+  total_tips_received: number;
+  tips_verified: number;
+  total_assigned_officers: number;
+  created_at: string;
+  case: { disposition?: string; jurisdiction_id?: string } | null;
+  [key: string]: unknown;
+}
+
+/** Shape of an aggregate row calculated for a period */
+interface PeriodAggregate {
+  aggregation_period: string;
+  period_start: string;
+  period_end: string;
+  jurisdiction_id: string | null;
+  total_cases_resolved: number;
+  cases_found_alive_safe: number;
+  cases_found_alive_injured: number;
+  cases_found_deceased: number;
+  cases_returned_voluntarily: number;
+  cases_other_resolution: number;
+  avg_resolution_hours: number;
+  avg_leads_per_case: number;
+  avg_officers_per_case: number;
+}
 
 /**
  * GET /api/outcome-reports/analytics
@@ -100,7 +135,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
       .map(([method, count]) => ({
-        method: method as any,
+        method: method as DiscoveryMethod,
         count,
       }));
 
@@ -117,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate disposition distribution
     const dispositionCounts: Record<string, number> = {};
-    reports?.forEach((r: any) => {
+    reports?.forEach((r) => {
       const caseData = r.case as { disposition?: string; jurisdiction_id?: string } | null;
       const disposition = caseData?.disposition;
       if (disposition) {
@@ -222,7 +257,7 @@ export async function GET(request: NextRequest) {
         avgVerificationRate: Math.round(avgVerificationRate * 10) / 10,
         avgFalsePositiveRate: Math.round(avgFalsePositiveRate * 10) / 10,
       },
-      resolutionTimeDistribution: calculateResolutionTimeDistribution(reports),
+      resolutionTimeDistribution: calculateResolutionTimeDistribution(reports as unknown as OutcomeReportRow[]),
     };
 
     return NextResponse.json({
@@ -230,7 +265,7 @@ export async function GET(request: NextRequest) {
       computedMetrics,
     });
   } catch (error) {
-    console.error("Error fetching outcome analytics:", error);
+    logger.error("Error fetching outcome analytics:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch outcome analytics" },
       { status: 500 }
@@ -286,7 +321,7 @@ export async function POST(request: NextRequest) {
       aggregatesCount: aggregates.length,
     });
   } catch (error) {
-    console.error("Error recalculating analytics:", error);
+    logger.error("Error recalculating analytics:", { error: error });
     return NextResponse.json(
       { error: "Failed to recalculate analytics" },
       { status: 500 }
@@ -294,7 +329,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function calculateResolutionTimeDistribution(reports: any[]): {
+function calculateResolutionTimeDistribution(reports: OutcomeReportRow[]): {
   bucket: string;
   count: number;
   percentage: number;
@@ -329,12 +364,12 @@ function calculateResolutionTimeDistribution(reports: any[]): {
 }
 
 async function calculateAggregates(
-  supabase: any,
+  supabase: SupabaseClient,
   period: string,
   dateFrom?: string,
   dateTo?: string,
   jurisdictionId?: string
-): Promise<any[]> {
+): Promise<PeriodAggregate[]> {
   // This would typically be a background job
   // For now, we'll calculate and upsert aggregates
 
@@ -368,8 +403,8 @@ async function calculateAggregates(
   }
 
   // Group by period
-  const periodGroups: Record<string, any[]> = {};
-  reports.forEach((report: any) => {
+  const periodGroups: Record<string, OutcomeReportRow[]> = {};
+  reports.forEach((report: OutcomeReportRow) => {
     const date = new Date(report.created_at);
     let periodKey: string;
 

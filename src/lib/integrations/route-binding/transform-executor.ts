@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../logger";
 
 // =============================================================================
 // Types
@@ -55,7 +56,7 @@ async function getTransformConfig(
     .single();
 
   if (error || !data) {
-    console.warn(`[TransformExecutor] Transform not found: ${name}`);
+    logger.warn(`[TransformExecutor] Transform not found: ${name}`);
     return null;
   }
 
@@ -238,7 +239,7 @@ function executeMethod(
   context: TransformContext
 ): unknown {
   if (!Array.isArray(value)) {
-    console.warn(`[TransformExecutor] Cannot call ${method}() on non-array`);
+    logger.warn(`[TransformExecutor] Cannot call ${method}() on non-array`);
     return value;
   }
 
@@ -274,7 +275,7 @@ function executeMethod(
       return executeSortMethod(value, args);
 
     default:
-      console.warn(`[TransformExecutor] Unknown method: ${method}`);
+      logger.warn(`[TransformExecutor] Unknown method: ${method}`);
       return value;
   }
 }
@@ -291,7 +292,7 @@ function executeMapMethod(
   const arrowMatch = args.match(/^\s*\(?\s*(\w+)\s*\)?\s*=>\s*([\s\S]+)$/);
 
   if (!arrowMatch) {
-    console.warn('[TransformExecutor] Invalid map expression:', args);
+    logger.warn('[TransformExecutor] Invalid map expression:', { data: args });
     return array;
   }
 
@@ -329,7 +330,7 @@ function executeFilterMethod(
   const arrowMatch = args.match(/^\s*\(?\s*(\w+)\s*\)?\s*=>\s*([\s\S]+)$/);
 
   if (!arrowMatch) {
-    console.warn('[TransformExecutor] Invalid filter expression:', args);
+    logger.warn('[TransformExecutor] Invalid filter expression:', { data: args });
     return array;
   }
 
@@ -601,7 +602,7 @@ export async function executeTransform(
   const config = await getTransformConfig(transformName, supabase);
 
   if (!config) {
-    console.warn(`[TransformExecutor] Transform not found, returning data as-is: ${transformName}`);
+    logger.warn(`[TransformExecutor] Transform not found, returning data as-is: ${transformName}`);
     return data;
   }
 
@@ -621,7 +622,7 @@ export async function executeTransform(
     const result = executeExpression(config.transform_expression, context);
     return result ?? data;
   } catch (error) {
-    console.error(`[TransformExecutor] Transform execution failed:`, error);
+    logger.error(`[TransformExecutor] Transform execution failed:`, { error: error });
     return data;
   }
 }
@@ -638,7 +639,7 @@ export function executeInlineTransform(expression: string, data: unknown): unkno
   try {
     return executeExpression(expression, context);
   } catch (error) {
-    console.error(`[TransformExecutor] Inline transform failed:`, error);
+    logger.error(`[TransformExecutor] Inline transform failed:`, { error: error });
     return data;
   }
 }

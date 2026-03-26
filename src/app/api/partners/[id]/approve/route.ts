@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (updateError) {
-    console.error('Partner approval error:', updateError);
+    logger.error('Partner approval error:', { error: updateError });
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
@@ -152,7 +153,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (updateError) {
-    console.error('Partner rejection error:', updateError);
+    logger.error('Partner rejection error:', { error: updateError });
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 

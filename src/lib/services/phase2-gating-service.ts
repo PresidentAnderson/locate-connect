@@ -9,6 +9,7 @@ import type {
   Jurisdiction,
   JurisdictionAgreement,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 // Default Phase 2 criteria
 const DEFAULT_CRITERIA: Phase2Criteria[] = [
@@ -474,7 +475,7 @@ class Phase2GatingService {
     jurisdiction.updatedAt = new Date().toISOString();
     this.jurisdictions.set(jurisdictionId, jurisdiction);
 
-    console.log(`[Phase2] Enabled jurisdiction: ${jurisdiction.code}`);
+    logger.debug(`[Phase2] Enabled jurisdiction: ${jurisdiction.code}`);
     return true;
   }
 

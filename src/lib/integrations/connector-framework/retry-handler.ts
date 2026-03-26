@@ -4,6 +4,7 @@
  */
 
 import type { RetryPolicy } from '@/types';
+import { logger } from "../../logger";
 
 export interface RetryContext {
   attempt: number;
@@ -89,10 +90,7 @@ export class RetryHandler {
           const delay = this.calculateDelay(context.attempt);
           context.delays.push(delay);
 
-          console.log(
-            `[RetryHandler] Attempt ${context.attempt}/${this.config.maxAttempts} failed, ` +
-              `retrying in ${delay}ms: ${lastError.message}`
-          );
+          logger.debug(`[RetryHandler] Attempt ${context.attempt}/${this.config.maxAttempts} failed, `);
 
           this.options.onRetry?.(context);
           await this.sleep(delay);

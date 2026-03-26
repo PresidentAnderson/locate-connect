@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 /**
  * Service Worker registration and management utilities
  * LC-FEAT-031: Mobile App Companion
@@ -23,7 +24,7 @@ export function isServiceWorkerSupported(): boolean {
  */
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!isServiceWorkerSupported()) {
-    console.warn('Service workers are not supported in this browser');
+    logger.warn('Service workers are not supported in this browser');
     return null;
   }
 
@@ -33,7 +34,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
       updateViaCache: 'none',
     });
 
-    console.log('ServiceWorker registered successfully:', registration.scope);
+    logger.debug('ServiceWorker registered successfully:', { data: registration.scope });
 
     // Check for updates periodically
     setInterval(
@@ -45,7 +46,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
     return registration;
   } catch (error) {
-    console.error('ServiceWorker registration failed:', error);
+    logger.error('ServiceWorker registration failed:', { error: error });
     return null;
   }
 }
@@ -100,7 +101,7 @@ export async function unregisterServiceWorker(): Promise<boolean> {
     }
     return false;
   } catch (error) {
-    console.error('Failed to unregister service worker:', error);
+    logger.error('Failed to unregister service worker:', { error: error });
     return false;
   }
 }
@@ -215,7 +216,7 @@ export async function registerBackgroundSync(tag: string): Promise<boolean> {
     }
     return false;
   } catch (error) {
-    console.error('Failed to register background sync:', error);
+    logger.error('Failed to register background sync:', { error: error });
     return false;
   }
 }
@@ -250,7 +251,7 @@ export async function registerPeriodicSync(
     }
     return false;
   } catch (error) {
-    console.error('Failed to register periodic sync:', error);
+    logger.error('Failed to register periodic sync:', { error: error });
     return false;
   }
 }

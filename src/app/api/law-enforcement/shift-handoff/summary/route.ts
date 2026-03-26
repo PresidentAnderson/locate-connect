@@ -5,6 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 function getShiftBoundaries(): { start: Date; end: Date; type: "day" | "evening" | "night" } {
   const now = new Date();
@@ -143,7 +144,7 @@ export async function GET(): Promise<NextResponse> {
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error("Error fetching shift summary:", error);
+    logger.error("Error fetching shift summary:", { error: error });
     return NextResponse.json(
       { error: "Failed to fetch shift summary" },
       { status: 500 }

@@ -14,6 +14,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { CompleteReviewRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -105,7 +106,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return apiNotFound('Review not found');
     }
-    console.error('Error fetching review:', error);
+    logger.error('Error fetching review:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -217,7 +218,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error('Error starting review:', error);
+      logger.error('Error starting review:', { error: error });
       return apiServerError(error.message);
     }
 
@@ -246,7 +247,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       });
 
     if (completeError) {
-      console.error('Error completing review:', completeError);
+      logger.error('Error completing review:', { error: completeError });
       return apiServerError(completeError.message);
     }
 
@@ -321,7 +322,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .single();
 
     if (fetchError) {
-      console.error('Error fetching updated review:', fetchError);
+      logger.error('Error fetching updated review:', { error: fetchError });
       return apiServerError(fetchError.message);
     }
 
@@ -356,7 +357,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     .single();
 
   if (error) {
-    console.error('Error updating review:', error);
+    logger.error('Error updating review:', { error: error });
     return apiServerError(error.message);
   }
 

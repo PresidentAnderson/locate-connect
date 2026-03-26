@@ -11,6 +11,7 @@ import {
   apiServerError,
 } from '@/lib/api/response';
 import type { ColdCaseDashboardStats } from '@/types/cold-case.types';
+import { logger } from "../../../../lib/logger";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -164,7 +165,7 @@ export async function GET(request: Request) {
 
     return apiSuccess(stats);
   } catch (error) {
-    console.error('Error fetching cold case metrics:', error);
+    logger.error('Error fetching cold case metrics:', { error: error });
     return apiServerError('Failed to fetch metrics');
   }
 }

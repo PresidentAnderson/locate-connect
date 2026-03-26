@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../../lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       .eq("id", credential.id);
 
     if (updateError) {
-      console.error("Error updating credential:", updateError);
+      logger.error("Error updating credential:", { error: updateError });
     }
 
     return NextResponse.json({
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
       credentialId: assertion.id,
     });
   } catch (error) {
-    console.error("WebAuthn authentication verify error:", error);
+    logger.error("WebAuthn authentication verify error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

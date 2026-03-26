@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { logger } from "../lib/logger";
 
 interface UseFormPersistenceOptions<T> {
   key: string;
@@ -61,7 +62,7 @@ export function useFormPersistence<T extends Record<string, unknown>>({
         setHasPersistedData(true);
       }
     } catch (error) {
-      console.error('[FormPersistence] Failed to restore data:', error);
+      logger.error('[FormPersistence] Failed to restore data:', { error: error });
     } finally {
       setIsRestoring(false);
     }
@@ -87,7 +88,7 @@ export function useFormPersistence<T extends Record<string, unknown>>({
           localStorage.setItem(storageKey, JSON.stringify(dataToSave));
           setHasPersistedData(true);
         } catch (error) {
-          console.error('[FormPersistence] Failed to save data:', error);
+          logger.error('[FormPersistence] Failed to save data:', { error: error });
         }
       }, debounceMs);
     },
@@ -128,7 +129,7 @@ export function useFormPersistence<T extends Record<string, unknown>>({
       localStorage.removeItem(storageKey);
       setHasPersistedData(false);
     } catch (error) {
-      console.error('[FormPersistence] Failed to clear data:', error);
+      logger.error('[FormPersistence] Failed to clear data:', { error: error });
     }
   }, [storageKey]);
 

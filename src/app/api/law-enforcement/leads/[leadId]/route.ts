@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { leadManagementService, type UpdateLeadInput } from "@/lib/services/lead-management-service";
+import { logger } from "../../../../../lib/logger";
 
 export async function GET(
   request: NextRequest,
@@ -19,7 +20,7 @@ export async function GET(
 
     return NextResponse.json(lead);
   } catch (error) {
-    console.error("[API] Error getting lead:", error);
+    logger.error("[API] Error getting lead:", { error: error });
     return NextResponse.json(
       { error: "Failed to get lead" },
       { status: 500 }
@@ -53,7 +54,7 @@ export async function PATCH(
 
     return NextResponse.json(lead);
   } catch (error) {
-    console.error("[API] Error updating lead:", error);
+    logger.error("[API] Error updating lead:", { error: error });
     return NextResponse.json(
       { error: "Failed to update lead" },
       { status: 500 }
@@ -94,7 +95,7 @@ export async function POST(
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   } catch (error) {
-    console.error("[API] Error performing lead action:", error);
+    logger.error("[API] Error performing lead action:", { error: error });
     return NextResponse.json(
       { error: "Failed to perform action" },
       { status: 500 }

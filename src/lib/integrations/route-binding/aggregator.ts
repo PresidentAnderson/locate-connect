@@ -4,6 +4,7 @@
  */
 
 import type { AggregationConfig, ConnectorResponse } from '@/types';
+import { logger } from "../../logger";
 
 export interface AggregationResult<T = unknown> {
   success: boolean;
@@ -207,9 +208,7 @@ export class ResponseAggregator {
   ): T {
     // Custom aggregators would be registered and looked up here
     // For now, fall back to merge
-    console.warn(
-      `[ResponseAggregator] Custom aggregator '${aggregatorId}' not found, using merge`
-    );
+    logger.warn(`[ResponseAggregator] Custom aggregator '${aggregatorId}' not found, using merge`);
     return this.aggregateMerge<T>(responses, sources, 'shallow');
   }
 

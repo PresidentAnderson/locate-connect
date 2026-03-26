@@ -9,6 +9,7 @@ import type {
   VoiceCommandParameter,
   VoiceCommandResult,
 } from "@/types/law-enforcement.types";
+import { logger } from "../logger";
 
 // Web Speech API type - use any to avoid conflicts with DOM lib types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -425,7 +426,7 @@ class VoiceCommandsService {
 
     this.recognition.start();
     this.isListening = true;
-    console.log(`[VoiceCommands] Started listening in ${this.currentLanguage}`);
+    logger.debug(`[VoiceCommands] Started listening in ${this.currentLanguage}`);
     return true;
   }
 
@@ -436,14 +437,14 @@ class VoiceCommandsService {
     this.isListening = false;
     this.recognition?.stop();
     this.recognition = null;
-    console.log("[VoiceCommands] Stopped listening");
+    logger.debug("[VoiceCommands] Stopped listening");
   }
 
   /**
    * Process voice transcript
    */
   private processTranscript(transcript: string, confidence: number): void {
-    console.log(`[VoiceCommands] Heard: "${transcript}" (${Math.round(confidence * 100)}%)`);
+    logger.debug(`[VoiceCommands] Heard: "${transcript}" (${Math.round(confidence * 100)}%)`);
 
     const match = this.findBestMatch(transcript);
 

@@ -16,6 +16,7 @@ import {
   apiNoContent,
 } from '@/lib/api/response';
 import type { UpdateColdCaseProfileRequest } from '@/types/cold-case.types';
+import { logger } from "../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -98,7 +99,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return apiNotFound('Cold case profile not found');
     }
-    console.error('Error fetching cold case profile:', error);
+    logger.error('Error fetching cold case profile:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -282,7 +283,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (error.code === 'PGRST116') {
       return apiNotFound('Cold case profile not found');
     }
-    console.error('Error updating cold case profile:', error);
+    logger.error('Error updating cold case profile:', { error: error });
     return apiServerError(error.message);
   }
 
@@ -333,7 +334,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     .eq('id', id);
 
   if (error) {
-    console.error('Error deleting cold case profile:', error);
+    logger.error('Error deleting cold case profile:', { error: error });
     return apiServerError(error.message);
   }
 

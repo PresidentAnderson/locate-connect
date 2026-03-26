@@ -9,6 +9,7 @@ import {
   apiBadRequest,
 } from '@/lib/api/response';
 import { executeRoute } from '@/lib/integrations/route-binding';
+import { logger } from "../../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error('Route test error:', error);
+    logger.error('Route test error:', { error: error });
     return apiServerError('Internal server error');
   }
 }

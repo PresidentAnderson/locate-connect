@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { logger } from "../../../lib/logger";
 
 interface Application {
   id: string;
@@ -39,7 +40,7 @@ export default function DeveloperPortalPage() {
         setApplications(data.data || []);
       }
     } catch (error) {
-      console.error("Failed to fetch applications:", error);
+      logger.error("Failed to fetch applications:", { error: error });
     } finally {
       setLoading(false);
     }

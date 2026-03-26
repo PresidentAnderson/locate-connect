@@ -10,6 +10,7 @@ import type {
 } from '@/types';
 import type { IntegrationAlertRule } from '@/types/integration.types';
 import { getConnectorFactory } from '../connector-framework';
+import { logger } from "../../logger";
 
 export interface MonitoringConfig {
   healthCheckIntervalMs: number;
@@ -57,7 +58,7 @@ export class IntegrationMonitorService {
       return; // Already monitoring
     }
 
-    console.log(`[IntegrationMonitor] Starting monitoring for ${integrationId}`);
+    logger.debug(`[IntegrationMonitor] Starting monitoring for ${integrationId}`);
 
     // Initialize metrics buffer
     this.metricsBuffer.set(integrationId, []);
@@ -83,7 +84,7 @@ export class IntegrationMonitorService {
       this.healthCheckTimers.delete(integrationId);
     }
     this.metricsBuffer.delete(integrationId);
-    console.log(`[IntegrationMonitor] Stopped monitoring for ${integrationId}`);
+    logger.debug(`[IntegrationMonitor] Stopped monitoring for ${integrationId}`);
   }
 
   /**
@@ -199,7 +200,7 @@ export class IntegrationMonitorService {
    */
   registerIntegrationAlertRule(rule: IntegrationAlertRule): void {
     this.alertRules.set(rule.id, rule);
-    console.log(`[IntegrationMonitor] Registered alert rule: ${rule.name}`);
+    logger.debug(`[IntegrationMonitor] Registered alert rule: ${rule.name}`);
   }
 
   /**
@@ -449,7 +450,7 @@ export class IntegrationMonitorService {
     }
     this.healthCheckTimers.clear();
     this.metricsBuffer.clear();
-    console.log('[IntegrationMonitor] Stopped all monitoring');
+    logger.debug('[IntegrationMonitor] Stopped all monitoring');
   }
 }
 

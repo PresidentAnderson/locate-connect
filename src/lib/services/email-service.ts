@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server';
+import { logger } from "../logger";
 
 // =============================================================================
 // Types
@@ -79,7 +80,7 @@ class EmailServiceImpl {
 
     // Log in development or when email is not configured
     if (!this.isConfigured || process.env.NODE_ENV === 'development') {
-      console.log(`[EMAIL] Would send email:`, {
+      logger.debug(`[EMAIL] Would send email:`, {
         to: Array.isArray(to) ? to : [to],
         subject,
         from,
@@ -111,7 +112,7 @@ class EmailServiceImpl {
       }
 
       // Fallback to logging
-      console.warn('[EMAIL] No email provider configured, logging email instead');
+      logger.warn('[EMAIL] No email provider configured, logging email instead');
       await this.logEmail({
         recipients: Array.isArray(to) ? to : [to],
         subject,
@@ -121,7 +122,7 @@ class EmailServiceImpl {
 
       return { success: true, messageId: `logged-${Date.now()}` };
     } catch (error) {
-      console.error('[EMAIL] Send failed:', error);
+      logger.error('[EMAIL] Send failed:', { error: error });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -176,7 +177,7 @@ class EmailServiceImpl {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[EMAIL] SendGrid error:', errorText);
+      logger.error('[EMAIL] SendGrid error:', { error: errorText });
       return { success: false, error: `SendGrid error: ${response.status}` };
     }
 
@@ -205,7 +206,7 @@ class EmailServiceImpl {
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
     if (!accessKeyId || !secretAccessKey) {
-      console.log('[EMAIL] AWS credentials not configured, falling back to logging');
+      logger.debug('[EMAIL] AWS credentials not configured, falling back to logging');
       const recipients = Array.isArray(to) ? to : [to];
       await this.logEmail({
         recipients,
@@ -313,7 +314,7 @@ class EmailServiceImpl {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[EMAIL] AWS SES error:', response.status, errorText);
+        logger.error('[EMAIL] AWS SES error:', { error: response.status, errorText });
         return { success: false, error: `AWS SES error: ${response.status} - ${errorText}` };
       }
 
@@ -329,10 +330,10 @@ class EmailServiceImpl {
         metadata: {},
       });
 
-      console.log(`[EMAIL] Sent via AWS SES: ${messageId}`);
+      logger.debug(`[EMAIL] Sent via AWS SES: ${messageId}`);
       return { success: true, messageId };
     } catch (error) {
-      console.error('[EMAIL] AWS SES send error:', error);
+      logger.error('[EMAIL] AWS SES send error:', { error: error });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown SES error',
@@ -594,7 +595,7 @@ This AMBER Alert was sent via LocateConnect.
       });
     } catch (error) {
       // Don't fail the email send if logging fails
-      console.error('[EMAIL] Failed to log email:', error);
+      logger.error('[EMAIL] Failed to log email:', { error: error });
     }
   }
 }

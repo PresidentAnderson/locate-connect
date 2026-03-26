@@ -6,6 +6,7 @@
 import { BaseAgent } from "./base-agent";
 import { createClient } from "@/lib/supabase/server";
 import type { AgentConfig, PublicRecord } from "@/types/agent.types";
+import { logger } from "../logger";
 
 interface PublicRecordsCrawlerSettings {
   databases: RecordDatabase[];
@@ -96,10 +97,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
 
           this.addMetric(`database_${database.id}_records`, records.length);
         } catch (error) {
-          console.error(
-            `[PublicRecordsCrawlerAgent] Error searching ${database.name} for case ${caseData.caseId}:`,
-            error
-          );
+          logger.error(`[PublicRecordsCrawlerAgent] Error searching ${database.name} for case ${caseData.caseId}:`, { error: error });
           this.errors.push(this.createError(error));
         }
 
@@ -142,7 +140,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       .limit(this.settings.maxRecordsPerRun);
 
     if (error || !cases) {
-      console.error("[PublicRecordsCrawlerAgent] Error fetching cases:", error);
+      logger.error("[PublicRecordsCrawlerAgent] Error fetching cases:", { error: error });
       return [];
     }
 
@@ -189,7 +187,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
     }
 
-    console.log(`[PublicRecordsCrawlerAgent] Found ${searchCriteria.length} cases eligible for records search`);
+    logger.debug(`[PublicRecordsCrawlerAgent] Found ${searchCriteria.length} cases eligible for records search`);
     return searchCriteria;
   }
 
@@ -197,9 +195,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     database: RecordDatabase,
     criteria: PersonSearchCriteria
   ): Promise<PublicRecord[]> {
-    console.log(
-      `[PublicRecordsCrawlerAgent] Searching ${database.name} for ${criteria.firstName} ${criteria.lastName}`
-    );
+    logger.debug(`[PublicRecordsCrawlerAgent] Searching ${database.name} for ${criteria.firstName} ${criteria.lastName}`);
 
     switch (database.type) {
       case "court":
@@ -226,7 +222,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     this.addMetric("court_searches", 1);
 
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] Court records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] Court records API not configured`);
       return [];
     }
 
@@ -249,7 +245,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] Court records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] Court records API error: ${response.status}`);
         return [];
       }
 
@@ -288,7 +284,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         fetchedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] Court records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] Court records error:`, { error: error });
       return [];
     }
   }
@@ -300,7 +296,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     this.addMetric("property_searches", 1);
 
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] Property records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] Property records API not configured`);
       return [];
     }
 
@@ -322,7 +318,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] Property records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] Property records API error: ${response.status}`);
         return [];
       }
 
@@ -361,7 +357,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         fetchedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] Property records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] Property records error:`, { error: error });
       return [];
     }
   }
@@ -373,7 +369,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     this.addMetric("vital_searches", 1);
 
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] Vital records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] Vital records API not configured`);
       return [];
     }
 
@@ -395,7 +391,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] Vital records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] Vital records API error: ${response.status}`);
         return [];
       }
 
@@ -456,7 +452,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         };
       });
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] Vital records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] Vital records error:`, { error: error });
       return [];
     }
   }
@@ -469,7 +465,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
 
     // DMV records require special authorization - law enforcement only
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] DMV records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] DMV records API not configured`);
       return [];
     }
 
@@ -496,7 +492,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] DMV records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] DMV records API error: ${response.status}`);
         return [];
       }
 
@@ -554,7 +550,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         fetchedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] DMV records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] DMV records error:`, { error: error });
       return [];
     }
   }
@@ -566,7 +562,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     this.addMetric("arrest_searches", 1);
 
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] Arrest records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] Arrest records API not configured`);
       return [];
     }
 
@@ -589,7 +585,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] Arrest records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] Arrest records API error: ${response.status}`);
         return [];
       }
 
@@ -633,7 +629,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         fetchedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] Arrest records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] Arrest records error:`, { error: error });
       return [];
     }
   }
@@ -645,7 +641,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     this.addMetric("registry_searches", 1);
 
     if (!database.apiUrl || !database.apiKey) {
-      console.log(`[PublicRecordsCrawlerAgent] Registry records API not configured`);
+      logger.debug(`[PublicRecordsCrawlerAgent] Registry records API not configured`);
       return [];
     }
 
@@ -668,7 +664,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
       });
 
       if (!response.ok) {
-        console.error(`[PublicRecordsCrawlerAgent] Registry records API error: ${response.status}`);
+        logger.error(`[PublicRecordsCrawlerAgent] Registry records API error: ${response.status}`);
         return [];
       }
 
@@ -717,7 +713,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         fetchedAt: new Date().toISOString(),
       }));
     } catch (error) {
-      console.error(`[PublicRecordsCrawlerAgent] Registry records error:`, error);
+      logger.error(`[PublicRecordsCrawlerAgent] Registry records error:`, { error: error });
       return [];
     }
   }
@@ -854,9 +850,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     const supabase = await createClient();
     const { record, matchScore, matchedFields } = match;
 
-    console.log(
-      `[PublicRecordsCrawlerAgent] Storing record for case ${caseId} (score: ${matchScore})`
-    );
+    logger.debug(`[PublicRecordsCrawlerAgent] Storing record for case ${caseId} (score: ${matchScore})`);
 
     try {
       // Check if record already exists (by source ID and record ID)
@@ -907,7 +901,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
           .single();
 
         if (insertError) {
-          console.error("[PublicRecordsCrawlerAgent] Error storing record:", insertError);
+          logger.error("[PublicRecordsCrawlerAgent] Error storing record:", { error: insertError });
           return;
         }
         recordId = newRecord.id;
@@ -954,7 +948,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         });
       }
     } catch (error) {
-      console.error("[PublicRecordsCrawlerAgent] Error storing record:", error);
+      logger.error("[PublicRecordsCrawlerAgent] Error storing record:", { error: error });
     }
   }
 
@@ -965,9 +959,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
     const supabase = await createClient();
     const { record, matchScore, matchedFields } = match;
 
-    console.log(
-      `[PublicRecordsCrawlerAgent] High-confidence record match for case ${caseId}`
-    );
+    logger.debug(`[PublicRecordsCrawlerAgent] High-confidence record match for case ${caseId}`);
 
     try {
       // Get case details for notification
@@ -1071,7 +1063,7 @@ export class PublicRecordsCrawlerAgent extends BaseAgent {
         });
       }
     } catch (error) {
-      console.error("[PublicRecordsCrawlerAgent] Error triggering alert:", error);
+      logger.error("[PublicRecordsCrawlerAgent] Error triggering alert:", { error: error });
     }
   }
 

@@ -8,6 +8,7 @@ import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { useLocale } from "@/components/i18n/LocaleProvider";
 import { useTranslations } from "@/hooks/useTranslations";
 import { isLocaleComplete } from "@/lib/i18n";
+import { MobileSidebarToggle } from "./mobile-sidebar";
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,8 +46,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Search */}
-        <div className="flex flex-1 items-center gap-4">
+        {/* Mobile menu + Search */}
+        <div className="flex flex-1 items-center gap-2 sm:gap-4">
+          <MobileSidebarToggle />
           <div className="w-full max-w-lg">
             <label htmlFor="search" className="sr-only">
               {t("header.searchLabel")}
@@ -71,11 +73,11 @@ export function Header() {
           {/* Notifications */}
           <button
             type="button"
-            className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            className="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
           >
             <span className="sr-only">{t("header.notifications")}</span>
-            <BellIcon className="h-6 w-6" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
+            <BellIcon className="h-6 w-6" aria-hidden="true" />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" aria-label="New notifications" />
           </button>
 
           {/* Live indicator */}
@@ -101,12 +103,15 @@ export function Header() {
             <button
               type="button"
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100"
+              aria-expanded={showDropdown}
+              aria-haspopup="true"
+              aria-label="User menu"
+              className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600 text-sm font-medium text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-600 text-sm font-medium text-white" aria-hidden="true">
                 {userInitials}
               </div>
-              <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+              <ChevronDownIcon className="h-4 w-4 text-gray-500" aria-hidden="true" />
             </button>
 
             {/* Dropdown */}
@@ -116,7 +121,7 @@ export function Header() {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowDropdown(false)}
                 />
-                <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+                <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white py-1 shadow-lg" role="menu" aria-orientation="vertical">
                   <div className="border-b border-gray-100 px-4 py-3">
                     <p className="text-sm font-medium text-gray-900">{userName}</p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
@@ -128,14 +133,16 @@ export function Header() {
                   </div>
                   <a
                     href="/settings"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                    role="menuitem"
                     onClick={() => setShowDropdown(false)}
                   >
                     Settings
                   </a>
                   <a
                     href="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                    role="menuitem"
                     onClick={() => setShowDropdown(false)}
                   >
                     Profile

@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "../../../../../lib/logger";
 
 interface GenerateReportPayload {
   notes?: string;
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: "Shift handoff report generated successfully",
     });
   } catch (error) {
-    console.error("Error generating shift report:", error);
+    logger.error("Error generating shift report:", { error: error });
     return NextResponse.json(
       { error: "Failed to generate report" },
       { status: 500 }

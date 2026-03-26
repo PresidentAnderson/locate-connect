@@ -10,6 +10,7 @@ import {
   AgeProgressionRequest,
   AgeProgressionVariationParams,
 } from '@/types/facial-recognition.types';
+import { logger } from "../../../../lib/logger";
 
 /**
  * GET /api/facial-recognition/age-progression
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error('Error fetching age progression requests:', error);
+    logger.error('Error fetching age progression requests:', { error: error });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Error creating age progression request:', dbError);
+      logger.error('Error creating age progression request:', { error: dbError });
       return NextResponse.json({ error: dbError.message }, { status: 500 });
     }
 
@@ -254,7 +255,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Age progression request error:', error);
+    logger.error('Age progression request error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -362,7 +363,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating age progression request:', updateError);
+      logger.error('Error updating age progression request:', { error: updateError });
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -371,7 +372,7 @@ export async function PATCH(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Age progression update error:', error);
+    logger.error('Age progression update error:', { error: error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

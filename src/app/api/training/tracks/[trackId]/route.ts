@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "../../../../../lib/logger";
 
 interface RouteParams {
   params: Promise<{ trackId: string }>;
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       if (error.code === "PGRST116") {
         return NextResponse.json({ error: "Track not found" }, { status: 404 });
       }
-      console.error("Error fetching track:", error);
+      logger.error("Error fetching track:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -151,7 +152,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: typedTrack });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -221,13 +222,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       .single();
 
     if (error) {
-      console.error("Error updating track:", error);
+      logger.error("Error updating track:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -269,13 +270,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .eq("id", trackId);
 
     if (error) {
-      console.error("Error deleting track:", error);
+      logger.error("Error deleting track:", { error: error });
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Unexpected error:", error);
+    logger.error("Unexpected error:", { error: error });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

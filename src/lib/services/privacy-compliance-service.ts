@@ -10,6 +10,7 @@ import type {
   DataCategory,
   PrivacyRequest,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 const DEFAULT_DATA_CATEGORIES: DataCategory[] = [
   {
@@ -125,7 +126,7 @@ class PrivacyComplianceService {
     this.compliance.consentObtained = true;
     this.compliance.consentDate = new Date().toISOString();
     this.compliance.consentVersion = version;
-    console.log(`[Privacy] Consent recorded for user ${userId}`);
+    logger.debug(`[Privacy] Consent recorded for user ${userId}`);
   }
 
   /**
@@ -196,7 +197,7 @@ class PrivacyComplianceService {
     };
 
     this.requests.set(id, request);
-    console.log(`[Privacy] Created ${type} request ${id}`);
+    logger.debug(`[Privacy] Created ${type} request ${id}`);
 
     // Notify privacy officer
     await this.notifyPrivacyOfficer(request);
@@ -594,9 +595,7 @@ class PrivacyComplianceService {
    * Notify privacy officer of new request
    */
   private async notifyPrivacyOfficer(request: PrivacyRequest): Promise<void> {
-    console.log(
-      `[Privacy] Notifying privacy officer of ${request.type} request ${request.id}`
-    );
+    logger.debug(`[Privacy] Notifying privacy officer of ${request.type} request ${request.id}`);
 
     const supabase = await createClient();
 
@@ -607,7 +606,7 @@ class PrivacyComplianceService {
       .in("role", ["privacy_officer", "admin"]);
 
     if (error || !privacyOfficers?.length) {
-      console.error("[Privacy] No privacy officers found to notify");
+      logger.error("[Privacy] No privacy officers found to notify");
       return;
     }
 
@@ -681,16 +680,14 @@ Under Quebec Law 25, privacy requests must be responded to within 30 days.
       });
     }
 
-    console.log(`[Privacy] Notified ${privacyOfficers.length} privacy officers`);
+    logger.debug(`[Privacy] Notified ${privacyOfficers.length} privacy officers`);
   }
 
   /**
    * Notify requester of status update
    */
   private async notifyRequester(request: PrivacyRequest): Promise<void> {
-    console.log(
-      `[Privacy] Notifying requester ${request.requesterEmail} of status update: ${request.status}`
-    );
+    logger.debug(`[Privacy] Notifying requester ${request.requesterEmail} of status update: ${request.status}`);
 
     const statusMessages: Record<string, { subject: string; message: string }> = {
       pending: {
@@ -772,7 +769,7 @@ If you have any questions about your privacy request, please contact our Privacy
       `.trim(),
     });
 
-    console.log(`[Privacy] Notified requester at ${request.requesterEmail}`);
+    logger.debug(`[Privacy] Notified requester at ${request.requesterEmail}`);
   }
 
   /**

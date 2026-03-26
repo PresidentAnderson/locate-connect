@@ -11,6 +11,7 @@ import type {
   FAQItem,
   SupportedLanguage,
 } from "@/types/compliance.types";
+import { logger } from "../logger";
 
 // Default media access charter
 const DEFAULT_CHARTER: MediaAccessCharter = {
@@ -298,7 +299,7 @@ class MediaFAQService {
     };
 
     this.mediaRequests.set(id, request);
-    console.log(`[Media] Request submitted by ${input.organizationName}`);
+    logger.debug(`[Media] Request submitted by ${input.organizationName}`);
 
     return request;
   }
@@ -344,7 +345,7 @@ class MediaFAQService {
     if (accessLevel) request.accessLevel = accessLevel;
 
     this.mediaRequests.set(requestId, request);
-    console.log(`[Media] Request ${requestId} ${status}`);
+    logger.debug(`[Media] Request ${requestId} ${status}`);
 
     return request;
   }
