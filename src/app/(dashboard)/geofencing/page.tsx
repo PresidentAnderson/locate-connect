@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -69,27 +69,7 @@ const getStatusColor = (status: GeofenceStatus) => {
 
 export default function GeofencingPage() {
   const [activeTab, setActiveTab] = useState<"geofences" | "alerts" | "create">("geofences");
-  const [geofences, setGeofences] = useState<Geofence[]>([]);
-  const [alerts, setAlerts] = useState<GeofenceAlert[]>([]);
-  const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
-  const [filterStatus, setFilterStatus] = useState<GeofenceStatus | "all">("all");
-  const [filterPriority, setFilterPriority] = useState<AlertPriority | "all">("all");
-
-  // Create form state
-  const [newGeofence, setNewGeofence] = useState({
-    name: "",
-    caseId: "",
-    type: "circle" as GeofenceType,
-    radius: 500,
-    trigger: "both" as AlertTrigger,
-    priority: "medium" as AlertPriority,
-    description: "",
-    notifyChannels: ["email", "push"],
-  });
-
-  useEffect(() => {
-    // Load mock geofences
-    setGeofences([
+  const [geofences, setGeofences] = useState<Geofence[]>(() => ([
       {
         id: "geo-1",
         name: "Last Known Location - Jane Doe",
@@ -163,10 +143,8 @@ export default function GeofencingPage() {
         notifyChannels: ["push"],
         description: "LRT corridor from downtown to West Edmonton",
       },
-    ]);
-
-    // Load mock alerts
-    setAlerts([
+    ]));
+  const [alerts, setAlerts] = useState<GeofenceAlert[]>(() => ([
       {
         id: "alert-1",
         geofenceId: "geo-1",
@@ -200,8 +178,24 @@ export default function GeofencingPage() {
         source: "Tip Report",
         acknowledged: true,
       },
-    ]);
-  }, []);
+    ]));
+  const [selectedGeofence, setSelectedGeofence] = useState<Geofence | null>(null);
+  const [filterStatus, setFilterStatus] = useState<GeofenceStatus | "all">("all");
+  const [filterPriority, setFilterPriority] = useState<AlertPriority | "all">("all");
+
+  // Create form state
+  const [newGeofence, setNewGeofence] = useState({
+    name: "",
+    caseId: "",
+    type: "circle" as GeofenceType,
+    radius: 500,
+    trigger: "both" as AlertTrigger,
+    priority: "medium" as AlertPriority,
+    description: "",
+    notifyChannels: ["email", "push"],
+  });
+
+
 
   const filteredGeofences = geofences.filter((geo) => {
     if (filterStatus !== "all" && geo.status !== filterStatus) return false;

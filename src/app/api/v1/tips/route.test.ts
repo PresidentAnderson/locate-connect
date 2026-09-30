@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 
 const mockSingle = vi.fn();
 const mockSelect = vi.fn(() => ({ single: mockSingle }));
-const mockInsert = vi.fn(() => ({ select: mockSelect }));
+const mockInsert = vi.fn((_row: Record<string, unknown>) => ({ select: mockSelect }));
 const mockEq = vi.fn();
 
 function makeCaseLookupChain(result: { data: unknown; error: unknown }) {
@@ -261,7 +261,7 @@ describe('POST /api/v1/tips', () => {
     };
 
     // First from('cases') for case lookup, then from('tips') for insert
-    let callCount = 0;
+    const callCount = 0;
     mockFromBehavior = (table: string) => {
       if (table === 'cases') {
         return {
@@ -347,7 +347,7 @@ describe('POST /api/v1/tips', () => {
     mockHasScope.mockReturnValue(true);
     mockCheckRateLimit.mockResolvedValue(allowedRateLimit);
 
-    const mockTipInsert = vi.fn(() => ({
+    const mockTipInsert = vi.fn((_row: Record<string, unknown>) => ({
       select: vi.fn(() => ({
         single: vi.fn(() =>
           Promise.resolve({

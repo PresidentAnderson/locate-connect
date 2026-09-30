@@ -340,7 +340,7 @@ export default function NewIntegrationPage() {
             <div>
               <h2 className="text-lg font-semibold text-gray-900">Enable Integration</h2>
               <p className="mt-1 text-sm text-gray-500">
-                Enable after configuring credentials. Disabled integrations won't make API calls.
+                Enable after configuring credentials. Disabled integrations won&apos;t make API calls.
               </p>
             </div>
             <button

@@ -10,6 +10,7 @@ import {
   createContext,
   useContext,
   useState,
+  useSyncExternalStore,
   useEffect,
   useCallback,
   ReactNode,
@@ -286,19 +287,18 @@ export function PWAInstallBanner() {
   const { canInstall, promptInstall, isInstalled } = usePWA();
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    const wasDismissed = localStorage.getItem("pwa-banner-dismissed");
-    if (wasDismissed) {
-      setDismissed(true);
-    }
-  }, []);
+  const wasDismissed = useSyncExternalStore(
+    subscribeToBannerStorage,
+    () => localStorage.getItem("pwa-banner-dismissed") !== null,
+    () => false
+  );
 
   const handleDismiss = () => {
     setDismissed(true);
     localStorage.setItem("pwa-banner-dismissed", "true");
   };
 
-  if (isInstalled || !canInstall || dismissed) {
+  if (isInstalled || !canInstall || dismissed || wasDismissed) {
     return null;
   }
 
@@ -396,4 +396,9 @@ export function OfflineIndicator() {
       </span>
     </div>
   );
+}
+
+function subscribeToBannerStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
 }

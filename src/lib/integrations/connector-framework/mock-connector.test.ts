@@ -15,9 +15,10 @@ import type { ConnectorConfig, ConnectorRequest } from '@/types';
 // Helper to make requests using the execute method
 const request = async <T>(
   connector: MockConnector,
-  options: { method: string; path: string; body?: unknown }
+  options: { method: ConnectorRequest['method']; path: string; body?: unknown }
 ) => {
   return connector.execute<T>({
+    id: crypto.randomUUID(),
     method: options.method,
     path: options.path,
     body: options.body,
@@ -34,16 +35,25 @@ describe('MockConnector', () => {
     baseUrl: 'https://mock.api.local',
     authType: 'api_key',
     timeout: 5000,
-    isEnabled: true,
+    enabled: true,
+    integrationId: 'mock-integration',
+    credentialId: 'mock-credential',
+    keepAlive: true,
+    rateLimit: { maxRequestsPerSecond: 100, maxConcurrentRequests: 10 },
     circuitBreaker: {
       failureThreshold: 5,
       successThreshold: 2,
       timeout: 30000,
+      monitoringPeriod: 60000,
+      halfOpenMaxAttempts: 3,
     },
     retryPolicy: {
       maxAttempts: 3,
       baseDelayMs: 100,
       maxDelayMs: 1000,
+      backoffMultiplier: 2,
+      jitterEnabled: true,
+      retryableErrors: ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'EPIPE', 'NETWORK_ERROR', 'TIMEOUT', '429', '500', '502', '503', '504'],
     },
   });
 
@@ -487,6 +497,9 @@ describe('MockConnector', () => {
     it('should set custom health status', async () => {
       connector.setHealthStatus({
         healthy: false,
+        status: 'unhealthy',
+        responseTimeMs: 0,
+        lastCheck: new Date().toISOString(),
         message: 'Service unavailable',
       });
 
@@ -511,6 +524,7 @@ describe('MockConnector', () => {
       await failingConnector.connect();
 
       const result = await failingConnector.execute({
+        id: 'failure-test',
         method: 'GET',
         path: '/api/test',
         headers: {},

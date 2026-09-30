@@ -266,7 +266,7 @@ export class MockConnector extends BaseConnector {
       Math.random() < this.mockConfig.failureRate
     ) {
       const error = new Error('Simulated random failure');
-      (error as any).statusCode = 500;
+      Object.assign(error, { statusCode: 500 });
       throw error;
     }
 
@@ -307,7 +307,7 @@ export class MockConnector extends BaseConnector {
         typeof mockResponse.error === 'string'
           ? new Error(mockResponse.error)
           : mockResponse.error;
-      (error as any).statusCode = mockResponse.statusCode || 500;
+      Object.assign(error, { statusCode: mockResponse.statusCode || 500 });
       throw error;
     }
 

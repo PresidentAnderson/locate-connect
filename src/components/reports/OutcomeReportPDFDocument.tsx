@@ -856,7 +856,7 @@ export function OutcomeReportPDFDocument({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>What Didn't Work</Text>
+          <Text style={styles.sectionTitle}>What Didn&apos;t Work</Text>
           <View style={styles.infoBox}>
             {report.whatDidntWork && report.whatDidntWork.length > 0 ? (
               report.whatDidntWork.map((item, index) => (

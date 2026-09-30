@@ -309,7 +309,7 @@ export function SuccessMetricsDashboard({
             No Metrics Available
           </h3>
           <p className="mt-1 text-sm text-gray-500">
-            Click "Recalculate" to generate metrics for this period.
+            Click &quot;Recalculate&quot; to generate metrics for this period.
           </p>
         </div>
       )}

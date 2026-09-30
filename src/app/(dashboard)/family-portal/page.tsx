@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -75,36 +75,27 @@ function formatTimeAgo(dateString: string): string {
 
 export default function FamilyPortalPage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "tasks" | "documents" | "timeline">("dashboard");
-  const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [tasks, setTasks] = useState<CoordinationTask[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newMessage, setNewMessage] = useState("");
-
-  useEffect(() => {
-    // Load mock data
-    setMembers([
+  const [members, setMembers] = useState<FamilyMember[]>(() => ([
       { id: "1", name: "Sarah Johnson", email: "sarah@example.com", role: "primary_reporter", relationship: "Mother", isOnline: true },
       { id: "2", name: "Michael Johnson", email: "michael@example.com", role: "family_member", relationship: "Father", isOnline: false, lastActiveAt: new Date(Date.now() - 3600000).toISOString() },
       { id: "3", name: "Emily Johnson", email: "emily@example.com", role: "family_member", relationship: "Sister", isOnline: true },
       { id: "4", name: "Robert Williams", email: "robert@example.com", role: "extended_family", relationship: "Uncle", isOnline: false, lastActiveAt: new Date(Date.now() - 86400000).toISOString() },
-    ]);
-
-    setTasks([
+    ]));
+  const [tasks, setTasks] = useState<CoordinationTask[]>(() => ([
       { id: "1", title: "Distribute flyers downtown", priority: "high", status: "in_progress", assignedTo: "2", dueDate: new Date().toISOString(), category: "outreach" },
       { id: "2", title: "Contact local shelters", priority: "urgent", status: "pending", category: "outreach" },
       { id: "3", title: "Update social media posts", priority: "medium", status: "completed", assignedTo: "3", category: "media" },
       { id: "4", title: "Coordinate with volunteer group", priority: "high", status: "pending", dueDate: new Date(Date.now() + 86400000).toISOString(), category: "coordination" },
-    ]);
-
-    setMessages([
+    ]));
+  const [messages, setMessages] = useState<ChatMessage[]>(() => ([
       { id: "1", senderId: "1", senderName: "Sarah Johnson", message: "The police just called with an update. They're expanding the search to the east side.", createdAt: new Date(Date.now() - 1800000).toISOString() },
       { id: "2", senderId: "3", senderName: "Emily Johnson", message: "I'll head over there after work. Can someone share the flyer files?", createdAt: new Date(Date.now() - 1200000).toISOString() },
       { id: "3", senderId: "2", senderName: "Michael Johnson", message: "Just uploaded them to the documents section.", createdAt: new Date(Date.now() - 600000).toISOString() },
-    ]);
+    ]));
+  const [loading, setLoading] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
 
-    setLoading(false);
-  }, []);
+
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;

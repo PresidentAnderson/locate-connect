@@ -16,7 +16,7 @@ const mockOrder = vi.fn();
 const mockRange = vi.fn();
 
 // Build a chainable query object for GET tests
-function makeChainableQuery(resolvedData: { data: unknown; error: unknown; count?: number }) {
+function makeChainableQuery(resolvedData: { data: unknown; error: unknown; count?: number | null }) {
   const chain: Record<string, unknown> = {};
   const self = () => chain;
   chain.select = vi.fn(() => chain);
@@ -344,7 +344,7 @@ describe('POST /api/success-stories', () => {
 
     const auditChain = makeChainableQuery({ data: null, error: null });
 
-    let fromCallCount = 0;
+    const fromCallCount = 0;
     mockFromBehavior = (table: string) => {
       if (table === 'cases') return casesChain;
       if (table === 'profiles') return profileChain;

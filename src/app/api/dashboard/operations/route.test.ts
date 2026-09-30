@@ -26,7 +26,7 @@ function makePromiseChain(result: ChainResult) {
   chain.in = vi.fn(() => chain);
   chain.order = vi.fn(() => chain);
   // Return the result when awaited via Promise.all
-  (chain as PromiseLike<ChainResult>)[Symbol.toStringTag] = 'Promise';
+  Object.defineProperty(chain, Symbol.toStringTag, { value: 'Promise' });
   Object.defineProperty(chain, 'then', {
     value: (resolve: (v: ChainResult) => void) => Promise.resolve(result).then(resolve),
   });

@@ -136,7 +136,7 @@ export default function LiaisonContactsPage() {
           <div>
             <h3 className="font-semibold text-red-900">24/7 Emergency Liaisons Available</h3>
             <p className="text-sm text-red-700">
-              For urgent cases, contact liaisons marked with "24/7 Available"
+              For urgent cases, contact liaisons marked with &quot;24/7 Available&quot;
             </p>
           </div>
           <button
@@ -232,7 +232,7 @@ export default function LiaisonContactsPage() {
         <h3 className="font-semibold text-amber-900">Working with Community Liaisons</h3>
         <ul className="mt-2 space-y-1 text-sm text-amber-800">
           <li>- Always introduce yourself and your role clearly</li>
-          <li>- Respect the liaison's guidance on cultural protocols</li>
+          <li>- Respect the liaison&apos;s guidance on cultural protocols</li>
           <li>- Allow adequate time for community consultation processes</li>
           <li>- Maintain confidentiality of community-sensitive information</li>
           <li>- Follow up appropriately and keep liaisons informed of case progress</li>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -62,30 +62,7 @@ const getConfidenceColor = (confidence: SightingConfidence) => {
 
 export default function VehicleTrackingPage() {
   const [activeTab, setActiveTab] = useState<"vehicles" | "sightings" | "add">("vehicles");
-  const [vehicles, setVehicles] = useState<VehicleRecord[]>([]);
-  const [sightings, setSightings] = useState<VehicleSighting[]>([]);
-  const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterAlertStatus, setFilterAlertStatus] = useState<AlertStatus | "all">("all");
-
-  // Add vehicle form state
-  const [newVehicle, setNewVehicle] = useState({
-    caseId: "",
-    licensePlate: "",
-    state: "AB",
-    make: "",
-    model: "",
-    year: new Date().getFullYear(),
-    color: "",
-    type: "car" as VehicleType,
-    vin: "",
-    description: "",
-    createAlert: true,
-  });
-
-  useEffect(() => {
-    // Load mock vehicles
-    setVehicles([
+  const [vehicles, setVehicles] = useState<VehicleRecord[]>(() => ([
       {
         id: "veh-1",
         caseId: "case-1",
@@ -147,10 +124,8 @@ export default function VehicleTrackingPage() {
         createdAt: "2026-01-10T12:00:00Z",
         sightingCount: 8,
       },
-    ]);
-
-    // Load mock sightings
-    setSightings([
+    ]));
+  const [sightings, setSightings] = useState<VehicleSighting[]>(() => ([
       {
         id: "sight-1",
         vehicleId: "veh-1",
@@ -193,8 +168,27 @@ export default function VehicleTrackingPage() {
         confidence: "possible",
         notes: "Reported parked outside coffee shop",
       },
-    ]);
-  }, []);
+    ]));
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleRecord | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterAlertStatus, setFilterAlertStatus] = useState<AlertStatus | "all">("all");
+
+  // Add vehicle form state
+  const [newVehicle, setNewVehicle] = useState({
+    caseId: "",
+    licensePlate: "",
+    state: "AB",
+    make: "",
+    model: "",
+    year: new Date().getFullYear(),
+    color: "",
+    type: "car" as VehicleType,
+    vin: "",
+    description: "",
+    createAlert: true,
+  });
+
+
 
   const filteredVehicles = vehicles.filter((vehicle) => {
     const matchesSearch =
@@ -258,7 +252,7 @@ export default function VehicleTrackingPage() {
           <p className="text-2xl font-bold text-blue-600">{sightings.length}</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Today's Sightings</p>
+          <p className="text-sm text-gray-500">Today&apos;s Sightings</p>
           <p className="text-2xl font-bold text-green-600">
             {sightings.filter((s) => new Date(s.timestamp).toDateString() === new Date().toDateString()).length}
           </p>

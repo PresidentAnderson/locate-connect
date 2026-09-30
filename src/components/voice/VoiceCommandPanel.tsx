@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import {
   VoiceCommandService,
@@ -19,7 +19,8 @@ export function VoiceCommandPanel({
   onCommand,
 }: VoiceCommandPanelProps) {
   const router = useRouter();
-  const [isSupported, setIsSupported] = useState(false);
+  const isSupported = useSyncExternalStore(subscribeToVoiceSupport,
+    () => Boolean(window.SpeechRecognition || window.webkitSpeechRecognition), () => false);
   const [isListening, setIsListening] = useState(false);
   const [isDictating, setIsDictating] = useState(false);
   const [language, setLanguage] = useState<VoiceCommandLanguage>(defaultLanguage);
@@ -28,21 +29,6 @@ export function VoiceCommandPanel({
   const [showHelp, setShowHelp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceService] = useState(() => new VoiceCommandService({ language: defaultLanguage }));
-
-  useEffect(() => {
-    const supported = voiceService.init();
-    setIsSupported(supported);
-
-    if (supported) {
-      voiceService.onCommand(handleCommand);
-      voiceService.onDictation(setTranscript);
-      voiceService.onError(setError);
-    }
-
-    return () => {
-      voiceService.stop();
-    };
-  }, [voiceService]);
 
   const handleCommand = useCallback(
     (result: VoiceCommandResult) => {
@@ -113,6 +99,23 @@ export function VoiceCommandPanel({
     },
     [router, voiceService, onCommand]
   );
+
+  useEffect(() => {
+    const supported = voiceService.init();
+
+    if (supported) {
+      voiceService.onDictation(setTranscript);
+      voiceService.onError(setError);
+    }
+
+    return () => {
+      voiceService.stop();
+    };
+  }, [voiceService]);
+
+  useEffect(() => {
+    voiceService.onCommand(handleCommand);
+  }, [voiceService, handleCommand]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -243,3 +246,5 @@ function MicrophoneIcon({ className }: { className?: string }) {
 }
 
 export default VoiceCommandPanel;
+
+const subscribeToVoiceSupport = () => () => {};

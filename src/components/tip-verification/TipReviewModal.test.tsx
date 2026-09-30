@@ -138,7 +138,8 @@ describe('TipReviewModal', () => {
 
   it('displays hoax indicators when present', () => {
     const item = makeItem();
-    (item.verification as Record<string, unknown>).hoaxIndicators = ['stock_photo_detected', 'impossible_timeline'];
+    if (!item.verification) throw new Error('Expected verification fixture');
+    item.verification.hoaxIndicators = ['stock_photo_detected', 'impossible_timeline'];
     render(
       <TipReviewModal item={item} isOpen onClose={onClose} onComplete={onComplete} />
     );
@@ -149,7 +150,8 @@ describe('TipReviewModal', () => {
 
   it('displays duplicate notice when isDuplicate is true', () => {
     const item = makeItem();
-    (item.verification as Record<string, unknown>).isDuplicate = true;
+    if (!item.verification) throw new Error('Expected verification fixture');
+    item.verification.isDuplicate = true;
     render(
       <TipReviewModal item={item} isOpen onClose={onClose} onComplete={onComplete} />
     );

@@ -42,15 +42,9 @@ const sections = [
   },
 ];
 
-export function MobileSidebarToggle() {
+function MobileSidebar({ pathname }: { pathname: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
   const t = useTranslations("common");
-
-  // Close sidebar on route change
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
 
   // Close on escape key
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -183,4 +177,9 @@ export function MobileSidebarToggle() {
       )}
     </>
   );
+}
+
+export function MobileSidebarToggle() {
+  const pathname = usePathname();
+  return <MobileSidebar key={pathname} pathname={pathname} />;
 }

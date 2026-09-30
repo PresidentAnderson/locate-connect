@@ -222,7 +222,7 @@ export default function OperationsDashboard() {
           {/* Staff Productivity */}
           <div className="rounded-xl border border-gray-200 bg-white p-6">
             <h3 className="text-lg font-semibold text-gray-900">Staff Productivity</h3>
-            <p className="text-sm text-gray-500">Today's performance metrics</p>
+            <p className="text-sm text-gray-500">Today&apos;s performance metrics</p>
             <div className="mt-4 overflow-x-auto">
               {data.staffProductivity.length > 0 ? (
                 <table className="min-w-full">

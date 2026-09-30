@@ -21,7 +21,12 @@ interface ErrorLog {
 export function DebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"info" | "errors" | "network" | "performance">("info");
-  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [debugInfo] = useState<DebugInfo | null>(() => process.env.NODE_ENV === "development" ? {
+    environment: process.env.NODE_ENV || "unknown",
+    nodeVersion: process.env.NODE_VERSION || "unknown",
+    buildTime: process.env.BUILD_TIME || new Date().toISOString(),
+    gitCommit: process.env.GIT_COMMIT || "unknown",
+  } : null);
   const [errors, setErrors] = useState<ErrorLog[]>([]);
   const [networkLogs, setNetworkLogs] = useState<Array<{ url: string; status: number; duration: number }>>([]);
 
@@ -29,13 +34,6 @@ export function DebugPanel() {
 
   useEffect(() => {
     if (!isDev) return;
-
-    setDebugInfo({
-      environment: process.env.NODE_ENV || "unknown",
-      nodeVersion: process.env.NODE_VERSION || "unknown",
-      buildTime: process.env.BUILD_TIME || new Date().toISOString(),
-      gitCommit: process.env.GIT_COMMIT || "unknown",
-    });
 
     // Capture console errors
     const originalError = console.error;
@@ -67,10 +65,9 @@ export function DebugPanel() {
     };
   }, [isDev]);
 
-  if (!isDev) return null;
-
   // Keyboard shortcut: Ctrl+Shift+D
   useEffect(() => {
+    if (!isDev) return;
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === "D") {
         setIsOpen(prev => !prev);
@@ -78,7 +75,9 @@ export function DebugPanel() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [isDev]);
+
+  if (!isDev) return null;
 
   if (!isOpen) {
     return (

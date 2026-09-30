@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useEffectEvent, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import type { LatLng, LeafletMouseEvent, Map as LeafletMap } from "leaflet";
 
@@ -111,24 +111,22 @@ export function GeofenceDrawingMap({
   drawingMode = null,
   className = "",
 }: GeofenceDrawingMapProps) {
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [currentGeometry, setCurrentGeometry] = useState<GeofenceGeometry | null>(null);
   const [tempPoints, setTempPoints] = useState<Array<{ lat: number; lng: number }>>([]);
   const [circleRadius, setCircleRadius] = useState<number>(500);
   const [corridorWidth, setCorridorWidth] = useState<number>(100);
   const mapRef = useRef<LeafletMap | null>(null);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Reset when drawing mode changes
-  useEffect(() => {
+  const [previousMode, setPreviousMode] = useState(drawingMode);
+  if (previousMode !== drawingMode) {
+    setPreviousMode(drawingMode);
     setCurrentGeometry(null);
     setTempPoints([]);
-    if (onGeometryChange) {
-      onGeometryChange(null);
-    }
+  }
+
+  const notifyGeometryReset = useEffectEvent(() => onGeometryChange?.(null));
+  useEffect(() => {
+    notifyGeometryReset();
   }, [drawingMode]);
 
   const handleMapClick = useCallback(
@@ -454,3 +452,5 @@ export function GeofenceDrawingMap({
 }
 
 export default GeofenceDrawingMap;
+
+const subscribeToHydration = () => () => {};

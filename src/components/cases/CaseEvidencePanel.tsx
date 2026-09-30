@@ -25,8 +25,7 @@ export default function CaseEvidencePanel({ caseId }: CaseEvidencePanelProps) {
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const loadEvidence = useCallback(async () => {
-    const response = await fetch(`/api/cases/${caseId}/evidence`);
+  const loadEvidence = useCallback(() => fetch(`/api/cases/${caseId}/evidence`).then(async (response) => {
     if (!response.ok) {
       return;
     }
@@ -41,7 +40,8 @@ export default function CaseEvidencePanel({ caseId }: CaseEvidencePanelProps) {
       });
       return next;
     });
-  }, [caseId]);
+
+    }), [caseId]);
 
   useEffect(() => {
     void loadEvidence();

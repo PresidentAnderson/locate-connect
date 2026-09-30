@@ -156,7 +156,7 @@ export function VoiceNotes({
   }, [enableTranscription, isSpeechRecognitionSupported, language]);
 
   // Monitor audio levels
-  const monitorAudioLevel = useCallback(() => {
+  const monitorAudioLevel = useCallback(function sampleAudioLevel() {
     if (!analyserRef.current) return;
 
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
@@ -165,10 +165,69 @@ export function VoiceNotes({
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
     setAudioLevel(average / 255);
 
-    animationRef.current = requestAnimationFrame(monitorAudioLevel);
+    animationRef.current = requestAnimationFrame(sampleAudioLevel);
   }, []);
 
   // Start recording
+  const stopRecording = useCallback(() => {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      mediaRecorderRef.current.stop();
+
+      mediaRecorderRef.current.onstop = () => {
+        const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
+        const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || "audio/webm" });
+        const url = URL.createObjectURL(blob);
+
+        const note: VoiceNote = {
+          id: `voice-${Date.now()}`,
+          blob,
+          url,
+          duration,
+          transcript: liveTranscript.trim() || undefined,
+          createdAt: Date.now(),
+        };
+
+        onRecordingComplete(note);
+
+        if (note.transcript && onTranscriptUpdate) {
+          onTranscriptUpdate(note.id, note.transcript);
+        }
+      };
+    }
+
+    // Cleanup
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsTranscribing(false);
+    }
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    setIsRecording(false);
+    setIsPaused(false);
+    setRecordingTime(0);
+    setAudioLevel(0);
+  }, [liveTranscript, onRecordingComplete, onTranscriptUpdate]);
+
   const startRecording = useCallback(async () => {
     try {
       setError(null);
@@ -235,7 +294,7 @@ export function VoiceNotes({
       setError(errorMessage);
       onError?.(new Error(errorMessage));
     }
-  }, [enableTranscription, maxDuration, monitorAudioLevel, onError]);
+  }, [enableTranscription, maxDuration, monitorAudioLevel, onError, stopRecording]);
 
   // Pause recording
   const pauseRecording = useCallback(() => {
@@ -279,67 +338,10 @@ export function VoiceNotes({
         });
       }, 1000);
     }
-  }, [maxDuration, monitorAudioLevel]);
+  }, [maxDuration, monitorAudioLevel, stopRecording]);
 
   // Stop recording
-  const stopRecording = useCallback(() => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop();
 
-      mediaRecorderRef.current.onstop = () => {
-        const duration = Math.round((Date.now() - startTimeRef.current) / 1000);
-        const blob = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || "audio/webm" });
-        const url = URL.createObjectURL(blob);
-
-        const note: VoiceNote = {
-          id: `voice-${Date.now()}`,
-          blob,
-          url,
-          duration,
-          transcript: liveTranscript.trim() || undefined,
-          createdAt: Date.now(),
-        };
-
-        onRecordingComplete(note);
-
-        if (note.transcript && onTranscriptUpdate) {
-          onTranscriptUpdate(note.id, note.transcript);
-        }
-      };
-    }
-
-    // Cleanup
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      setIsTranscribing(false);
-    }
-
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-
-    setIsRecording(false);
-    setIsPaused(false);
-    setRecordingTime(0);
-    setAudioLevel(0);
-  }, [liveTranscript, onRecordingComplete, onTranscriptUpdate]);
 
   // Cancel recording
   const cancelRecording = useCallback(() => {
@@ -443,7 +445,7 @@ export function VoiceNotes({
                 key={i}
                 className="w-1 bg-blue-500 rounded-full transition-all duration-75"
                 style={{
-                  height: `${Math.max(4, audioLevel * 64 * (0.5 + Math.random() * 0.5))}px`,
+                  height: `${Math.max(4, audioLevel * 64 * (0.5 + ((i * 7) % 20) / 40))}px`,
                   opacity: isPaused ? 0.3 : 1,
                 }}
               />

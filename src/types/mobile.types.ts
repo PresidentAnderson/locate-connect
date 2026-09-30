@@ -203,7 +203,7 @@ export interface GeofenceZone {
   caseId: string;
   name: string;
   zoneType: "last_seen" | "search_area" | "alert_zone" | "exclusion_zone";
-  geometry: GeoJSON.Polygon;
+  geometry: GeoJSON["Polygon"];
   radiusMeters?: number;
   priority: number;
   isActive: boolean;
@@ -328,14 +328,17 @@ export interface PushNotificationLog {
 // GeoJSON Types (for geofencing)
 // ============================================
 
-export namespace GeoJSON {
-  export interface Point {
-    type: "Point";
-    coordinates: [number, number]; // [longitude, latitude]
-  }
-
-  export interface Polygon {
-    type: "Polygon";
-    coordinates: Array<Array<[number, number]>>;
-  }
+export interface GeoJSONPoint {
+  type: "Point";
+  coordinates: [number, number]; // [longitude, latitude]
 }
+
+export interface GeoJSONPolygon {
+  type: "Polygon";
+  coordinates: Array<Array<[number, number]>>;
+}
+
+export type GeoJSON = {
+  Point: GeoJSONPoint;
+  Polygon: GeoJSONPolygon;
+};

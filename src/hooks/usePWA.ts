@@ -6,7 +6,7 @@
  * LC-FEAT-031: Mobile App Companion
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import {
   registerServiceWorker,
   isServiceWorkerSupported,
@@ -133,28 +133,19 @@ export function useOnlineStatus() {
 /**
  * Hook to check if running as installed PWA
  */
+function subscribeToDisplayMode(onChange: () => void) {
+  const mediaQuery = window.matchMedia("(display-mode: standalone)");
+  mediaQuery.addEventListener("change", onChange);
+  return () => mediaQuery.removeEventListener("change", onChange);
+}
+
 export function useIsInstalled() {
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  useEffect(() => {
-    // Check display mode
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-
-    setIsInstalled(isStandalone);
-
-    // Listen for changes
-    const mediaQuery = window.matchMedia("(display-mode: standalone)");
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsInstalled(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  return isInstalled;
+  return useSyncExternalStore(
+    subscribeToDisplayMode,
+    () => window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true,
+    () => false
+  );
 }
 
 /**

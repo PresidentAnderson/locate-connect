@@ -6,7 +6,7 @@
  * LC-FEAT-031: Mobile App Companion
  */
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 export interface EmergencyContact {
   id: string;
@@ -74,32 +74,15 @@ export function EmergencyContacts({
   caseId,
   className = "",
 }: EmergencyContactsProps) {
-  const [allContacts, setAllContacts] = useState<EmergencyContact[]>([]);
-  const [recentCalls, setRecentCalls] = useState<string[]>([]);
+  const [recentCallsOverride, setRecentCalls] = useState<string[] | null>(null);
+  const storedCalls = useSyncExternalStore(subscribeToRecentCalls,
+    () => localStorage.getItem("emergency-recent-calls"), () => null);
+  const recentCalls: string[] = recentCallsOverride ?? (storedCalls ? JSON.parse(storedCalls) : []);
   const [isDialing, setIsDialing] = useState<string | null>(null);
 
-  // Combine default and custom contacts
-  useEffect(() => {
-    const combined = showDefaultContacts
-      ? [...DEFAULT_CONTACTS, ...contacts]
-      : contacts;
-
-    // Remove duplicates based on number
-    const unique = combined.filter(
-      (contact, index, self) =>
-        index === self.findIndex((c) => c.number === contact.number)
-    );
-
-    setAllContacts(unique);
-  }, [contacts, showDefaultContacts]);
-
-  // Load recent calls from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("emergency-recent-calls");
-    if (stored) {
-      setRecentCalls(JSON.parse(stored));
-    }
-  }, []);
+  const combined = showDefaultContacts ? [...DEFAULT_CONTACTS, ...contacts] : contacts;
+  const allContacts = combined.filter((contact, index, self) =>
+    index === self.findIndex(candidate => candidate.number === contact.number));
 
   // Initiate phone call
   const initiateCall = (contact: EmergencyContact) => {
@@ -114,7 +97,7 @@ export function EmergencyContacts({
     localStorage.setItem("emergency-recent-calls", JSON.stringify(updatedRecent));
 
     // Initiate the call
-    window.location.href = `tel:${contact.number}`;
+    window.location.assign(`tel:${contact.number}`);
 
     // Reset dialing state after delay
     setTimeout(() => setIsDialing(null), 2000);
@@ -355,4 +338,9 @@ export function EmergencyContacts({
       </div>
     </div>
   );
+}
+
+function subscribeToRecentCalls(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
 }

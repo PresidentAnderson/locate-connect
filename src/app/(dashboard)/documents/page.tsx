@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -65,29 +65,7 @@ const formatDate = (dateString: string): string => {
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "recent" | "shared" | "trash">("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<DocumentType | "all">("all");
-  const [filterStatus, setFilterStatus] = useState<DocumentStatus | "all">("all");
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showPreviewModal, setShowPreviewModal] = useState<Document | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  useEffect(() => {
-    // Load mock data
-    setFolders([
-      { id: "folder-1", name: "Case Files", parentId: null, documentCount: 24, color: "blue" },
-      { id: "folder-2", name: "Evidence Photos", parentId: null, documentCount: 156, color: "green" },
-      { id: "folder-3", name: "Reports", parentId: null, documentCount: 18, color: "purple" },
-      { id: "folder-4", name: "Forms & Templates", parentId: null, documentCount: 12, color: "orange" },
-      { id: "folder-5", name: "Correspondence", parentId: null, documentCount: 45, color: "red" },
-    ]);
-
-    setDocuments([
+  const [documents, setDocuments] = useState<Document[]>(() => ([
       {
         id: "doc-1",
         name: "Jane_Doe_Initial_Report.pdf",
@@ -189,8 +167,25 @@ export default function DocumentsPage() {
         isConfidential: false,
         version: 1,
       },
-    ]);
-  }, []);
+    ]));
+  const [folders, setFolders] = useState<Folder[]>(() => ([
+      { id: "folder-1", name: "Case Files", parentId: null, documentCount: 24, color: "blue" },
+      { id: "folder-2", name: "Evidence Photos", parentId: null, documentCount: 156, color: "green" },
+      { id: "folder-3", name: "Reports", parentId: null, documentCount: 18, color: "purple" },
+      { id: "folder-4", name: "Forms & Templates", parentId: null, documentCount: 12, color: "orange" },
+      { id: "folder-5", name: "Correspondence", parentId: null, documentCount: 45, color: "red" },
+    ]));
+  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<DocumentType | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<DocumentStatus | "all">("all");
+  const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState<Document | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch =

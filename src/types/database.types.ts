@@ -14,17 +14,9 @@ export type Json =
 
 export interface Database {
   public: {
-    Tables: {
-      // Define your tables here
-      // Example:
-      // users: {
-      //   Row: { id: string; email: string; created_at: string }
-      //   Insert: { id?: string; email: string; created_at?: string }
-      //   Update: { id?: string; email?: string; created_at?: string }
-      // }
-    };
-    Views: {};
-    Functions: {};
-    Enums: {};
+    Tables: Record<string, never>;
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
   };
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -61,15 +61,7 @@ const getDispositionColor = (type: DispositionType) => {
 
 export default function DispositionsPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "cases" | "analytics">("overview");
-  const [dispositions, setDispositions] = useState<CaseDisposition[]>([]);
-  const [stats, setStats] = useState<DispositionStats[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>("month");
-  const [selectedDisposition, setSelectedDisposition] = useState<CaseDisposition | null>(null);
-  const [filterType, setFilterType] = useState<DispositionType | "all">("all");
-
-  useEffect(() => {
-    // Load mock dispositions
-    setDispositions([
+  const [dispositions, setDispositions] = useState<CaseDisposition[]>(() => ([
       {
         id: "disp-1",
         caseId: "case-10",
@@ -134,10 +126,8 @@ export default function DispositionsPage() {
         notes: "Subject was arrested in Calgary on unrelated charges.",
         location: "Calgary Remand Centre",
       },
-    ]);
-
-    // Load mock stats
-    setStats([
+    ]));
+  const [stats, setStats] = useState<DispositionStats[]>(() => ([
       { type: "found_safe", count: 45, percentage: 38, avgDaysToResolve: 4.2 },
       { type: "returned_home", count: 32, percentage: 27, avgDaysToResolve: 2.1 },
       { type: "runaway_resolved", count: 18, percentage: 15, avgDaysToResolve: 5.8 },
@@ -146,8 +136,12 @@ export default function DispositionsPage() {
       { type: "found_deceased", count: 4, percentage: 3, avgDaysToResolve: 12.5 },
       { type: "case_closed", count: 5, percentage: 4, avgDaysToResolve: 30.0 },
       { type: "unknown", count: 1, percentage: 1, avgDaysToResolve: 45.0 },
-    ]);
-  }, []);
+    ]));
+  const [timeRange, setTimeRange] = useState<TimeRange>("month");
+  const [selectedDisposition, setSelectedDisposition] = useState<CaseDisposition | null>(null);
+  const [filterType, setFilterType] = useState<DispositionType | "all">("all");
+
+
 
   const totalResolved = stats.reduce((sum, s) => sum + s.count, 0);
   const avgDaysOverall = stats.reduce((sum, s) => sum + s.avgDaysToResolve * s.count, 0) / totalResolved;

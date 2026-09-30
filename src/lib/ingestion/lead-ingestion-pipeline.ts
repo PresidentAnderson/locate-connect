@@ -332,7 +332,7 @@ const deduplicationStep: PipelineStep<Record<string, unknown>, Record<string, un
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // Build query to find potential duplicates
-    let query = supabase
+    const query = supabase
       .from("leads")
       .select("id, title, description, submitted_at, location")
       .eq("case_id", lead.caseId)

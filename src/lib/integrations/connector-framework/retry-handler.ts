@@ -1,3 +1,4 @@
+import { errorProperty, errorStatusCode } from './error-properties';
 /**
  * Retry Handler Implementation
  * Implements exponential backoff with jitter for resilient API calls
@@ -151,8 +152,8 @@ export class RetryHandler {
       if (
         message.includes(code.toLowerCase()) ||
         name.includes(code) ||
-        (error as any).code === code ||
-        (error as any).statusCode?.toString() === code
+        errorProperty(error, 'code') === code ||
+        errorStatusCode(error)?.toString() === code
       ) {
         return true;
       }

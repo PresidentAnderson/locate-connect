@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockSingle = vi.fn();
 const mockSelect = vi.fn(() => ({ single: mockSingle }));
-const mockInsert = vi.fn(() => ({ select: mockSelect }));
+const mockInsert = vi.fn((_row: Record<string, unknown> & { intake_metadata: { reporter: Record<string, unknown> } | null }) => ({ select: mockSelect }));
 const mockFrom = vi.fn(() => ({ insert: mockInsert }));
 const mockGetUser = vi.fn();
 
@@ -249,6 +249,7 @@ describe('POST /api/cases', () => {
 
     const insertArg = mockInsert.mock.calls[0][0];
     expect(insertArg.intake_metadata).not.toBeNull();
+    if (!insertArg.intake_metadata) throw new Error('Expected reporter intake metadata');
     expect(insertArg.intake_metadata.reporter.firstName).toBe('Alice');
     expect(insertArg.intake_metadata.reporter.email).toBe('alice@example.com');
   });
