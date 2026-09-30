@@ -1,3 +1,4 @@
+import { trustedPhotoUrl } from '@/lib/api/photo-url';
 /**
  * AI Photo Matching Service
  * Face recognition and photo comparison for missing persons
@@ -307,7 +308,9 @@ class PhotoMatchingService {
   private async extractFeaturesWithAWS(imageUrl: string): Promise<FacialFeatures | null> {
     try {
       // Download image and convert to bytes
-      const imageResponse = await fetch(imageUrl);
+      const photoUrl = trustedPhotoUrl(imageUrl, process.env.NEXT_PUBLIC_SUPABASE_URL);
+      // Never follow a storage redirect to an untrusted destination.
+      const imageResponse = await fetch(photoUrl, { redirect: 'error', signal: AbortSignal.timeout(10000) });
       if (!imageResponse.ok) {
         logger.error(`[PhotoMatching] Failed to fetch image: ${imageResponse.status}`);
         return null;
@@ -397,7 +400,7 @@ class PhotoMatchingService {
             "Content-Type": "application/json",
             "Ocp-Apim-Subscription-Key": this.azureFaceKey,
           },
-          body: JSON.stringify({ url: imageUrl }),
+          body: JSON.stringify({ url: trustedPhotoUrl(imageUrl, process.env.NEXT_PUBLIC_SUPABASE_URL) }),
         }
       );
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { escapeHtml, safeImageUrl } from '@/lib/api/html';
 import { createClient } from '@/lib/supabase/server';
 import { apiBadRequest, apiUnauthorized, apiServerError } from '@/lib/api/response';
 import { generateAuthorizationCode, hashApiKey } from '@/lib/api/crypto';
@@ -78,11 +79,12 @@ export async function GET(request: NextRequest) {
     const app = client.api_applications as unknown as { name: string; logo_url?: string };
     const requestedScopes = scope?.split(' ').filter(Boolean) || [];
 
+    const logoUrl = app.logo_url ? safeImageUrl(app.logo_url) : undefined;
     const html = `
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Authorize ${app.name} - LocateConnect</title>
+  <title>Authorize ${escapeHtml(app.name)} - LocateConnect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -105,24 +107,24 @@ export async function GET(request: NextRequest) {
 </head>
 <body>
   <div class="card">
-    ${app.logo_url ? `<img src="${app.logo_url}" alt="${app.name}" class="logo">` : '<div class="logo"></div>'}
-    <h1>Authorize ${app.name}</h1>
-    <p class="subtitle">${app.name} wants to access your LocateConnect account</p>
+    ${logoUrl ? `<img src="${escapeHtml(logoUrl!)}" alt="${escapeHtml(app.name)}" class="logo">` : '<div class="logo"></div>'}
+    <h1>Authorize ${escapeHtml(app.name)}</h1>
+    <p class="subtitle">${escapeHtml(app.name)} wants to access your LocateConnect account</p>
 
     ${requestedScopes.length > 0 ? `
     <div class="scopes">
       <h2>This application will be able to:</h2>
-      ${requestedScopes.map(s => `<div class="scope">${getScopeDescription(s)}</div>`).join('')}
+      ${requestedScopes.map(s => `<div class="scope">${escapeHtml(getScopeDescription(s))}</div>`).join('')}
     </div>
     ` : ''}
 
     <form method="POST" action="/api/developer/oauth/authorize">
-      <input type="hidden" name="client_id" value="${clientId}">
-      <input type="hidden" name="redirect_uri" value="${redirectUri}">
-      <input type="hidden" name="scope" value="${scope || ''}">
-      <input type="hidden" name="state" value="${state || ''}">
-      <input type="hidden" name="code_challenge" value="${codeChallenge || ''}">
-      <input type="hidden" name="code_challenge_method" value="${codeChallengeMethod || ''}">
+      <input type="hidden" name="client_id" value="${escapeHtml(clientId)}">
+      <input type="hidden" name="redirect_uri" value="${escapeHtml(redirectUri)}">
+      <input type="hidden" name="scope" value="${escapeHtml(scope || '')}">
+      <input type="hidden" name="state" value="${escapeHtml(state || '')}">
+      <input type="hidden" name="code_challenge" value="${escapeHtml(codeChallenge || '')}">
+      <input type="hidden" name="code_challenge_method" value="${escapeHtml(codeChallengeMethod || '')}">
 
       <div class="buttons">
         <button type="submit" name="action" value="deny" class="deny">Deny</button>
