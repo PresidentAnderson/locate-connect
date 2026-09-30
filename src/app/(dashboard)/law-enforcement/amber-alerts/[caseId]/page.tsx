@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { AmberAlertRequestPanel } from "@/components/alerts/AmberAlertRequestPanel";
 
 interface AmberAlertPageProps {
-  params: { caseId: string };
+  params: Promise<{ caseId: string }>;
 }
 
 export default async function AmberAlertCasePage({ params }: AmberAlertPageProps) {
+  const { caseId } = await params;
   const supabase = await createClient();
 
   const { data: caseRecord, error } = await supabase
@@ -32,7 +33,7 @@ export default async function AmberAlertCasePage({ params }: AmberAlertPageProps
         "circumstances",
       ].join(",")
     )
-    .eq("id", params.caseId)
+    .eq("id", caseId)
     .single();
 
   if (error || !caseRecord) {

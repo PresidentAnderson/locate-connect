@@ -75,8 +75,7 @@ export default function CaseResolutionPanel({ caseId }: CaseResolutionPanelProps
     "save_draft" | "submit_for_signoff" | "sign_off" | "close" | null
   >(null);
 
-  const loadResolution = useCallback(async () => {
-    const response = await fetch(`/api/cases/${caseId}/resolution`);
+  const loadResolution = useCallback(() => fetch(`/api/cases/${caseId}/resolution`).then(async (response) => {
     if (!response.ok) {
       return;
     }
@@ -106,7 +105,8 @@ export default function CaseResolutionPanel({ caseId }: CaseResolutionPanelProps
       );
       setLegalHold(Boolean(data.retention.legalHold));
     }
-  }, [caseId]);
+
+    }), [caseId]);
 
   useEffect(() => {
     void loadResolution();
@@ -117,7 +117,7 @@ export default function CaseResolutionPanel({ caseId }: CaseResolutionPanelProps
     return resolution.status
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
-  }, [resolution?.status]);
+  }, [resolution]);
 
   const isSensitiveResolution = useMemo(() => {
     return resolutionType && SENSITIVE_RESOLUTION_TYPES.includes(resolutionType as CaseResolutionType);

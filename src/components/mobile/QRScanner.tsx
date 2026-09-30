@@ -41,6 +41,44 @@ export function QRScanner({
   const isBarcodeDetectorSupported = typeof BarcodeDetector !== "undefined";
 
   // Start scanner
+  const scanFrame = useCallback(async function scanNextFrame() {
+    if (
+      !videoRef.current ||
+      !scannerRef.current ||
+      videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA
+    ) {
+      animationRef.current = requestAnimationFrame(scanNextFrame);
+      return;
+    }
+
+    try {
+      const codes: DetectedQRCode[] = await scannerRef.current.detect(videoRef.current);
+
+      if (codes.length > 0) {
+        const qrData = codes[0].rawValue;
+
+        // Debounce repeated scans
+        if (qrData !== lastScanned) {
+          setLastScanned(qrData);
+
+          // Vibrate on successful scan
+          if ("vibrate" in navigator) {
+            navigator.vibrate(100);
+          }
+
+          onScan(qrData);
+
+          // Reset after delay to allow re-scanning
+          setTimeout(() => setLastScanned(null), 2000);
+        }
+      }
+    } catch {
+      // Detection error, continue scanning
+    }
+
+    animationRef.current = requestAnimationFrame(scanNextFrame);
+  }, [lastScanned, onScan]);
+
   const startScanner = useCallback(async () => {
     try {
       setError(null);
@@ -83,46 +121,10 @@ export function QRScanner({
       setError(errorMessage);
       onError?.(new Error(errorMessage));
     }
-  }, [isBarcodeDetectorSupported, onError]);
+  }, [isBarcodeDetectorSupported, onError, scanFrame]);
 
   // Scan frame for QR codes
-  const scanFrame = useCallback(async () => {
-    if (
-      !videoRef.current ||
-      !scannerRef.current ||
-      videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA
-    ) {
-      animationRef.current = requestAnimationFrame(scanFrame);
-      return;
-    }
 
-    try {
-      const codes: DetectedQRCode[] = await scannerRef.current.detect(videoRef.current);
-
-      if (codes.length > 0) {
-        const qrData = codes[0].rawValue;
-
-        // Debounce repeated scans
-        if (qrData !== lastScanned) {
-          setLastScanned(qrData);
-
-          // Vibrate on successful scan
-          if ("vibrate" in navigator) {
-            navigator.vibrate(100);
-          }
-
-          onScan(qrData);
-
-          // Reset after delay to allow re-scanning
-          setTimeout(() => setLastScanned(null), 2000);
-        }
-      }
-    } catch {
-      // Detection error, continue scanning
-    }
-
-    animationRef.current = requestAnimationFrame(scanFrame);
-  }, [lastScanned, onScan]);
 
   // Stop scanner
   const stopScanner = useCallback(() => {

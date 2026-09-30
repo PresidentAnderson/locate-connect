@@ -1,3 +1,4 @@
+import { errorProperty, errorStatusCode } from './error-properties';
 /**
  * Base Connector
  * Abstract base class for external API connectors
@@ -226,7 +227,7 @@ export abstract class BaseConnector {
       const connectorError: ConnectorError = {
         code: this.getErrorCode(error),
         message: error instanceof Error ? error.message : String(error),
-        statusCode: (error as any).statusCode,
+        statusCode: errorStatusCode(error),
         retryable: this.retryHandler.isRetryableError(
           error instanceof Error ? error : new Error(String(error))
         ),
@@ -321,7 +322,7 @@ export abstract class BaseConnector {
       const error = new Error(
         `HTTP ${response.status}: ${response.statusText} - ${errorBody}`
       );
-      (error as any).statusCode = response.status;
+      Object.assign(error, { statusCode: response.status });
       throw error;
     }
 
@@ -384,12 +385,10 @@ export abstract class BaseConnector {
     if (error instanceof RetryExhaustedError) {
       return 'RETRY_EXHAUSTED';
     }
-    if ((error as any).code) {
-      return (error as any).code;
-    }
-    if ((error as any).statusCode) {
-      return `HTTP_${(error as any).statusCode}`;
-    }
+    const code = errorProperty(error, 'code');
+    if (typeof code === 'string' && code) return code;
+    const statusCode = errorStatusCode(error);
+    if (statusCode) return `HTTP_${statusCode}`;
     return 'UNKNOWN_ERROR';
   }
 

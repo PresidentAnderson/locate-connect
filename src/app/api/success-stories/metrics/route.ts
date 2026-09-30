@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
   // Calculate date ranges based on period
   const now = new Date();
   let periodStart: Date;
-  let periodEnd: Date = now;
+  const periodEnd: Date = now;
 
   switch (period) {
     case 'daily':

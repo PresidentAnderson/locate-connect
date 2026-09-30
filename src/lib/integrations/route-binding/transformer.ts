@@ -173,7 +173,7 @@ export class DataTransformer {
     // In production, use a proper expression parser
     try {
       // Replace placeholders
-      let evalExpr = expression
+      const evalExpr = expression
         .replace(/\{value\}/g, String(value))
         .replace(/\{(\w+)\}/g, (_, field) => {
           const val = this.getNestedValue(ctx?.source || {}, field);

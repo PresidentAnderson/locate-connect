@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -67,16 +67,7 @@ const getStatusColor = (status: MatchStatus) => {
 
 export default function CaseSimilarityPage() {
   const [activeTab, setActiveTab] = useState<"matches" | "analysis" | "settings">("matches");
-  const [matches, setMatches] = useState<CaseMatch[]>([]);
-  const [selectedMatch, setSelectedMatch] = useState<CaseMatch | null>(null);
-  const [filterConfidence, setFilterConfidence] = useState<MatchConfidence | "all">("all");
-  const [filterStatus, setFilterStatus] = useState<MatchStatus | "all">("all");
-  const [runningAnalysis, setRunningAnalysis] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState(0);
-
-  useEffect(() => {
-    // Load mock matches
-    setMatches([
+  const [matches, setMatches] = useState<CaseMatch[]>(() => ([
       {
         id: "match-1",
         sourceCase: {
@@ -164,8 +155,14 @@ export default function CaseSimilarityPage() {
         reviewedAt: "2026-01-17T09:00:00Z",
         notes: "Confirmed pattern. Recommending increased patrol presence at WEM during school hours.",
       },
-    ]);
-  }, []);
+    ]));
+  const [selectedMatch, setSelectedMatch] = useState<CaseMatch | null>(null);
+  const [filterConfidence, setFilterConfidence] = useState<MatchConfidence | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<MatchStatus | "all">("all");
+  const [runningAnalysis, setRunningAnalysis] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+
+
 
   const filteredMatches = matches.filter((match) => {
     if (filterConfidence !== "all" && match.confidence !== filterConfidence) return false;

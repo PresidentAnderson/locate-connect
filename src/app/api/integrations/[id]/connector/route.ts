@@ -174,7 +174,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     switch (action) {
       case 'connect': {
-        let connector = factory.get(id);
+        const connector = factory.get(id);
 
         if (!connector) {
           // Connector doesn't exist - would need to create it

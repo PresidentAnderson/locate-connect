@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import {
   DEFAULT_LOCALE,
@@ -33,24 +33,20 @@ const LocaleContext = createContext<LocaleContextValue>({
 const STORAGE_KEY = "locateconnect.locale";
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [resolvedLocale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const [profileResolved, setIsHydrated] = useState(false);
+  const stored = useSyncExternalStore(
+    subscribeToLocaleStorage,
+    () => window.localStorage.getItem(STORAGE_KEY),
+    () => null
+  );
+  const locale = stored ? normalizeLocale(stored) : resolvedLocale;
+  const isHydrated = Boolean(stored) || profileResolved;
 
   // Initialize locale from storage, profile preference, or browser detection
   useEffect(() => {
     let isMounted = true;
-    const stored = typeof window !== "undefined"
-      ? window.localStorage.getItem(STORAGE_KEY)
-      : null;
-
-    if (stored) {
-      const nextLocale = normalizeLocale(stored);
-      setLocaleState(nextLocale);
-      setIsHydrated(true);
-      return () => {
-        isMounted = false;
-      };
-    }
+    if (stored) return;
 
     const resolveLocale = async () => {
       let nextLocale = detectBrowserLocale();
@@ -77,7 +73,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [stored]);
 
   // Update document attributes when locale changes
   useEffect(() => {
@@ -162,4 +158,9 @@ export function useDirection() {
 export function useIsRTL() {
   const { isRTL } = useLocale();
   return isRTL;
+}
+
+function subscribeToLocaleStorage(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
 }

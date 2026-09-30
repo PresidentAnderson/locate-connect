@@ -54,7 +54,7 @@ describe('CredentialsVaultService', () => {
     ...overrides,
   });
 
-  const createMockRow = (overrides: any = {}) => ({
+  const createMockRow = (overrides: Record<string, unknown> = {}) => ({
     id: 'cred-123',
     name: 'Test Credential',
     type: 'api_key',
@@ -82,8 +82,8 @@ describe('CredentialsVaultService', () => {
   });
 
   // Helper to create mock chain that returns properly
-  const createMockChain = (singleResult?: { data: any; error: any }) => {
-    const chain: any = {};
+  const createMockChain = (singleResult?: { data: unknown; error: unknown }) => {
+    const chain: Record<string, Mock> = {};
     chain.from = vi.fn(() => chain);
     chain.select = vi.fn(() => chain);
     chain.insert = vi.fn(() => Promise.resolve({ error: null }));

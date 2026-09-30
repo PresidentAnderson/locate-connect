@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   const pageSize = Math.min(parseInt(url.searchParams.get("pageSize") || "20", 10), 100);
   const offset = (page - 1) * pageSize;
 
-  let query = supabase
+  const query = supabase
     .from("cold_case_reviews")
     .select(
       `

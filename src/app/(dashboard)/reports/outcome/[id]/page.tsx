@@ -223,7 +223,7 @@ export default function OutcomeReportViewPage({ params }: Props) {
         </div>
       </div>
 
-      {/* What Worked / What Didn't Work Summary */}
+      {/* What Worked / What Didn&apos;t Work Summary */}
       {(report.whatWorked?.length > 0 || report.whatDidntWork?.length > 0) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {report.whatWorked && report.whatWorked.length > 0 && (
@@ -241,7 +241,7 @@ export default function OutcomeReportViewPage({ params }: Props) {
           )}
           {report.whatDidntWork && report.whatDidntWork.length > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h3 className="font-semibold text-red-800 mb-3">What Didn't Work</h3>
+              <h3 className="font-semibold text-red-800 mb-3">What Didn&apos;t Work</h3>
               <ul className="space-y-1">
                 {report.whatDidntWork.map((item, i) => (
                   <li key={i} className="text-sm text-red-700 flex items-start gap-2">

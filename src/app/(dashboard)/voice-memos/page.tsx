@@ -39,21 +39,7 @@ const formatFileSize = (bytes: number): string => {
 
 export default function VoiceMemosPage() {
   const [activeTab, setActiveTab] = useState<"recordings" | "record" | "transcriptions">("recordings");
-  const [memos, setMemos] = useState<VoiceMemo[]>([]);
-  const [selectedMemo, setSelectedMemo] = useState<VoiceMemo | null>(null);
-  const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [audioQuality, setAudioQuality] = useState<AudioQuality>("high");
-  const [selectedCase, setSelectedCase] = useState("");
-  const [memoTitle, setMemoTitle] = useState("");
-  const [isEvidence, setIsEvidence] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [playingMemoId, setPlayingMemoId] = useState<string | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    // Load mock data
-    setMemos([
+  const [memos, setMemos] = useState<VoiceMemo[]>(() => ([
       {
         id: "memo-1",
         caseId: "case-1",
@@ -109,8 +95,19 @@ export default function VoiceMemosPage() {
         tags: ["tip", "anonymous"],
         isEvidence: true,
       },
-    ]);
-  }, []);
+    ]));
+  const [selectedMemo, setSelectedMemo] = useState<VoiceMemo | null>(null);
+  const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>("idle");
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [audioQuality, setAudioQuality] = useState<AudioQuality>("high");
+  const [selectedCase, setSelectedCase] = useState("");
+  const [memoTitle, setMemoTitle] = useState("");
+  const [isEvidence, setIsEvidence] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [playingMemoId, setPlayingMemoId] = useState<string | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+
 
   useEffect(() => {
     if (recordingStatus === "recording") {

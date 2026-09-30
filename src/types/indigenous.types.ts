@@ -4,16 +4,14 @@
  */
 
 // GeoJSON types (simplified subset)
-declare namespace GeoJSON {
-  export interface Feature {
-    type: "Feature";
-    geometry: Record<string, unknown>;
-    properties: Record<string, unknown>;
-  }
-  export interface FeatureCollection {
-    type: "FeatureCollection";
-    features: Feature[];
-  }
+interface GeoJSONFeature {
+  type: "Feature";
+  geometry: Record<string, unknown>;
+  properties: Record<string, unknown>;
+}
+interface GeoJSONFeatureCollection {
+  type: "FeatureCollection";
+  features: GeoJSONFeature[];
 }
 
 // =============================================================================
@@ -558,7 +556,7 @@ export interface TraditionalTerritory {
   boundsWest?: number;
   centerLatitude?: number;
   centerLongitude?: number;
-  boundaryGeojson?: GeoJSON.FeatureCollection | GeoJSON.Feature;
+  boundaryGeojson?: GeoJSONFeatureCollection | GeoJSONFeature;
   treatyNumber?: string;
   treatyName?: string;
   treatyYear?: number;
@@ -583,7 +581,7 @@ export interface TraditionalTerritoryInput {
   boundsWest?: number;
   centerLatitude?: number;
   centerLongitude?: number;
-  boundaryGeojson?: GeoJSON.FeatureCollection | GeoJSON.Feature;
+  boundaryGeojson?: GeoJSONFeatureCollection | GeoJSONFeature;
   treatyNumber?: string;
   treatyName?: string;
   treatyYear?: number;

@@ -19,7 +19,26 @@ import {
   type RequestInterceptor,
   type ResponseInterceptor,
 } from './interceptors';
-import type { ConnectorRequest, ConnectorResponse } from '@/types';
+import type { ConnectorRequest, ConnectorResponse, ConnectorError } from '@/types';
+
+const responseMetadata = (): ConnectorResponse['metadata'] => ({
+  requestId: 'req-123', statusCode: 200, responseTimeMs: 0, retryCount: 0, circuitBreakerState: 'closed',
+});
+const connectorError = (message: string): ConnectorError => ({
+  code: 'TEST_ERROR', message, retryable: false, timestamp: new Date().toISOString(),
+});
+function requestHeaders(request: ConnectorRequest): Record<string, string> {
+  if (!request.headers) throw new Error('Expected request headers');
+  return request.headers;
+}
+function objectField(value: unknown, field: string): unknown {
+  if (typeof value !== 'object' || value === null) throw new Error('Expected object fixture');
+  return Reflect.get(value, field);
+}
+function metadataField(metadata: ConnectorResponse['metadata'], field: string): unknown {
+  return objectField(metadata, field);
+}
+
 
 describe('InterceptorChain', () => {
   let chain: InterceptorChain;
@@ -36,7 +55,7 @@ describe('InterceptorChain', () => {
   const createResponse = <T>(data: T, overrides: Partial<ConnectorResponse<T>> = {}): ConnectorResponse<T> => ({
     success: true,
     data,
-    metadata: { statusCode: 200 },
+    metadata: responseMetadata(),
     ...overrides,
   });
 
@@ -61,7 +80,7 @@ describe('InterceptorChain', () => {
       const request = createRequest();
       const result = await chain.processRequest(request, context);
 
-      expect(result.headers['X-Custom']).toBe('value');
+      expect(requestHeaders(result)['X-Custom']).toBe('value');
     });
 
     it('should execute interceptors in order', async () => {
@@ -92,7 +111,7 @@ describe('InterceptorChain', () => {
       });
 
       const result = await chain.processRequest(createRequest(), context);
-      expect(result.headers['X-Async']).toBe('true');
+      expect(requestHeaders(result)['X-Async']).toBe('true');
     });
 
     it('should chain return for fluent API', () => {
@@ -112,19 +131,19 @@ describe('InterceptorChain', () => {
       const response = createResponse({ value: 1 });
       const result = await chain.processResponse(response, context);
 
-      expect(result.metadata?.custom).toBe('added');
+      expect(metadataField(result.metadata, 'custom')).toBe('added');
     });
 
     it('should transform response data', async () => {
-      chain.addResponseInterceptor<{ doubled: number }>((res) => ({
-        ...res,
-        data: { doubled: (res.data as any).value * 2 },
-      }));
+      chain.addResponseInterceptor<{ value: number } | { doubled: number }>((res) => {
+        if (!res.data || !('value' in res.data)) throw new Error('Expected input value fixture');
+        return { ...res, data: { doubled: res.data.value * 2 } };
+      });
 
       const response = createResponse({ value: 5 });
       const result = await chain.processResponse(response, context);
 
-      expect((result.data as any).doubled).toBe(10);
+      expect(objectField(result.data, 'doubled')).toBe(10);
     });
   });
 
@@ -146,14 +165,15 @@ describe('InterceptorChain', () => {
       chain.addErrorInterceptor(() => ({
         success: false,
         data: null,
-        error: { message: 'Converted error' },
+        error: connectorError('Converted error'),
+        metadata: responseMetadata(),
       }));
 
       const error = new Error('Original error');
       const result = await chain.processError(error, context);
 
       expect(result).not.toBeInstanceOf(Error);
-      expect((result as any).success).toBe(false);
+      expect(objectField(result, 'success')).toBe(false);
     });
   });
 
@@ -168,7 +188,7 @@ describe('InterceptorChain', () => {
       expect(chain.removeRequestInterceptor(interceptor)).toBe(true);
 
       const result = await chain.processRequest(createRequest(), context);
-      expect(result.headers['X-Removable']).toBeUndefined();
+      expect(requestHeaders(result)['X-Removable']).toBeUndefined();
     });
 
     it('should return false for non-existent interceptor', () => {
@@ -199,7 +219,7 @@ describe('InterceptorChain', () => {
       }));
       chain.addResponseInterceptor((res) => ({
         ...res,
-        metadata: { added: true },
+        metadata: { ...res.metadata, added: true },
       }));
       chain.addErrorInterceptor((err) => err);
 
@@ -213,8 +233,8 @@ describe('InterceptorChain', () => {
       const resResult = await chain.processResponse(response, context);
       const errResult = await chain.processError(error, context);
 
-      expect(reqResult.headers['X-Test']).toBeUndefined();
-      expect(resResult.metadata?.added).toBeUndefined();
+      expect(requestHeaders(reqResult)['X-Test']).toBeUndefined();
+      expect(metadataField(resResult.metadata, 'added')).toBeUndefined();
       expect(errResult).toBe(error);
     });
   });
@@ -257,7 +277,7 @@ describe('Built-in Interceptors', () => {
   const createResponse = <T>(data: T): ConnectorResponse<T> => ({
     success: true,
     data,
-    metadata: { statusCode: 200 },
+    metadata: responseMetadata(),
   });
 
   beforeEach(() => {
@@ -270,101 +290,101 @@ describe('Built-in Interceptors', () => {
   });
 
   describe('correlationIdInterceptor', () => {
-    it('should add correlation ID header', () => {
+    it('should add correlation ID header', async () => {
       const request = createRequest();
-      const result = correlationIdInterceptor(request, context);
+      const result = await correlationIdInterceptor(request, context);
 
-      expect(result.headers['X-Correlation-ID']).toBe('corr-456');
+      expect(requestHeaders(result)['X-Correlation-ID']).toBe('corr-456');
     });
 
-    it('should add request ID header', () => {
+    it('should add request ID header', async () => {
       const request = createRequest({ id: 'custom-id' });
-      const result = correlationIdInterceptor(request, context);
+      const result = await correlationIdInterceptor(request, context);
 
-      expect(result.headers['X-Request-ID']).toBe('custom-id');
+      expect(requestHeaders(result)['X-Request-ID']).toBe('custom-id');
     });
 
-    it('should use correlation ID when request ID is missing', () => {
+    it('should use correlation ID when request ID is missing', async () => {
       const request = createRequest({ id: undefined });
-      const result = correlationIdInterceptor(request, context);
+      const result = await correlationIdInterceptor(request, context);
 
-      expect(result.headers['X-Request-ID']).toBe('corr-456');
+      expect(requestHeaders(result)['X-Request-ID']).toBe('corr-456');
     });
   });
 
   describe('contentTypeInterceptor', () => {
-    it('should add Content-Type for requests with body', () => {
+    it('should add Content-Type for requests with body', async () => {
       const request = createRequest({ body: { data: 'test' } });
-      const result = contentTypeInterceptor(request, context);
+      const result = await contentTypeInterceptor(request, context);
 
-      expect(result.headers['Content-Type']).toBe('application/json');
+      expect(requestHeaders(result)['Content-Type']).toBe('application/json');
     });
 
-    it('should not override existing Content-Type', () => {
+    it('should not override existing Content-Type', async () => {
       const request = createRequest({
         body: { data: 'test' },
         headers: { 'Content-Type': 'text/plain' },
       });
-      const result = contentTypeInterceptor(request, context);
+      const result = await contentTypeInterceptor(request, context);
 
-      expect(result.headers['Content-Type']).toBe('text/plain');
+      expect(requestHeaders(result)['Content-Type']).toBe('text/plain');
     });
 
-    it('should add Accept header', () => {
+    it('should add Accept header', async () => {
       const request = createRequest();
-      const result = contentTypeInterceptor(request, context);
+      const result = await contentTypeInterceptor(request, context);
 
-      expect(result.headers['Accept']).toBe('application/json');
+      expect(requestHeaders(result)['Accept']).toBe('application/json');
     });
 
-    it('should not override existing Accept header', () => {
+    it('should not override existing Accept header', async () => {
       const request = createRequest({ headers: { Accept: 'text/html' } });
-      const result = contentTypeInterceptor(request, context);
+      const result = await contentTypeInterceptor(request, context);
 
-      expect(result.headers['Accept']).toBe('text/html');
+      expect(requestHeaders(result)['Accept']).toBe('text/html');
     });
   });
 
   describe('timingResponseInterceptor', () => {
-    it('should add client duration to metadata', () => {
+    it('should add client duration to metadata', async () => {
       const response = createResponse({ value: 1 });
-      const result = timingResponseInterceptor(response, context);
+      const result = await timingResponseInterceptor(response, context);
 
-      expect(result.metadata?.clientDurationMs).toBeGreaterThanOrEqual(50);
+      expect(metadataField(result.metadata, 'clientDurationMs')).toBeGreaterThanOrEqual(50);
     });
 
-    it('should add request start time to metadata', () => {
+    it('should add request start time to metadata', async () => {
       const response = createResponse({ value: 1 });
-      const result = timingResponseInterceptor(response, context);
+      const result = await timingResponseInterceptor(response, context);
 
-      expect(result.metadata?.requestStartTime).toBe(context.startTime);
+      expect(metadataField(result.metadata, 'requestStartTime')).toBe(context.startTime);
     });
   });
 
   describe('createUserAgentInterceptor', () => {
-    it('should add User-Agent header', () => {
+    it('should add User-Agent header', async () => {
       const interceptor = createUserAgentInterceptor('TestClient/1.0');
       const request = createRequest();
-      const result = interceptor(request, context);
+      const result = await interceptor(request, context);
 
-      expect(result.headers['User-Agent']).toBe('TestClient/1.0');
+      expect(requestHeaders(result)['User-Agent']).toBe('TestClient/1.0');
     });
   });
 
   describe('retryHeaderInterceptor', () => {
-    it('should add retry attempt header when present in context', () => {
+    it('should add retry attempt header when present in context', async () => {
       context.metadata.retryAttempt = 2;
       const request = createRequest();
-      const result = retryHeaderInterceptor(request, context);
+      const result = await retryHeaderInterceptor(request, context);
 
-      expect(result.headers['X-Retry-Attempt']).toBe('2');
+      expect(requestHeaders(result)['X-Retry-Attempt']).toBe('2');
     });
 
-    it('should not add header when no retry attempt', () => {
+    it('should not add header when no retry attempt', async () => {
       const request = createRequest();
-      const result = retryHeaderInterceptor(request, context);
+      const result = await retryHeaderInterceptor(request, context);
 
-      expect(result.headers['X-Retry-Attempt']).toBeUndefined();
+      expect(requestHeaders(result)['X-Retry-Attempt']).toBeUndefined();
     });
   });
 
@@ -373,14 +393,14 @@ describe('Built-in Interceptors', () => {
       const error = new Error('Test error');
       const result = errorNormalizationInterceptor(error, context);
 
-      expect((result as any).correlationId).toBe('corr-456');
+      expect(objectField(result, 'correlationId')).toBe('corr-456');
     });
 
     it('should add connector ID to error', () => {
       const error = new Error('Test error');
       const result = errorNormalizationInterceptor(error, context);
 
-      expect((result as any).connectorId).toBe('test-connector');
+      expect(objectField(result, 'connectorId')).toBe('test-connector');
     });
   });
 
@@ -440,7 +460,7 @@ describe('Built-in Interceptors', () => {
       const req = createRequest({ headers: { Authorization: 'Bearer token' } });
       interceptor(req, context);
 
-      expect((logs[0] as any).headers).toEqual({ Authorization: 'Bearer token' });
+      expect(objectField(logs[0], 'headers')).toEqual({ Authorization: 'Bearer token' });
     });
 
     it('should redact body by default', () => {
@@ -454,33 +474,34 @@ describe('Built-in Interceptors', () => {
       const req = createRequest({ body: { password: 'secret' } });
       interceptor(req, context);
 
-      expect((logs[0] as any).body).toBe('[REDACTED]');
+      expect(objectField(logs[0], 'body')).toBe('[REDACTED]');
     });
   });
 
   describe('createTransformInterceptor', () => {
-    it('should transform successful response data', () => {
-      const interceptor = createTransformInterceptor<{ value: number }, { doubled: number }>(
+    it('should transform successful response data', async () => {
+      const interceptor = createTransformInterceptor<{ value: number }, { value: number } | { doubled: number } | null>(
         (data) => ({ doubled: data.value * 2 })
       );
 
       const response = createResponse({ value: 5 });
-      const result = interceptor(response, context);
+      const result = await interceptor(response, context);
 
       expect(result.data).toEqual({ doubled: 10 });
     });
 
-    it('should not transform failed responses', () => {
-      const interceptor = createTransformInterceptor<{ value: number }, { doubled: number }>(
+    it('should not transform failed responses', async () => {
+      const interceptor = createTransformInterceptor<{ value: number }, { value: number } | { doubled: number } | null>(
         (data) => ({ doubled: data.value * 2 })
       );
 
-      const response: ConnectorResponse<{ doubled: number }> = {
+      const response: ConnectorResponse<{ value: number } | { doubled: number } | null> = {
         success: false,
-        data: null as any,
-        error: { message: 'Failed' },
+        data: null,
+        error: connectorError('Failed'),
+        metadata: responseMetadata(),
       };
-      const result = interceptor(response, context);
+      const result = await interceptor(response, context);
 
       expect(result.success).toBe(false);
     });
@@ -520,16 +541,16 @@ describe('Built-in Interceptors', () => {
 
       interceptor(request, context);
 
-      expect((context.metadata.redactedBody as any).PASSWORD).toBe('[REDACTED]');
+      expect(objectField(context.metadata.redactedBody, 'PASSWORD')).toBe('[REDACTED]');
     });
 
-    it('should return request unmodified', () => {
+    it('should return request unmodified', async () => {
       const interceptor = createRedactionInterceptor(['password']);
       const request = createRequest({
         body: { password: 'secret' },
       });
 
-      const result = interceptor(request, context);
+      const result = await interceptor(request, context);
 
       expect(result.body).toEqual({ password: 'secret' });
     });
@@ -556,10 +577,10 @@ describe('Built-in Interceptors', () => {
       const result = await chain.processRequest(request, ctx);
 
       // Check correlation ID interceptor worked
-      expect(result.headers['X-Correlation-ID']).toBe('corr-test');
+      expect(requestHeaders(result)['X-Correlation-ID']).toBe('corr-test');
       // Check content type interceptor worked
-      expect(result.headers['Content-Type']).toBe('application/json');
-      expect(result.headers['Accept']).toBe('application/json');
+      expect(requestHeaders(result)['Content-Type']).toBe('application/json');
+      expect(requestHeaders(result)['Accept']).toBe('application/json');
     });
 
     it('should add timing to responses', async () => {
@@ -567,7 +588,7 @@ describe('Built-in Interceptors', () => {
       const response: ConnectorResponse<{ value: number }> = {
         success: true,
         data: { value: 1 },
-        metadata: { statusCode: 200 },
+        metadata: responseMetadata(),
       };
 
       const ctx: RequestContext = {
@@ -579,7 +600,7 @@ describe('Built-in Interceptors', () => {
 
       const result = await chain.processResponse(response, ctx);
 
-      expect(result.metadata?.clientDurationMs).toBeGreaterThanOrEqual(100);
+      expect(metadataField(result.metadata, 'clientDurationMs')).toBeGreaterThanOrEqual(100);
     });
 
     it('should normalize errors', async () => {
@@ -595,8 +616,8 @@ describe('Built-in Interceptors', () => {
 
       const result = await chain.processError(error, ctx);
 
-      expect((result as any).correlationId).toBe('corr-test');
-      expect((result as any).connectorId).toBe('my-connector');
+      expect(objectField(result, 'correlationId')).toBe('corr-test');
+      expect(objectField(result, 'connectorId')).toBe('my-connector');
     });
   });
 });

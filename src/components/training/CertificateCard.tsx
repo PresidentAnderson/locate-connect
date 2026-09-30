@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib";
 import type { TrainingCertification } from "@/types/training.types";
 
@@ -18,9 +19,10 @@ export function CertificateCard({
   onVerify,
   className,
 }: CertificateCardProps) {
-  const isExpired = certification.expiresAt && new Date(certification.expiresAt) < new Date();
+  const [now] = useState(() => Date.now());
+  const isExpired = certification.expiresAt && new Date(certification.expiresAt) < new Date(now);
   const daysUntilExpiry = certification.expiresAt
-    ? Math.ceil((new Date(certification.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil((new Date(certification.expiresAt).getTime() - now) / (1000 * 60 * 60 * 24))
     : null;
 
   const getStatusColor = () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -45,18 +45,15 @@ export default function PostersPage() {
     tiplineNumber: "1-800-THE-LOST",
   });
   const [showQRCode, setShowQRCode] = useState(true);
-  const [cases, setCases] = useState<CaseInfo[]>([]);
-  const [generating, setGenerating] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Load mock cases
-    setCases([
+  const [cases, setCases] = useState<CaseInfo[]>(() => ([
       { id: "1", name: "Jane Doe", age: 16, lastSeenDate: "2026-01-15", lastSeenLocation: "Downtown Edmonton", description: "5'4\", brown hair, brown eyes, last seen wearing blue jacket" },
       { id: "2", name: "John Smith", age: 72, lastSeenDate: "2026-01-14", lastSeenLocation: "Sherwood Park", description: "6'0\", gray hair, blue eyes, uses walker" },
       { id: "3", name: "Emily Chen", age: 14, lastSeenDate: "2026-01-16", lastSeenLocation: "West Edmonton Mall", description: "5'2\", black hair, brown eyes, wearing school uniform" },
-    ]);
-  }, []);
+    ]));
+  const [generating, setGenerating] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+
 
   const handleGenerate = async () => {
     setGenerating(true);

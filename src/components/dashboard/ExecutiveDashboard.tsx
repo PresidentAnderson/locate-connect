@@ -29,7 +29,7 @@ export function ExecutiveDashboard({
     setDatePreset(preset);
     const now = new Date();
     let startDate: Date;
-    let endDate = new Date();
+    const endDate = new Date();
 
     switch (preset) {
       case "today":

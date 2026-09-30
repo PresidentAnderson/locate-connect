@@ -309,8 +309,10 @@ export const retryHeaderInterceptor: RequestInterceptor = (request, context) => 
  */
 export const errorNormalizationInterceptor: ErrorInterceptor = (error, context) => {
   // Add correlation ID to error
-  (error as any).correlationId = context.correlationId;
-  (error as any).connectorId = context.connectorId;
+  Object.assign(error, {
+    correlationId: context.correlationId,
+    connectorId: context.connectorId,
+  });
 
   return error;
 };

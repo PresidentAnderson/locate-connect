@@ -43,16 +43,16 @@ export default function CaseWeatherPanel({ caseId }: CaseWeatherPanelProps) {
   const [data, setData] = useState<WeatherResponse | null>(null);
   const [shelterAccess, setShelterAccess] = useState(false);
 
-  const loadWeather = useCallback(async () => {
-    const response = await fetch(
+  const loadWeather = useCallback(() => fetch(
       `/api/cases/${caseId}/weather?shelterAccess=${shelterAccess}`
-    );
+    ).then(async (response) => {
     if (!response.ok) {
       return;
     }
     const payload = (await response.json()) as WeatherResponse;
     setData(payload);
-  }, [caseId, shelterAccess]);
+
+    }), [caseId, shelterAccess]);
 
   useEffect(() => {
     void loadWeather();

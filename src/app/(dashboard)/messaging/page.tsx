@@ -68,18 +68,7 @@ function formatTime(dateString: string): string {
 }
 
 export default function MessagingPage() {
-  const [threads, setThreads] = useState<Thread[]>([]);
-  const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterChannel, setFilterChannel] = useState<ChannelType | "all">("all");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Load mock threads
-    setThreads([
+  const [threads, setThreads] = useState<Thread[]>(() => ([
       {
         id: "1",
         channelType: "case_discussion",
@@ -137,12 +126,21 @@ export default function MessagingPage() {
         isPinned: false,
         isArchived: false,
       },
-    ]);
-    setLoading(false);
-  }, []);
+    ]));
+  const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterChannel, setFilterChannel] = useState<ChannelType | "all">("all");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (selectedThread) {
+
+
+  const handleSelectThread = (thread: Thread, eventTime: number) => {
+    const now = eventTime > 1e12 ? eventTime : performance.timeOrigin + eventTime;
+    setSelectedThread(thread);
+    {
       // Load mock messages for selected thread
       setMessages([
         {
@@ -153,7 +151,7 @@ export default function MessagingPage() {
           content: "Good morning everyone. I wanted to update you on the investigation progress.",
           status: "read",
           isEncrypted: true,
-          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          createdAt: new Date(now - 3600000).toISOString(),
         },
         {
           id: "2",
@@ -163,7 +161,7 @@ export default function MessagingPage() {
           content: "Thank you for the update. Is there anything new we should know?",
           status: "read",
           isEncrypted: true,
-          createdAt: new Date(Date.now() - 3000000).toISOString(),
+          createdAt: new Date(now - 3000000).toISOString(),
         },
         {
           id: "3",
@@ -173,7 +171,7 @@ export default function MessagingPage() {
           content: "We received a verified sighting yesterday near the downtown transit station. We're following up on it today.",
           status: "read",
           isEncrypted: true,
-          createdAt: new Date(Date.now() - 2400000).toISOString(),
+          createdAt: new Date(now - 2400000).toISOString(),
         },
         {
           id: "4",
@@ -183,7 +181,7 @@ export default function MessagingPage() {
           content: "I'll be canvassing the area this afternoon with the K-9 unit.",
           status: "delivered",
           isEncrypted: true,
-          createdAt: new Date(Date.now() - 1800000).toISOString(),
+          createdAt: new Date(now - 1800000).toISOString(),
         },
         {
           id: "5",
@@ -193,11 +191,16 @@ export default function MessagingPage() {
           content: "That's great news! Please keep us updated. We've also distributed more flyers in that area.",
           status: "sent",
           isEncrypted: true,
-          createdAt: new Date(Date.now() - 600000).toISOString(),
+          createdAt: new Date(now - 600000).toISOString(),
         },
       ]);
-      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     }
+  };
+
+  useEffect(() => {
+    if (!selectedThread) return;
+    const timer = setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    return () => clearTimeout(timer);
   }, [selectedThread]);
 
   const handleSendMessage = () => {
@@ -280,7 +283,7 @@ export default function MessagingPage() {
           {filteredThreads.map((thread) => (
             <button
               key={thread.id}
-              onClick={() => setSelectedThread(thread)}
+              onClick={(event) => handleSelectThread(thread, event.timeStamp)}
               className={`w-full p-4 text-left border-b border-gray-100 hover:bg-gray-50 transition-colors ${
                 selectedThread?.id === thread.id ? "bg-blue-50" : ""
               }`}

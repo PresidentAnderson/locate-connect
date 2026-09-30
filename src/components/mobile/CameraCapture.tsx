@@ -231,6 +231,19 @@ export function CameraCapture({
   }, [getCurrentLocation, onCapture, quality]);
 
   // Start video recording
+  const stopRecording = useCallback(() => {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      mediaRecorderRef.current.stop();
+    }
+
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+    }
+  }, []);
+
   const startRecording = useCallback(() => {
     if (!streamRef.current) return;
 
@@ -286,21 +299,10 @@ export function CameraCapture({
         return prev + 1;
       });
     }, 1000);
-  }, [getCurrentLocation, maxVideoDuration, onCapture, quality]);
+  }, [getCurrentLocation, maxVideoDuration, onCapture, quality, stopRecording]);
 
   // Stop video recording
-  const stopRecording = useCallback(() => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop();
-    }
 
-    if (recordingTimerRef.current) {
-      clearInterval(recordingTimerRef.current);
-    }
-  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
