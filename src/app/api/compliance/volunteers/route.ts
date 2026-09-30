@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireComplianceVerifier } from "@/lib/api/compliance-verifier";
 import { volunteerNetworkService } from "@/lib/services/volunteer-network-service";
 import type { VolunteerOpportunity } from "@/types/compliance.types";
 import { logger } from "../../../../lib/logger";
@@ -120,6 +121,18 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
+        const editableFields = ["name", "phone", "location", "skills", "languages", "availability", "searchRadius"];
+        if (
+          typeof updates !== "object" || Array.isArray(updates) ||
+          Object.keys(updates).some(field => !editableFields.includes(field))
+        ) {
+          return NextResponse.json({ error: "Only editable volunteer profile fields may be updated" }, { status: 400 });
+        }
+        // Identity edits must not reuse another person's completed background check.
+        if (volunteerNetworkService.getVolunteer(updateId)?.verified) {
+          const verifier = await requireComplianceVerifier();
+          if (verifier.error) return verifier.error;
+        }
         const updatedVolunteer = await volunteerNetworkService.updateVolunteer(
           updateId,
           updates
@@ -130,10 +143,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(updatedVolunteer);
 
       case "verify":
+        const verifier = await requireComplianceVerifier();
+        if (verifier.error) return verifier.error;
         const { volunteerId: verifyId, backgroundCheckStatus } = body;
-        if (!verifyId || !backgroundCheckStatus) {
+        if (!verifyId || !["passed", "failed"].includes(backgroundCheckStatus)) {
           return NextResponse.json(
-            { error: "volunteerId and backgroundCheckStatus required" },
+            { error: "volunteerId and backgroundCheckStatus (passed or failed) required" },
             { status: 400 }
           );
         }
