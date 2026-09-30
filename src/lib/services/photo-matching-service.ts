@@ -925,7 +925,7 @@ class PhotoMatchingService {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          imageUrl,
+          imageUrl: trustedPhotoUrl(imageUrl, process.env.NEXT_PUBLIC_SUPABASE_URL),
           targetAge,
           preserveIdentity: true,
         }),

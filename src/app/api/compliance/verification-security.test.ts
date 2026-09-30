@@ -85,3 +85,19 @@ it('does not let the profile-update action forge verification state', async () =
   expect(volunteerNetworkService.getVolunteer(volunteer.id)?.verified).toBe(false);
   expect(volunteerNetworkService.getVolunteer(volunteer.id)?.userId).toBeUndefined();
 });
+
+it('prevents unauthenticated identity edits of a verified volunteer', async () => {
+  const volunteer = await volunteerNetworkService.registerVolunteer({ name: 'Verified Identity', email: 'identity@example.com', phone: '123', location: { city: 'Montreal', province: 'QC', postalCode: 'H1A1A1' }, availability: { weekdays: true, weekends: false, evenings: false, onCall: false } });
+  await volunteerNetworkService.verifyVolunteer(volunteer.id, 'passed');
+  state.user = null;
+  const response = await volunteerPost(request({ action: 'update', volunteerId: volunteer.id, updates: { name: 'Impersonator', phone: 'attacker' } }));
+  expect(response.status).toBe(401);
+  expect(volunteerNetworkService.getVolunteer(volunteer.id)?.name).toBe('Verified Identity');
+});
+it('allows verified staff to correct a verified volunteer identity', async () => {
+  const volunteer = await volunteerNetworkService.registerVolunteer({ name: 'Correction', email: 'correct@example.com', phone: '123', location: { city: 'Montreal', province: 'QC', postalCode: 'H1A1A1' }, availability: { weekdays: true, weekends: false, evenings: false, onCall: false } });
+  await volunteerNetworkService.verifyVolunteer(volunteer.id, 'passed');
+  const response = await volunteerPost(request({ action: 'update', volunteerId: volunteer.id, updates: { name: 'Corrected' } }));
+  expect(response.status).toBe(200);
+  expect(volunteerNetworkService.getVolunteer(volunteer.id)?.name).toBe('Corrected');
+});

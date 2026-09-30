@@ -128,6 +128,11 @@ export async function POST(request: NextRequest) {
         ) {
           return NextResponse.json({ error: "Only editable volunteer profile fields may be updated" }, { status: 400 });
         }
+        // Identity edits must not reuse another person's completed background check.
+        if (volunteerNetworkService.getVolunteer(updateId)?.verified) {
+          const verifier = await requireComplianceVerifier();
+          if (verifier.error) return verifier.error;
+        }
         const updatedVolunteer = await volunteerNetworkService.updateVolunteer(
           updateId,
           updates
