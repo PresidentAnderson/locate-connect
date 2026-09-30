@@ -121,6 +121,13 @@ export async function POST(request: NextRequest) {
             { status: 400 }
           );
         }
+        const editableFields = ["name", "phone", "location", "skills", "languages", "availability", "searchRadius"];
+        if (
+          typeof updates !== "object" || Array.isArray(updates) ||
+          Object.keys(updates).some(field => !editableFields.includes(field))
+        ) {
+          return NextResponse.json({ error: "Only editable volunteer profile fields may be updated" }, { status: 400 });
+        }
         const updatedVolunteer = await volunteerNetworkService.updateVolunteer(
           updateId,
           updates

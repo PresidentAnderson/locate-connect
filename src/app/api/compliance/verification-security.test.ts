@@ -77,3 +77,11 @@ it('permits verified staff to record a genuine background-check result', async (
 it('rejects unknown background-check statuses', async () => {
   expect((await volunteerPost(request({ action: 'verify', volunteerId: 'any', backgroundCheckStatus: 'approved' }))).status).toBe(400);
 });
+
+it('does not let the profile-update action forge verification state', async () => {
+  const volunteer = await volunteerNetworkService.registerVolunteer({ name: 'Update Test', email: 'update@example.com', phone: '123', location: { city: 'Montreal', province: 'QC', postalCode: 'H1A1A1' }, availability: { weekdays: true, weekends: false, evenings: false, onCall: false } });
+  const response = await volunteerPost(request({ action: 'update', volunteerId: volunteer.id, updates: { verified: true, userId: 'attacker', backgroundCheck: { status: 'passed' } } }));
+  expect(response.status).toBe(400);
+  expect(volunteerNetworkService.getVolunteer(volunteer.id)?.verified).toBe(false);
+  expect(volunteerNetworkService.getVolunteer(volunteer.id)?.userId).toBeUndefined();
+});
