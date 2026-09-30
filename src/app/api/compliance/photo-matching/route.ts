@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireComplianceVerifier } from "@/lib/api/compliance-verifier";
 import { photoMatchingService } from "@/lib/services/photo-matching-service";
 import { logger } from "../../../../lib/logger";
 
@@ -83,10 +84,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(comparison);
 
       case "verify":
-        const { requestId, resultId, isMatch, verifierId } = body;
-        if (!requestId || !resultId || isMatch === undefined || !verifierId) {
+        const verifier = await requireComplianceVerifier();
+        if (verifier.error) return verifier.error;
+        const { requestId, resultId, isMatch } = body;
+        if (!requestId || !resultId || typeof isMatch !== "boolean") {
           return NextResponse.json(
-            { error: "requestId, resultId, isMatch, and verifierId required" },
+            { error: "requestId, resultId, and boolean isMatch required" },
             { status: 400 }
           );
         }
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
           requestId,
           resultId,
           isMatch,
-          verifierId
+          verifier.userId
         );
         return NextResponse.json({ success: verifyResult });
 

@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireComplianceVerifier } from "@/lib/api/compliance-verifier";
 import { volunteerNetworkService } from "@/lib/services/volunteer-network-service";
 import type { VolunteerOpportunity } from "@/types/compliance.types";
 import { logger } from "../../../../lib/logger";
@@ -130,10 +131,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(updatedVolunteer);
 
       case "verify":
+        const verifier = await requireComplianceVerifier();
+        if (verifier.error) return verifier.error;
         const { volunteerId: verifyId, backgroundCheckStatus } = body;
-        if (!verifyId || !backgroundCheckStatus) {
+        if (!verifyId || !["passed", "failed"].includes(backgroundCheckStatus)) {
           return NextResponse.json(
-            { error: "volunteerId and backgroundCheckStatus required" },
+            { error: "volunteerId and backgroundCheckStatus (passed or failed) required" },
             { status: 400 }
           );
         }
